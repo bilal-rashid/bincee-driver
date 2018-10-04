@@ -5,7 +5,7 @@ android {
     buildToolsVersion "28.0.2"
     defaultConfig {
         applicationId "com.findxain.uberdriver"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -17,12 +17,27 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.0.0-alpha1'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0-alpha1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha3'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.jakewharton:butterknife:9.0.0-SNAPSHOT'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-SNAPSHOT'
+
+
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
+
+    implementation 'com.github.hotchemi:stringpicker:0.0.2'
+
 }
