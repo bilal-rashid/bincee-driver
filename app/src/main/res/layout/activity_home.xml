@@ -37,6 +37,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
 
+
+                    app:itemTextColor="#000"
                     app:menu="@menu/botton_navigation_menu" />
             </LinearLayout>
 
@@ -57,9 +59,7 @@
 
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="start"
                 android:layout_marginTop="50dp"
-
                 android:fitsSystemWindows="true"
                 android:orientation="vertical">
 
@@ -82,10 +82,10 @@
 
                 <ImageView
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
+                    android:layout_height="200dp"
                     android:layout_weight="1"
                     android:scaleType="fitXY"
-                    android:src="@drawable/profile_avatar"
+                    android:src="@drawable/driver_menu_bg_3x"
 
                     />
             </LinearLayout>

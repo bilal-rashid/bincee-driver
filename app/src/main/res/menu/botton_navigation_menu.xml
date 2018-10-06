@@ -2,12 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/bottomNavigationMap"
+        android:icon="@drawable/bottemnavigation_map_selector"
         android:title="Map" />
     <item
         android:id="@+id/bottomNavigationAttendance"
+        android:icon="@drawable/attendance_icon_selector"
         android:title="Attendance" />
     <item
         android:id="@+id/bottomNavigationPowerScreen"
+        android:icon="@drawable/bottemnavigation_power_selector"
         android:title="PowerScreen" />
 
 </menu>

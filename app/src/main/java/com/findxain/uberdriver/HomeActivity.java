@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.findxain.uberdriver.base.BA;
 import com.findxain.uberdriver.fragment.AttendanceFragemnt;
+import com.findxain.uberdriver.fragment.HomeFragment;
 import com.findxain.uberdriver.fragment.MapFragment;
 import com.findxain.uberdriver.fragment.MyPowerFragemnt;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -30,6 +31,8 @@ import butterknife.OnClick;
 
 public class HomeActivity extends BA {
 
+    public static final String MY_POWER = "- My Power";
+    public static final String HOME = "- Home";
     @BindView(R.id.imageViewProfilePic)
     ImageView imageViewProfilePic;
     @BindView(R.id.textViewUsername)
@@ -62,8 +65,8 @@ public class HomeActivity extends BA {
 
         menuItem = new ArrayList<String>();
 
-        menuItem.add("- Home");
-        menuItem.add("- My Power");
+        menuItem.add(HOME);
+        menuItem.add(MY_POWER);
         menuItem.add("- Settings");
         menuItem.add("- FAQ");
         menuItem.add("- About Us");
@@ -113,6 +116,11 @@ public class HomeActivity extends BA {
             return true;
         });
 
+        bottomNavigationView.setItemIconTintList(null);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frameLayout, HomeFragment.getInstance())
+                .commit();
 
     }
 
@@ -140,7 +148,21 @@ public class HomeActivity extends BA {
 
         @OnClick(R.id.textView)
         public void onMenuItemClicked() {
+
             drawerLayout.closeDrawer(Gravity.LEFT);
+            if (textView.getText().toString().equalsIgnoreCase(MY_POWER)) {
+
+//                getSupportFragmentManager().beginTransaction()
+//                        .replace(R.id.frameLayout, MyPowerFragemnt.getInstance())
+//                        .commit();
+
+                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationPowerScreen);
+            } else if (textView.getText().toString().equalsIgnoreCase(HOME)) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frameLayout, HomeFragment.getInstance())
+                        .commit();
+            }
+
         }
     }
 }
