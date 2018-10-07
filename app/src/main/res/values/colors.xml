@@ -3,4 +3,7 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="atttandace_red">#fd4560</color>
+    <color name="attendance_green_selected">#10c0ae</color>
+    <color name="sky_blue">#01c5fe</color>
 </resources>

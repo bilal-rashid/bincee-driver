@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:layout_marginBottom="10dp"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/imageViewGreenSelected"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="0dp"
+            android:background="@drawable/green_selected"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/linearLayout"
+            app:layout_constraintTop_toTopOf="parent">
+
+
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/imageViewRedSelected"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/red_selected"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+
+        </ImageView>
+
+        <View
+            android:id="@+id/viewRed"
+            android:layout_width="50dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="0dp"
+            android:background="@color/atttandace_red"
+
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewCross"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCross"
+            app:layout_constraintTop_toTopOf="@+id/imageViewCross" />
+
+        <View
+            android:id="@+id/viewGreen"
+            android:layout_width="50dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/green_selected"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewCheck"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewCheck"
+            app:layout_constraintTop_toTopOf="@+id/imageViewCheck" />
+
+        <ImageView
+            android:id="@+id/imageViewCross"
+            android:layout_width="@dimen/thirty_dp"
+            android:layout_height="@dimen/thirty_dp"
+
+
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+
+            android:background="@drawable/swipe_red_dot"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageViewCheck"
+            android:layout_width="@dimen/thirty_dp"
+            android:layout_height="@dimen/thirty_dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/swipe_green_dot"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/black_border_transparent_rectangle"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/viewGreen"
+            app:layout_constraintStart_toEndOf="@+id/viewRed"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/textViewName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="Name"
+                android:textColor="#000"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/textViewLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lines="1"
+                android:text="Lcoation" />
+
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</FrameLayout>
