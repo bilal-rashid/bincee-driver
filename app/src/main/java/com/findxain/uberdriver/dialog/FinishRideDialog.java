@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.findxain.uberdriver.R;
 import com.findxain.uberdriver.base.BDialog;
@@ -17,7 +18,7 @@ public class FinishRideDialog extends BDialog {
     @BindView(R.id.buttonLogout)
     Button buttonLogout;
     @BindView(R.id.buttonCancel)
-    Button buttonCancel;
+    TextView buttonCancel;
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
 

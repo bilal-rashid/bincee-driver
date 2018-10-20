@@ -3,14 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
@@ -21,32 +20,35 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:scaleType="fitXY"
-                android:src="@drawable/send_alert_bg" />
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"
+                android:src="@drawable/driver_attendence_confirm_bg" />
 
             <TextView
+                style="@style/dialogTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
                 android:text="Are you sure?"
-                android:textColor="#000"
-                android:textSize="20dp"
-                android:textStyle="bold" />
+
+
+                />
 
             <TextView
+                style="@style/dialogText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Are you sure you want to mark those\n
-                students Absent?"
+                android:layout_marginTop="5dp"
+                android:text="Are you sure you want to mark those\nstudents Absent?"
                 android:textAlignment="center"
 
 
@@ -55,32 +57,35 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycleView"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="10dp"
                 android:layout_weight="1"
+                android:maxHeight="500dp"
+                android:minHeight="200dp"
                 tools:listitem="@layout/recycler_row_mark_student_absent" />
 
             <Button
                 android:id="@+id/buttonSend"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
+                style="@style/dialogButtonBlue"
+                android:layout_width="@dimen/blue_butoon_width"
+                android:layout_height="@dimen/blue_button_height"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginStart="40dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="40dp"
-                android:background="@drawable/circle_rectangle_blue"
-                android:text="SEND"
-                android:textColor="#fff" />
+                android:text="YES" />
 
-            <Button
+            <TextView
                 android:id="@+id/buttonCancel"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
+                style="@style/dialogButtonWhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="15dp"
                 android:layout_marginEnd="40dp"
-                android:layout_marginBottom="30dp"
-                android:background="@drawable/rectangle_white_border"
-                android:text="CANCEL"
-                android:textColor="@color/sky_blue" />
+                android:layout_marginBottom="20dp"
+                android:gravity="center_horizontal"
+                android:text="NO" />
 
 
         </LinearLayout>
@@ -94,5 +99,6 @@
         android:background="@drawable/circle_rectangle_blue"
         android:elevation="2dp"
         android:padding="10dp"
-        android:src="@drawable/corss" />
+        android:src="@drawable/corss"
+        android:translationZ="@dimen/dialog_cross_translation" />
 </FrameLayout>
