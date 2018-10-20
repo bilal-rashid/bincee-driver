@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.findxain.uberdriver.activity.ProfileActivity;
 import com.findxain.uberdriver.base.BA;
 import com.findxain.uberdriver.fragment.AttendanceFragemnt;
 import com.findxain.uberdriver.fragment.HomeFragment;
@@ -33,6 +34,7 @@ public class HomeActivity extends BA {
 
     public static final String MY_POWER = "- My Power";
     public static final String HOME = "- Home";
+    public static final String MY_PROFILE = "- My Profile";
     @BindView(R.id.imageViewProfilePic)
     ImageView imageViewProfilePic;
     @BindView(R.id.textViewUsername)
@@ -68,6 +70,7 @@ public class HomeActivity extends BA {
 
         menuItem.add(HOME);
         menuItem.add(MY_POWER);
+        menuItem.add(MY_PROFILE);
         menuItem.add("- Settings");
         menuItem.add("- FAQ");
         menuItem.add("- About Us");
@@ -162,7 +165,10 @@ public class HomeActivity extends BA {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.frameLayout, HomeFragment.getInstance())
                         .commit();
+            } else if (textView.getText().toString().equalsIgnoreCase(MY_POWER)) {
+                ProfileActivity.start(HomeActivity.this);
             }
+
 
         }
     }
