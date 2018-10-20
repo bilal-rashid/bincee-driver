@@ -7,4 +7,5 @@
     <dimen name="status_title_text">16sp</dimen>
     <dimen name="status_text_size">12sp</dimen>
     <dimen name="login_edittext_width">280dp</dimen>
+    <dimen name="mypower_box_size">120dp</dimen>
 </resources>

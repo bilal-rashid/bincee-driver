@@ -9,6 +9,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.findxain.uberdriver.R;
 import com.findxain.uberdriver.base.BDialog;
@@ -27,7 +28,7 @@ public class SendAlertDialog extends BDialog {
     @BindView(R.id.buttonSend)
     Button buttonSend;
     @BindView(R.id.buttonCancel)
-    Button buttonCancel;
+    TextView buttonCancel;
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
 

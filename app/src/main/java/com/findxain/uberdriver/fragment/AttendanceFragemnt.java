@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.findxain.uberdriver.R;
+import com.findxain.uberdriver.base.BFragment;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,7 +25,7 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AttendanceFragemnt extends Fragment {
+public class AttendanceFragemnt extends BFragment {
 
 
     private static AttendanceFragemnt attendanceFragemnt;
@@ -52,7 +53,13 @@ public class AttendanceFragemnt extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        attandanceAdapter=new MyAttandanceAdapter();
+        attandanceAdapter = new MyAttandanceAdapter();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setActivityTitle("MARK STUDENTS");
     }
 
     @Override

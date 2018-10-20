@@ -10,7 +10,8 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
         android:scaleType="fitXY"
         android:src="@drawable/driver_attendace_bottom_logo"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,16 +21,14 @@
 
     <Button
         android:id="@+id/buttonStartRide"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
+        style="@style/dialogButtonBlue"
+        android:layout_width="@dimen/blue_butoon_width"
+        android:layout_height="@dimen/blue_button_height"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-
-        android:background="@drawable/start_ride_bg"
         android:text="START RIDE"
-        android:textColor="#fff"
-        app:layout_constraintBottom_toTopOf="@+id/imageView"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -60,6 +59,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="Student Name"
+        android:textColor="#000"
+        android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/recycleView"
         app:layout_constraintEnd_toStartOf="@+id/textView14"
         app:layout_constraintHorizontal_bias="0.5"
@@ -73,6 +74,9 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="0dp"
         android:text="Absent"
+
+        android:textColor="#000"
+        android:textSize="10sp"
         app:layout_constraintEnd_toStartOf="@+id/textView15"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -86,10 +90,19 @@
         android:layout_marginTop="0dp"
         android:layout_marginEnd="8dp"
         android:text="Present"
+        android:textColor="#000"
+        android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/textView15"
         app:layout_constraintTop_toTopOf="@+id/textView15" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="@dimen/blue_butoon_width"
+        android:layout_height="@dimen/blue_button_height"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.82" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

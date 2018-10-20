@@ -31,6 +31,7 @@
     <dimen name="design_bottom_navigation_active_text_size" tools:override="true">12sp</dimen>
     <dimen name="thirty_dp">30dp</dimen>
     <dimen name="dialog_cross_translation">5dp</dimen>
+    <dimen name="mypower_box_size">120dp</dimen>
 
 
 </resources>
