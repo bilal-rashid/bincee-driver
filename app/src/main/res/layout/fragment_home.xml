@@ -5,14 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
-    android:background="@drawable/driver_home_bg"
     tools:context=".fragment.HomeFragment">
 
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/driver_home_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/circleImageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -33,10 +42,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="8dp"
-        android:text="Name"
-        android:textColor="#000"
-        android:textSize="30sp"
-        android:textStyle="bold"
+        android:fontFamily="@font/gotham_bold"
+        android:text="Johan Doe"
+        android:textColor="@color/_303030"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/spinnerSchoolName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -46,13 +55,13 @@
 
     <Spinner
         android:id="@+id/spinnerSchoolName"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="250dp"
+        android:maxWidth="200dp"
+        android:layout_height="@dimen/blue_button_height"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="50dp"
         android:background="@drawable/spinner_bg"
-
         app:layout_constraintBottom_toTopOf="@+id/spinnerCarNumber"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -63,25 +72,24 @@
 
     <Spinner
         android:id="@+id/spinnerCarNumber"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/blue_button_height"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:background="@drawable/spinner_bg"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/buttonStartRide"
+        app:layout_constraintEnd_toEndOf="@+id/spinnerSchoolName"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/spinnerSchoolName"
         app:layout_constraintTop_toBottomOf="@+id/spinnerSchoolName">
 
     </Spinner>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/buttonStartRide"
+        style="@style/dialogButtonBlue"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_height="@dimen/blue_button_height"
+        android:layout_margin="30dp"
         android:background="@drawable/start_ride_bg"
         android:text="START RIDE"
         android:textColor="#fff"

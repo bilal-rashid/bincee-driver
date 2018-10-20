@@ -10,11 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.findxain.uberdriver.R;
+import com.findxain.uberdriver.base.BFragment;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends BFragment {
 
 
     private static HomeFragment instance;
@@ -30,6 +31,14 @@ public class HomeFragment extends Fragment {
         return instance;
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        setActivityTitle("HOME");
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

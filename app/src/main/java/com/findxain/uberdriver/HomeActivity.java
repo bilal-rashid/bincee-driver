@@ -61,6 +61,7 @@ public class HomeActivity extends BA {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.threel_line);
 
 
         menuItem = new ArrayList<String>();

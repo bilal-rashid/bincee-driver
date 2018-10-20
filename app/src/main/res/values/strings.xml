@@ -1,6 +1,14 @@
 <resources>
-    <string name="app_name">UberDriver</string>
+    <string name="app_name">UberParentApp</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="left_for_school">Left For School</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="continue_text">Continue</string>
+    <string name="ok">OK</string>
+    <string name="done">Done</string>
+    <string name="u_contactus_bincee_com_u">contactus@bincee.com</string>
+
+
 </resources>
