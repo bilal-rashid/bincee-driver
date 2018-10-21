@@ -25,6 +25,14 @@
         <activity
             android:name=".activity.ProfileActivity"
             android:screenOrientation="portrait" />
+     <activity
+            android:name=".activity.ContectUsActivity"
+            android:screenOrientation="portrait" />
+
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDN9BCU7f8RasbWAr7fMho6qgdavTEIXQc" />
 
     </application>
 

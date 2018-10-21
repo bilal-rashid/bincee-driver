@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import butterknife.ButterKnife;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +20,14 @@ import com.findxain.uberdriver.dialog.MarkAttendanceDialog;
 import com.findxain.uberdriver.dialog.MarkStudentAbdentDialog;
 import com.findxain.uberdriver.dialog.SelectRouteDialog;
 import com.findxain.uberdriver.dialog.SendAlertDialog;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapFragment extends BFragment {
+public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 
     private static MapFragment mapFragment;
@@ -44,7 +48,12 @@ public class MapFragment extends BFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_map, container, false);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        ButterKnife.bind(this, view);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        return view;
     }
 
     @Override
@@ -62,7 +71,12 @@ public class MapFragment extends BFragment {
     @Override
     public void onResume() {
         super.onResume();
-        setActivityTitle("");
+        setActivityTitle("ROUTE");
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
 
     }
 }

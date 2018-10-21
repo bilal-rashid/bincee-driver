@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.findxain.uberdriver.activity.ContectUsActivity;
 import com.findxain.uberdriver.activity.ProfileActivity;
 import com.findxain.uberdriver.base.BA;
 import com.findxain.uberdriver.fragment.AttendanceFragemnt;
@@ -35,6 +36,7 @@ public class HomeActivity extends BA {
     public static final String MY_POWER = "- My Power";
     public static final String HOME = "- Home";
     public static final String MY_PROFILE = "- My Profile";
+    public static final String CONTACT_US = "- Contact Us";
     @BindView(R.id.imageViewProfilePic)
     ImageView imageViewProfilePic;
     @BindView(R.id.textViewUsername)
@@ -74,7 +76,7 @@ public class HomeActivity extends BA {
         menuItem.add("- Settings");
         menuItem.add("- FAQ");
         menuItem.add("- About Us");
-        menuItem.add("- Contact Us");
+        menuItem.add(CONTACT_US);
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
         recycleView.setLayoutFrozen(true);
@@ -156,9 +158,6 @@ public class HomeActivity extends BA {
             drawerLayout.closeDrawer(Gravity.LEFT);
             if (textView.getText().toString().equalsIgnoreCase(MY_POWER)) {
 
-//                getSupportFragmentManager().beginTransaction()
-//                        .replace(R.id.frameLayout, MyPowerFragemnt.getInstance())
-//                        .commit();
 
                 bottomNavigationView.setSelectedItemId(R.id.bottomNavigationPowerScreen);
             } else if (textView.getText().toString().equalsIgnoreCase(HOME)) {
@@ -166,6 +165,11 @@ public class HomeActivity extends BA {
                         .replace(R.id.frameLayout, HomeFragment.getInstance())
                         .commit();
             } else if (textView.getText().toString().equalsIgnoreCase(MY_POWER)) {
+                ProfileActivity.start(HomeActivity.this);
+
+            } else if (textView.getText().toString().equalsIgnoreCase(CONTACT_US)) {
+                ContectUsActivity.start(HomeActivity.this);
+            } else if (textView.getText().toString().equalsIgnoreCase(MY_PROFILE)) {
                 ProfileActivity.start(HomeActivity.this);
             }
 

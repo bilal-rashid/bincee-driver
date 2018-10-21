@@ -24,16 +24,16 @@ import butterknife.ButterKnife;
 public class ParentProfileFragment extends BFragment {
 
 
-    @BindView(R.id.imageView13)
-    ImageView imageView13;
-    @BindView(R.id.textViewName)
-    TextView textViewName;
-    @BindView(R.id.textViewNumber)
-    TextView textViewNumber;
-    @BindView(R.id.textView11)
-    TextView textView11;
-    @BindView(R.id.textView12)
-    TextView textView12;
+//    @BindView(R.id.imageView13)
+//    ImageView imageView13;
+//    @BindView(R.id.textViewName)
+//    TextView textViewName;
+//    @BindView(R.id.textViewNumber)
+//    TextView textViewNumber;
+//    @BindView(R.id.textView11)
+//    TextView textView11;
+//    @BindView(R.id.textView12)
+//    TextView textView12;
     private MyAdapter adapter;
 
     public ParentProfileFragment() {
