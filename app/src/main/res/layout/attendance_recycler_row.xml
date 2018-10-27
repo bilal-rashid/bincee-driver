@@ -112,9 +112,9 @@
                 android:id="@+id/textViewName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/gotham_light"
                 android:lines="1"
                 android:text="Saleh Ayub"
-
                 android:textAlignment="center"
                 android:textColor="#000"
                 android:textSize="14sp" />
@@ -123,6 +123,7 @@
                 android:id="@+id/textViewLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/gotham_light"
                 android:lines="1"
                 android:text="Lcoation"
                 android:textAlignment="center"

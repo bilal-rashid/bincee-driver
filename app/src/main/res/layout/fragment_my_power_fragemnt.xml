@@ -273,7 +273,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="7dp"
+            android:fontFamily="@font/gotham_book"
             android:text="Attendance"
+            android:textColor="@color/_5e5e5e"
             android:textSize="10sp" />
 
         <FrameLayout
@@ -303,15 +305,18 @@
 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/gotham_light"
                     android:text="21"
-                    android:textColor="#000"
+                    android:textColor="#1a1a1a"
                     android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/textViewAttendanceTotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/gotham_light"
                     android:text="/22"
+                    android:textColor="#1a1a1a"
                     android:textSize="10sp" />
             </LinearLayout>
         </FrameLayout>
@@ -355,7 +360,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="7dp"
+                android:fontFamily="@font/gotham_book"
                 android:text="Eligible for bonus"
+                android:textColor="@color/_5e5e5e"
                 android:textSize="10sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -365,8 +372,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="0dp"
+                android:fontFamily="@font/gotham_light"
+
                 android:text="YES"
-                android:textColor="#000"
+                android:textColor="#404040"
                 android:textSize="18sp"
                 app:layout_constraintStart_toStartOf="@+id/textView7"
                 app:layout_constraintTop_toBottomOf="@+id/textView7" />
@@ -382,9 +391,9 @@
         android:layout_height="80dp"
         android:layout_marginStart="0dp"
         android:layout_marginTop="16dp"
-        app:cardCornerRadius="15sp"
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="8dp"
+        app:cardCornerRadius="15sp"
         app:cardUseCompatPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:0"
