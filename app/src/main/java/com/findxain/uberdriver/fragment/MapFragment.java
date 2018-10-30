@@ -20,6 +20,8 @@ import com.findxain.uberdriver.dialog.MarkAttendanceDialog;
 import com.findxain.uberdriver.dialog.MarkStudentAbdentDialog;
 import com.findxain.uberdriver.dialog.SelectRouteDialog;
 import com.findxain.uberdriver.dialog.SendAlertDialog;
+import com.findxain.uberdriver.dialog.SendNotificationDialog;
+import com.findxain.uberdriver.dialog.SendNotificationToAll;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -60,12 +62,14 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        new SendNotificationDialog(getContext()).show();
         new SendAlertDialog(getContext()).show();
         new MarkStudentAbdentDialog(getContext()).show();
         new FinishRideDialog(getContext()).show();
         new SelectRouteDialog(getContext()).show();
         new MarkAttendanceDialog(getContext()).show();
         new LocateMeDialog(getContext()).show();
+        new SendNotificationToAll(getContext()).show();
     }
 
     @Override

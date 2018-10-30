@@ -36,7 +36,7 @@ public class HomeActivity extends BA {
     public static final String MY_POWER = "- My Power";
     public static final String HOME = "- Home";
     public static final String MY_PROFILE = "- My Profile";
-    public static final String CONTACT_US = "- Contact Us";
+    public static final String CONTACT_US = "- Contact Bincee";
     @BindView(R.id.imageViewProfilePic)
     ImageView imageViewProfilePic;
     @BindView(R.id.textViewUsername)
@@ -70,12 +70,13 @@ public class HomeActivity extends BA {
 
         menuItem = new ArrayList<String>();
 
-        menuItem.add(HOME);
+//        menuItem.add(HOME);
         menuItem.add(MY_POWER);
         menuItem.add(MY_PROFILE);
-        menuItem.add("- Settings");
+        menuItem.add("- Route Designer");
+//        menuItem.add("- Settings");
         menuItem.add("- FAQ");
-        menuItem.add("- About Us");
+//        menuItem.add("- About Us");
         menuItem.add(CONTACT_US);
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
