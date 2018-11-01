@@ -125,7 +125,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/gotham_light"
                 android:lines="1"
-                android:text="Lcoation"
+                android:text="@string/manama_building_behrain"
                 android:textAlignment="center"
                 android:textColor="#000"
                 android:textSize="12sp" />
