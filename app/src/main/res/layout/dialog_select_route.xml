@@ -49,6 +49,7 @@
                 android:orientation="vertical">
 
                 <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/checkBoxSuggested"
                     style="@style/dialogText"
                     android:layout_width="wrap_content"
                     android:fontFamily="@font/gotham_book"
@@ -58,6 +59,7 @@
 
                 <androidx.appcompat.widget.AppCompatCheckBox
                     style="@style/dialogText"
+                    android:id="@+id/checkBoxDefault"
                     android:layout_width="wrap_content"
                     android:fontFamily="@font/gotham_book"
 

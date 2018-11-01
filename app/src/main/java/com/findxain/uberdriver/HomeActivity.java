@@ -1,5 +1,7 @@
 package com.findxain.uberdriver;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -10,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.findxain.uberdriver.activity.ContectUsActivity;
+import com.findxain.uberdriver.activity.LoginActivity;
 import com.findxain.uberdriver.activity.ProfileActivity;
 import com.findxain.uberdriver.base.BA;
 import com.findxain.uberdriver.fragment.AttendanceFragemnt;
@@ -54,6 +57,11 @@ public class HomeActivity extends BA {
     @BindView(R.id.bottomNavigationView)
     BottomNavigationView bottomNavigationView;
     private List<String> menuItem;
+
+    public static void start(Context context) {
+        context.startActivity(new Intent(context, HomeActivity.class));
+    }
+
 
 
     @Override
