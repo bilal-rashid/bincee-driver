@@ -12,9 +12,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.findxain.uberdriver.activity.ContectUsActivity;
-import com.findxain.uberdriver.activity.LoginActivity;
 import com.findxain.uberdriver.activity.ProfileActivity;
+import com.findxain.uberdriver.api.model.LoginResponse;
 import com.findxain.uberdriver.base.BA;
+import com.findxain.uberdriver.databinding.ActivityHomeBinding;
 import com.findxain.uberdriver.fragment.AttendanceFragemnt;
 import com.findxain.uberdriver.fragment.HomeFragment;
 import com.findxain.uberdriver.fragment.MapFragment;
@@ -27,7 +28,12 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -58,16 +64,23 @@ public class HomeActivity extends BA {
     BottomNavigationView bottomNavigationView;
     private List<String> menuItem;
 
+    LiveData liveData;
+    ActivityHomeBinding binding;
+
     public static void start(Context context) {
         context.startActivity(new Intent(context, HomeActivity.class));
     }
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+//        setContentView(R.layout.activity_home);
+        liveData = ViewModelProviders.of(this).get(LiveData.class);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_home);
+        binding.setVm(liveData);
+        liveData.user.observe(this, user -> binding.userLayout.textViewUsername.setText(user.username));
+
 
         textViewTitle.setText("Home");
         setSupportActionBar(toolbar);
@@ -185,4 +198,15 @@ public class HomeActivity extends BA {
 
         }
     }
+
+
+    public static class LiveData extends ViewModel {
+
+        public MutableLiveData<LoginResponse.User> user = new MutableLiveData<>();
+
+        public LiveData() {
+            user.setValue(MyApp.instance.user);
+        }
+    }
+
 }
