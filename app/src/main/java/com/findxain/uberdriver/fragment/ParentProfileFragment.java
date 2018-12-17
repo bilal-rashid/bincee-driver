@@ -38,6 +38,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -332,7 +333,7 @@ public class ParentProfileFragment extends BFragment {
 
             EndpointObserver<MyResponse> observer = MyApp.endPoints.uploadImage(body)
                     .flatMap(uploadImageResponceResponse -> {
-                                loader.setValue(true);
+//                                loader.setValue(true);
                                 return MyApp.endPoints.updateProfile(MyApp.instance.user.id + "", "http://" + uploadImageResponceResponse.data.path);
                             }
                     )

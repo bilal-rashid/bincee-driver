@@ -10,12 +10,16 @@ import com.findxain.uberdriver.base.BA;
 import com.findxain.uberdriver.fragment.ContectUsFragment;
 
 import androidx.appcompat.widget.Toolbar;
-import butterknife.BindView;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
+import androidx.lifecycle.ViewModel;
+
+//import butterknife.BindView;
 
 public class ContectUsActivity extends BA {
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+//    @BindView(R.id.toolbar)
+//    Toolbar toolbar;
 
     public static void start(HomeActivity homeActivity) {
         homeActivity.startActivity(new Intent(homeActivity, ContectUsActivity.class));
@@ -25,9 +29,11 @@ public class ContectUsActivity extends BA {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contect_us);
+        ViewDataBinding viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_contect_us);
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("");
+
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setTitle("");
         textViewTitle.setText("CONTACT US");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -43,5 +49,9 @@ public class ContectUsActivity extends BA {
             onBackPressed();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public static class VM extends ViewModel {
+
     }
 }

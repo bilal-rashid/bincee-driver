@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -127,7 +128,7 @@ public class HomeActivity extends BA {
             switch (menuItem.getItemId()) {
                 case R.id.bottomNavigationMap:
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frameLayout, MapFragment.getInstance())
+                            .replace(R.id.frameLayout, HomeFragment.getInstance())
                             .commit();
                     break;
                 case R.id.bottomNavigationAttendance:
@@ -146,9 +147,11 @@ public class HomeActivity extends BA {
 
         bottomNavigationView.setItemIconTintList(null);
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frameLayout, HomeFragment.getInstance())
-                .commit();
+        bottomNavigationView.setSelectedItemId(R.id.bottomNavigationMap);
+
+//        getSupportFragmentManager().beginTransaction()
+//                .replace(R.id.frameLayout, HomeFragment.getInstance())
+//                .commit();
 
     }
 
