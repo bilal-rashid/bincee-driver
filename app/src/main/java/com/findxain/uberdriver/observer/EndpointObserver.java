@@ -5,9 +5,9 @@ import io.reactivex.observers.DisposableObserver;
 public abstract class EndpointObserver<T> extends DisposableObserver<T> {
 
     @Override
-    public void onNext(T o) {
+    public void onNext(T data) {
         try {
-            onData(o);
+            onData(data);
         } catch (Exception e) {
             onError(e);
         }

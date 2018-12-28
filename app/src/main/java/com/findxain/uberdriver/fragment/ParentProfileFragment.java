@@ -270,6 +270,7 @@ public class ParentProfileFragment extends BFragment {
         public MutableLiveData<String> profileUrl = new MutableLiveData<>();
         public MutableLiveData<String> contact = new MutableLiveData<>();
         public MutableLiveData<Boolean> loader = new MutableLiveData<>();
+
         public MutableLiveData<Event<Throwable>> parentErrorListner = new MutableLiveData<>();
 
 

@@ -31,32 +31,48 @@
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
 
-                <LinearLayout
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:layout_height="match_parent">
 
-                    <FrameLayout
-                        android:id="@+id/frameLayout"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:visibility="visible" />
+                        android:orientation="vertical">
 
-                    <com.google.android.material.bottomnavigation.BottomNavigationView
-                        android:id="@+id/bottomNavigationView"
-                        style="@style/BottomNavigationView"
+
+                        <FrameLayout
+                            android:id="@+id/frameLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:visibility="visible" />
+
+                        <com.google.android.material.bottomnavigation.BottomNavigationView
+                            android:id="@+id/bottomNavigationView"
+                            style="@style/BottomNavigationView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:itemTextAppearanceActive="@style/TextAppearance.BottomNavigationView.Active"
+                            app:itemTextAppearanceInactive="@style/TextAppearance.BottomNavigationView.Inactive"
+                            app:itemTextColor="#000"
+                            app:menu="@menu/botton_navigation_menu" />
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:itemTextAppearanceActive="@style/TextAppearance.BottomNavigationView.Active"
-                        app:itemTextAppearanceInactive="@style/TextAppearance.BottomNavigationView.Inactive"
-                        app:itemTextColor="#000"
-                        app:menu="@menu/botton_navigation_menu" />
-                </LinearLayout>
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone" />
 
-                <include layout="@layout/toolbar"
+                </FrameLayout>
+
+                <include
                     android:id="@+id/toolbarLayout"
-                    />
+                    layout="@layout/toolbar" />
             </FrameLayout>
 
             <com.google.android.material.navigation.NavigationView

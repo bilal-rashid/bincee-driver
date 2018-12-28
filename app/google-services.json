@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "831908909882",
+    "firebase_url": "https://bincee.firebaseio.com",
+    "project_id": "bincee",
+    "storage_bucket": "bincee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831908909882:android:fb1e0fb00ea11589",
+        "android_client_info": {
+          "package_name": "com.findxain.uberdriver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "831908909882-0d410ut1fs0kfj37ghbf0m080asg1vnl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.findxain.uberdriver",
+            "certificate_hash": "744216a45892a0733a65cefce8c589367c4c8f00"
+          }
+        },
+        {
+          "client_id": "831908909882-4cg4psa4eabnvv6t4gf5q253b617kl8g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsFeGnBX9NfBn8r-7xjGPb5XVGpfTEOgo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "831908909882-4cg4psa4eabnvv6t4gf5q253b617kl8g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

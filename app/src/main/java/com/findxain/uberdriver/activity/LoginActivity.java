@@ -52,8 +52,8 @@ public class LoginActivity extends BA {
         chechBoxRememberMe.setTypeface(ResourcesCompat.getFont(this, R.font.gotham_book));
 
 
-        editTextUsername.setText("testdriver1");
-        editTextPassword.setText("testdriver1");
+        editTextUsername.setText("driver1");
+        editTextPassword.setText("driver");
 
 
     }
@@ -80,7 +80,7 @@ public class LoginActivity extends BA {
                             response.data.save(LoginActivity.this);
                             MyApp.instance.user = response.data;
                             HomeActivity.start(LoginActivity.this);
-                            finish();
+//                            finish();
                         } else {
                             MyApp.showToast(response.data.message);
                         }

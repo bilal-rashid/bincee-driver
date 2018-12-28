@@ -44,7 +44,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
 
 
-
     implementation 'de.hdodenhof:circleimageview:2.2.0'
 
     implementation 'com.github.hotchemi:stringpicker:0.0.2'
@@ -74,5 +73,11 @@ dependencies {
 
     implementation 'id.zelory:compressor:2.1.0'
 
+    implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.google.firebase:firebase-firestore:17.1.5'
+
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+
 
 }
+apply plugin: 'com.google.gms.google-services'

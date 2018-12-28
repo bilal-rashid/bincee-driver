@@ -19,7 +19,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="0dp"
             android:background="@drawable/green_selected"
-            android:visibility="invisible"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/linearLayout"
@@ -33,7 +33,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/red_selected"
-            android:visibility="invisible"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/linearLayout"
             app:layout_constraintStart_toStartOf="parent"
@@ -67,8 +67,6 @@
             android:id="@+id/imageViewCross"
             android:layout_width="20dp"
             android:layout_height="20dp"
-
-
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"

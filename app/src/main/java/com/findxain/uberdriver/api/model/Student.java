@@ -2,7 +2,11 @@ package com.findxain.uberdriver.api.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public abstract class CreateRideResponseItem {
+public class Student {
+
+    public static int UNKNOWN = -1;
+    public static int PRESENT = 1;
+    public static int ABSENT = 2;
 
     public String email;
     public String photo;
@@ -14,4 +18,7 @@ public abstract class CreateRideResponseItem {
     public int shift;
     public String fullname;
     public int id;
+
+    public int present = UNKNOWN;
+
 }

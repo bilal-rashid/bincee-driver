@@ -21,6 +21,7 @@ public class FinishRideDialog extends BDialog {
     TextView buttonCancel;
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
+    private Listner listner;
 
     public FinishRideDialog(Context context) {
         super(context);
@@ -28,20 +29,39 @@ public class FinishRideDialog extends BDialog {
         View view = getLayoutInflater().inflate(layout, null, false);
         setContentView(view);
         ButterKnife.bind(this, view);
+        setCancelable(false);
     }
 
     @OnClick(R.id.buttonLogout)
     public void onButtonLogoutClicked() {
+        dismiss();
+        listner.startNewShft();
+
     }
 
     @OnClick(R.id.buttonCancel)
     public void onButtonCancelClicked() {
         dismiss();
+        listner.logOut();
 
     }
 
     @OnClick(R.id.imageViewCross)
     public void onImageViewCrossClicked() {
-        dismiss();
+//        dismiss();
+    }
+
+    public FinishRideDialog setListner(Listner listner) {
+        this.listner = listner;
+        return this;
+
+    }
+
+
+    public interface Listner {
+        void startNewShft();
+
+        void logOut();
+
     }
 }

@@ -1,9 +1,10 @@
 package com.findxain.uberdriver.api;
 
-import com.findxain.uberdriver.api.model.CreateRideResponseItem;
+import com.findxain.uberdriver.api.model.Student;
 import com.findxain.uberdriver.api.model.DriverProfileResponse;
 import com.findxain.uberdriver.api.model.LoginResponse;
 import com.findxain.uberdriver.api.model.MyResponse;
+import com.findxain.uberdriver.api.model.ShiftItem;
 import com.findxain.uberdriver.api.model.UploadImageResponce;
 
 import java.util.List;
@@ -41,7 +42,9 @@ public interface EndPoints {
 
     @FormUrlEncoded
     @POST("ride/create")
-    Observable<MyResponse<List<CreateRideResponseItem>>> createRide(@Field("driver_id") String driver_id, @Field("shift") String shift);
+    Observable<MyResponse<List<Student>>> createRide(@Field("driver_id") String driver_id, @Field("shift") String shift);
 
 
+    @GET("school/shift/list")
+    Observable<MyResponse<List<ShiftItem>>> listShift();
 }
