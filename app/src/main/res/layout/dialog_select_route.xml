@@ -42,32 +42,34 @@
                 android:textStyle="bold" />
 
 
-            <LinearLayout
+            <RadioGroup
+                android:id="@+id/radioGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
-                <androidx.appcompat.widget.AppCompatCheckBox
+                <RadioButton
+
                     android:id="@+id/checkBoxSuggested"
                     style="@style/dialogText"
                     android:layout_width="wrap_content"
-                    android:fontFamily="@font/gotham_book"
                     android:layout_height="wrap_content"
-                    android:checked="false"
+                    android:checked="true"
+                    android:fontFamily="@font/gotham_book"
                     android:text="Suggested Route (ETA:45 Mins)" />
 
-                <androidx.appcompat.widget.AppCompatCheckBox
-                    style="@style/dialogText"
+                <RadioButton
                     android:id="@+id/checkBoxDefault"
+                    style="@style/dialogText"
                     android:layout_width="wrap_content"
-                    android:fontFamily="@font/gotham_book"
-
                     android:layout_height="wrap_content"
+
                     android:checked="false"
+                    android:fontFamily="@font/gotham_book"
                     android:text="Default Route (ETA:45 Mins)" />
 
-            </LinearLayout>
+            </RadioGroup>
 
             <Button
                 android:id="@+id/buttonSend"
@@ -75,6 +77,7 @@
                 android:layout_height="@dimen/blue_button_height"
                 android:layout_marginStart="40dp"
                 android:layout_marginTop="10dp"
+
                 android:layout_marginEnd="40dp"
                 android:layout_marginBottom="40dp"
                 android:background="@drawable/circle_rectangle_blue"
@@ -94,5 +97,6 @@
         android:elevation="5dp"
         android:padding="10dp"
         android:src="@drawable/corss"
-        android:translationZ="@dimen/dialog_cross_translation" />
+        android:translationZ="@dimen/dialog_cross_translation"
+        android:visibility="gone" />
 </FrameLayout>

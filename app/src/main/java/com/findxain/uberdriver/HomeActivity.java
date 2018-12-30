@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -15,8 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.findxain.uberdriver.activity.ContectUsActivity;
@@ -28,10 +25,13 @@ import com.findxain.uberdriver.api.model.MyResponse;
 import com.findxain.uberdriver.base.BA;
 import com.findxain.uberdriver.databinding.ActivityHomeBinding;
 import com.findxain.uberdriver.dialog.FinishRideDialog;
+import com.findxain.uberdriver.dialog.SelectRouteDialog;
+import com.findxain.uberdriver.dialog.SelectRouteDialogBuilder;
 import com.findxain.uberdriver.fragment.AttendanceFragemnt;
 import com.findxain.uberdriver.fragment.HomeFragment;
 import com.findxain.uberdriver.fragment.MapFragment;
 import com.findxain.uberdriver.fragment.MyPowerFragemnt;
+import com.findxain.uberdriver.fragment.RouteDesignerFragment;
 import com.findxain.uberdriver.helper.PermissionHelper;
 import com.findxain.uberdriver.observer.EndpointObserver;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -53,13 +53,13 @@ import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
@@ -114,6 +114,7 @@ public class HomeActivity extends BA {
     private ProgressDialog progressDialog;
     private CollectionReference history;
 
+    public boolean customRoot = false;
 
     public static void start(Context context) {
         context.startActivity(new Intent(context, HomeActivity.class));
@@ -210,7 +211,6 @@ public class HomeActivity extends BA {
             public void onChanged(List<Student> students) {
                 if (students == null || students.size() == 0) return;
                 MyApp.showToast(students.size() + " Items");
-                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
 
                 if (ride == null) {
                     ride = new Ride();
@@ -220,13 +220,10 @@ public class HomeActivity extends BA {
                 ride.rideInProgress = true;
                 ride.students = students;
                 ride.driverId = MyApp.instance.user.id;
-
-
                 userDocument.set(ride)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-
                                 Log.d(TAG, "onSuccess: User Ride Stated Succefully");
                             }
                         })
@@ -234,9 +231,35 @@ public class HomeActivity extends BA {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 e.printStackTrace();
-
                             }
                         });
+
+
+                SelectRouteDialog selectRouteDialog = new SelectRouteDialogBuilder()
+                        .setContext(HomeActivity.this)
+                        .setListner(new SelectRouteDialog.Listner() {
+                            @Override
+                            public void routeSelected(int i) {
+
+                                switch (i) {
+                                    case 1:
+
+                                        customRoot = false;
+
+                                        break;
+                                    case 2:
+
+                                        customRoot = true;
+                                        break;
+                                }
+
+                                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
+
+
+                            }
+                        })
+                        .createSelectRouteDialog();
+                selectRouteDialog.show();
 
 
             }
@@ -301,13 +324,33 @@ public class HomeActivity extends BA {
             switch (menuItem.getItemId()) {
                 case R.id.bottomNavigationMap:
 //                    List<Student> studentList = liveData.students.getValue();
+                    Fragment fragment;
+                    if (ride == null) {
+
+                        fragment = HomeFragment.getInstance();
+                    } else if (ride.rideInProgress) {
+                        fragment = MapFragment.getInstance();
+                    } else {
+                        fragment = HomeFragment.getInstance();
+                    }
+
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frameLayout, ride == null ? HomeFragment.getInstance() : (ride.rideInProgress ? MapFragment.getInstance() : HomeFragment.getInstance()))
+                            .replace(R.id.frameLayout, fragment)
                             .commit();
                     break;
                 case R.id.bottomNavigationAttendance:
+
+                    Fragment instance;
+
+                    if (customRoot) {
+                        instance = RouteDesignerFragment.getInstance();
+                    } else {
+                        instance = AttendanceFragemnt.getInstance();
+                    }
+
+
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frameLayout, AttendanceFragemnt.getInstance())
+                            .replace(R.id.frameLayout, instance)
                             .commit();
                     break;
                 case R.id.bottomNavigationPowerScreen:
@@ -348,6 +391,7 @@ public class HomeActivity extends BA {
             public void onComplete(@NonNull Task<DocumentReference> task) {
 
                 ride = null;
+
             }
         });
         liveData.students.setValue(new ArrayList<>());
@@ -373,6 +417,12 @@ public class HomeActivity extends BA {
 
     public void updateAttendance() {
         userDocument.set(ride);
+    }
+
+    public void routeSelected() {
+        customRoot = false;
+
+        bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
     }
 
     public class NavigationVH extends RecyclerView.ViewHolder {
