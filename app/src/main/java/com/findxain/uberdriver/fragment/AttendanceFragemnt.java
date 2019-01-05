@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -124,7 +125,7 @@ public class AttendanceFragemnt extends BFragment {
     }
 
     private List<Student> getStudents() {
-        Ride ride = ((HomeActivity) getActivity()).ride;
+        Ride ride = ((HomeActivity) getActivity()).liveData.ride.getValue();
         return ride != null ? ride.students : new ArrayList<>();
     }
 
@@ -147,6 +148,9 @@ public class AttendanceFragemnt extends BFragment {
         TextView textViewLocation;
         @BindView(R.id.linearLayout)
         LinearLayout linearLayout;
+
+        @BindView(R.id.rootView)
+        FrameLayout rootView;
 
         public VH(@NonNull View itemView) {
             super(itemView);
@@ -218,21 +222,31 @@ public class AttendanceFragemnt extends BFragment {
 
         }
 
+        @OnClick(R.id.rootView)
+        public void onRootViewClicked() {
+            showAttDialog();
+
+        }
+
 
         private void showAttDialog() {
-            new MarkAttendanceDialog(getContext()).setListner(new MarkAttendanceDialog.Listner() {
-                @Override
-                public void markAbsent() {
-                    VH.this.markAbsent();
 
-                }
 
-                @Override
-                public void markPresent() {
-                    VH.this.markPresent();
+            new MarkAttendanceDialog(getContext())
+                    .setStudent(getStudents().get(getAdapterPosition()))
+                    .setListner(new MarkAttendanceDialog.Listner() {
+                        @Override
+                        public void markAbsent() {
+                            VH.this.markAbsent();
 
-                }
-            }).show();
+                        }
+
+                        @Override
+                        public void markPresent() {
+                            VH.this.markPresent();
+
+                        }
+                    }).show();
         }
 
     }

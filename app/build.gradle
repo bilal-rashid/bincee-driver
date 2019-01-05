@@ -80,6 +80,11 @@ dependencies {
 
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.8.1'
 
+    implementation ('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.26.0'){
+        transitive = true
+    }
+
+
 
 }
 apply plugin: 'com.google.gms.google-services'

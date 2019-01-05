@@ -149,7 +149,7 @@ public class RouteDesignerFragment extends BFragment {
     }
 
     private List<Student> getStudents() {
-        Ride ride = ((HomeActivity) getActivity()).ride;
+        Ride ride = ((HomeActivity) getActivity()).liveData.ride.getValue();
         return ride != null ? ride.students : new ArrayList<>();
     }
 

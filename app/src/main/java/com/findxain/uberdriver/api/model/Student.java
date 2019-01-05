@@ -18,6 +18,7 @@ public class Student {
     public int shift;
     public String fullname;
     public int id;
+    public int status = -1;
 
     public int present = UNKNOWN;
 

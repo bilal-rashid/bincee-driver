@@ -100,26 +100,20 @@ public class HomeFragment extends BFragment {
 
 
         binding.buttonStartRide.setEnabled(false);
-        model.shiftList.observe(this, new Observer<List<ShiftItem>>() {
-            @Override
-            public void onChanged(List<ShiftItem> shiftItems) {
-                binding.spinnerCarNumber.setAdapter(new ArrayAdapter<ShiftItem>(getContext()
-                        , android.R.layout.simple_list_item_1, shiftItems));
-
-                binding.buttonStartRide.setEnabled(true);
-
-
-            }
+        model.shiftList.observe(this, shiftItems -> {
+            binding.spinnerCarNumber.setAdapter(new ArrayAdapter<ShiftItem>(getContext()
+                    , android.R.layout.simple_list_item_1, shiftItems));
+            binding.buttonStartRide.setEnabled(true);
         });
 
         binding.buttonStartRide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((HomeActivity) getActivity()).liveData.startRide(model
+                ShiftItem shiftItem = model
                         .shiftList
                         .getValue()
-                        .get(binding.spinnerCarNumber.getSelectedItemPosition())
-                        .shift_id + "");
+                        .get(binding.spinnerCarNumber.getSelectedItemPosition());
+                ((HomeActivity) getActivity()).liveData.startRide(shiftItem);
             }
         });
 

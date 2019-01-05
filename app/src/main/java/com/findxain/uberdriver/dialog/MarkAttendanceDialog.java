@@ -7,7 +7,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.findxain.uberdriver.R;
+import com.findxain.uberdriver.api.model.Student;
 import com.findxain.uberdriver.base.BDialog;
+import com.findxain.uberdriver.helper.ImageBinder;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,6 +29,7 @@ public class MarkAttendanceDialog extends BDialog {
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
     private Listner listner;
+    private Student student;
 
     public MarkAttendanceDialog(Context context) {
         super(context);
@@ -60,6 +63,16 @@ public class MarkAttendanceDialog extends BDialog {
 
     public MarkAttendanceDialog setListner(Listner listner) {
         this.listner = listner;
+        return this;
+    }
+
+    public MarkAttendanceDialog setStudent(Student student) {
+        this.student = student;
+
+        textViewName.setText(student.fullname);
+        textViewAddress.setText(student.address);
+        ImageBinder.setImageUrl(imageViewProfilePic, student.photo);
+
         return this;
     }
 

@@ -6,7 +6,10 @@ import com.google.firebase.firestore.GeoPoint;
 
 import java.util.List;
 
-public class Ride  {
+public class Ride {
+
+    public static final String SHIFT_MORNING = "morning";
+    public static final String SHIFT_AFTERNOON = "afternoon";
 
     public String rideId;
 
@@ -16,7 +19,18 @@ public class Ride  {
     public Timestamp startTime;
     public List<Student> students;
     public int driverId;
+    public String shift;
+
 
     public Ride() {
     }
+
+//    public Student getCurrentStudent() {
+//        for (Student student : students) {
+//            if (student.present == Student.UNKNOWN) {
+//                return student;
+//            }
+//        }
+//        return null;
+//    }
 }

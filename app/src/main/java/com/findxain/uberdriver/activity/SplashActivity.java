@@ -19,6 +19,6 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 LoginActivity.start(SplashActivity.this);
             }
-        },3000);
+        },1);
     }
 }
