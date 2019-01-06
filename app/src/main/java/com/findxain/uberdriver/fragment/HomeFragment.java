@@ -67,11 +67,26 @@ public class HomeFragment extends BFragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        model = ViewModelProviders.of(this).get(VM.class);
+
+        HomeActivity activity = (HomeActivity) getActivity();
+        activity.liveData.driverProfile.observe(this, new Observer<DriverProfileResponse>() {
+            @Override
+            public void onChanged(DriverProfileResponse driverProfileResponse) {
+
+                model.driverProfile.setValue(driverProfileResponse);
+            }
+        });
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
-        model = ViewModelProviders.of(this).get(VM.class);
         binding.setModel(model);
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
@@ -139,9 +154,11 @@ public class HomeFragment extends BFragment {
             compositeDisposable = new CompositeDisposable();
             getStudents();
             user.setValue(getUser());
-            getDriverProfile();
             getShifts();
+
+
         }
+
 
         private void getShifts() {
             loaderGetShift.setValue(true);
@@ -188,42 +205,6 @@ public class HomeFragment extends BFragment {
 
         private void getStudents() {
 //            MyApp.endPoints.createRide(MyApp.instance.user.id,);
-        }
-
-        public void getDriverProfile() {
-            EndpointObserver<MyResponse<DriverProfileResponse>> endpointObserver = MyApp.endPoints
-                    .getDriverProfile(MyApp.instance.user.id + "")
-                    .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(new EndpointObserver<MyResponse<DriverProfileResponse>>() {
-                        @Override
-                        public void onComplete() {
-                            loader.setValue(false);
-
-                        }
-
-                        @Override
-                        public void onData(MyResponse<DriverProfileResponse> response) throws Exception {
-                            loader.setValue(false);
-
-                            if (response.status == 200) {
-
-                                driverProfile.setValue(response.data);
-
-                            } else {
-                                throw new Exception(response.status + "");
-                            }
-                        }
-
-                        @Override
-                        public void onHandledError(Throwable e) {
-                            e.printStackTrace();
-                            loader.setValue(false);
-                            errorListener.setValue(new Event<>(e));
-
-
-                        }
-                    });
-            compositeDisposable.add(endpointObserver);
         }
 
 

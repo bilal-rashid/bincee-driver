@@ -24,6 +24,7 @@ import androidx.lifecycle.Observer;
 import com.findxain.uberdriver.HomeActivity;
 import com.findxain.uberdriver.R;
 import com.findxain.uberdriver.api.firestore.Ride;
+import com.findxain.uberdriver.api.model.GetSchoolResponce;
 import com.findxain.uberdriver.api.model.Student;
 import com.findxain.uberdriver.base.BFragment;
 import com.findxain.uberdriver.helper.ImageBinder;
@@ -136,6 +137,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             @Override
             public void onChanged(Ride ride) {
 
+                if (ride == null || ride.students == null) return;
+
                 for (Student student : ride.students) {
                     if (student.present == Student.UNKNOWN) {
 
@@ -179,10 +182,14 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
             List<Student> students = homeActivity.liveData.ride.getValue().students;
 
+
             Student lastStudent = students.get((students.size() - 1));
 
             Point mylocation = Point.fromLngLat(myLocaton.getValue().getLongitude(), myLocaton.getValue().getLatitude());
-            Point lastLocation = Point.fromLngLat(lastStudent.lng, lastStudent.lat);
+
+
+            GetSchoolResponce school = homeActivity.liveData.schoolResponce.getValue();
+            Point lastLocation = Point.fromLngLat(school.lng, school.lat);
 
             GeoJsonSource source = mapboxMap.getSourceAs(ROUTE_SOURCE_ID);
             FeatureCollection featureCollection = FeatureCollection.fromFeature(
@@ -200,14 +207,24 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             }
 
 
-            com.mapbox.mapboxsdk.annotations.Marker marker = mapboxMap.addMarker(new MarkerOptions().setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(mylocation.latitude(), mylocation.longitude())));
-            com.mapbox.mapboxsdk.annotations.Marker marker1 = mapboxMap.addMarker(new MarkerOptions().setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(lastLocation.latitude(), lastLocation.longitude())));
+            com.mapbox.mapboxsdk.annotations.Marker marker = mapboxMap.addMarker(new MarkerOptions()
+                    .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(mylocation.latitude(),
+                            mylocation.longitude()))
+                    .setTitle("Start")
+            );
+            com.mapbox.mapboxsdk.annotations.Marker marker1 = mapboxMap.addMarker(new MarkerOptions()
+                    .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(lastLocation.latitude()
+                            , lastLocation.longitude()))
+                    .setTitle("end")
+
+            );
             markers.add(marker);
             markers.add(marker1);
 
             for (Student student : students) {
                 com.mapbox.mapboxsdk.annotations.Marker markerStudent = mapboxMap.addMarker(new MarkerOptions().setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(student.lat,
-                        student.lng)));
+                        student.lng))
+                        .setTitle(student.fullname));
 
                 markers.add(markerStudent);
 

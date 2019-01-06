@@ -21,6 +21,9 @@ import android.widget.Toast;
 import com.findxain.uberdriver.activity.ContectUsActivity;
 import com.findxain.uberdriver.activity.ProfileActivity;
 import com.findxain.uberdriver.api.firestore.Ride;
+import com.findxain.uberdriver.api.model.DriverProfileResponse;
+import com.findxain.uberdriver.api.model.Event;
+import com.findxain.uberdriver.api.model.GetSchoolResponce;
 import com.findxain.uberdriver.api.model.ShiftItem;
 import com.findxain.uberdriver.api.model.Student;
 import com.findxain.uberdriver.api.model.LoginResponse;
@@ -30,10 +33,12 @@ import com.findxain.uberdriver.databinding.ActivityHomeBinding;
 import com.findxain.uberdriver.dialog.FinishRideDialog;
 import com.findxain.uberdriver.dialog.SelectRouteDialog;
 import com.findxain.uberdriver.dialog.SelectRouteDialogBuilder;
+import com.findxain.uberdriver.dialog.SendNotificationDialog;
 import com.findxain.uberdriver.fragment.AttendanceFragemnt;
 import com.findxain.uberdriver.fragment.HomeFragment;
 import com.findxain.uberdriver.fragment.MapFragment;
 import com.findxain.uberdriver.fragment.MyPowerFragemnt;
+import com.findxain.uberdriver.fragment.NavigationFragment;
 import com.findxain.uberdriver.fragment.RouteDesignerFragment;
 import com.findxain.uberdriver.helper.DateHelper;
 import com.findxain.uberdriver.helper.PermissionHelper;
@@ -57,7 +62,11 @@ import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.matrix.v1.MapboxMatrix;
+import com.mapbox.api.matrix.v1.models.MatrixResponse;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -79,6 +88,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -133,6 +143,7 @@ public class HomeActivity extends BA {
     private ProgressDialog createRouteDialog;
     private Observer<Location> tempMyLocationObserver;
     private AlertDialog waiting_for_locationDialog;
+    public DirectionsRoute navigationRoute;
 
     public static void start(Context context) {
         context.startActivity(new Intent(context, HomeActivity.class));
@@ -142,6 +153,7 @@ public class HomeActivity extends BA {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_home);
+        Mapbox.getInstance(this, MAPBOX_TOKEN);
         liveData = ViewModelProviders.of(this).get(LiveData.class);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home);
         binding.setVm(liveData);
@@ -273,7 +285,6 @@ public class HomeActivity extends BA {
                                 case 1:
 
                                     customRoot = false;
-
                                     startRide();
                                     break;
                                 case 2:
@@ -310,22 +321,68 @@ public class HomeActivity extends BA {
                     return;
                 }
                 List<Location> locations = locationResult.getLocations();
-                for (Location location : locations) {
-                    // Update UI with location data
-                    // ...
-                }
+//                for (Location location : locations) {
+//                    // Update UI with location data
+//                    // ...
+//                }
 
                 if (locations.size() > 0 && locations.get(0) != null) {
-                    Location location = locations.get(0);
-                    HomeActivity.this.liveData.myLocaton.setValue(location);
+                    Location myLocation = locations.get(0);
+                    HomeActivity.this.liveData.myLocaton.setValue(myLocation);
 
                     MapFragment.getInstance().setMyLocation(liveData.myLocaton.getValue());
 
                     Ride ride = liveData.ride.getValue();
                     if (ride != null && ride.rideInProgress) {
 
-                        ride.latLng = new GeoPoint(location.getLatitude(), location.getLongitude());
+                        ride.latLng = new GeoPoint(myLocation.getLatitude(), myLocation.getLongitude());
                         liveData.ride.setValue(ride);
+
+                        if (ride.students != null) {
+
+                            if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+
+                                for (Student student : ride.students) {
+
+                                    if (student.status == Student.STATUS_MORNING_LEFTFROMSCHOOL) {
+
+                                        Location studentLocation = new Location("studentLocation");
+                                        studentLocation.setLatitude(student.lat);
+                                        studentLocation.setLongitude(student.lng);
+
+                                        if (myLocation.distanceTo(studentLocation) < 500) {
+                                            //send notification to student
+                                            Log.d(TAG, "At Student Location" + student.fullname);
+                                        }
+                                        student.status = Student.STATUS_MORNING_ATYOURLOCATION;
+//                                        return;
+                                    }
+                                }
+
+
+                            } else {
+
+
+                                for (Student student : ride.students) {
+
+                                    if (student.status == Student.STATUS_AFTERNOON_INTHEBUS) {
+
+                                        Location studentLocation = new Location("studentLocation");
+                                        studentLocation.setLatitude(student.lat);
+                                        studentLocation.setLongitude(student.lng);
+
+                                        if (myLocation.distanceTo(studentLocation) < 500) {
+                                            //send notification to student
+                                            Log.d(TAG, "At Student Location" + student.fullname);
+                                        }
+                                        student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
+//                                        return;
+                                    }
+                                }
+
+                            }
+                        }
+
 
                         userDocument.set(ride).addOnCompleteListener(task ->
                                 Log.d(TAG, "" +
@@ -368,8 +425,20 @@ public class HomeActivity extends BA {
         Location myLocation = liveData.myLocaton.getValue();
         if (myLocation != null) {
             Point mylocation = Point.fromLngLat(myLocation.getLongitude(), myLocation.getLatitude());
-            Point lastLocation = Point.fromLngLat(lastStudent.lng, lastStudent.lat);
+            GetSchoolResponce value = liveData.schoolResponce.getValue();
+            Point lastLocation = null;
+
+            if (value != null) {
+                lastLocation = Point.fromLngLat(value.lng, value.lat);
+            } else {
+                lastLocation = Point.fromLngLat(value.lng, value.lat);
+
+            }
+
+
             getRoute(mylocation, lastLocation, students);
+//            fetchRoute(mylocation, lastLocation, students);
+
         } else {
             tempMyLocationObserver = new Observer<Location>() {
                 @Override
@@ -390,6 +459,7 @@ public class HomeActivity extends BA {
         }
     }
 
+
     private void setupBottemNavListner() {
         bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
 
@@ -403,6 +473,7 @@ public class HomeActivity extends BA {
                         fragment = HomeFragment.getInstance();
                     } else if (ride.rideInProgress) {
                         fragment = MapFragment.getInstance();
+//                        fragment = NavigationFragment.getInstance();
                     } else {
                         fragment = HomeFragment.getInstance();
                     }
@@ -544,17 +615,53 @@ public class HomeActivity extends BA {
     public static class LiveData extends ViewModel {
 
         public MutableLiveData<Location> myLocaton = new MutableLiveData<>();
-        private CompositeDisposable compositeDisposable;
+        private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
         public MutableLiveData<LoginResponse.User> user = new MutableLiveData<>();
         public MutableLiveData<List<Student>> students = new MutableLiveData<>();
         public MutableLiveData<Boolean> createRideListener = new MutableLiveData<>();
         public MutableLiveData<ShiftItem> selectedShift = new MutableLiveData<>();
         public MutableLiveData<Ride> ride = new MutableLiveData<>();
+        public MutableLiveData<GetSchoolResponce> schoolResponce = new MutableLiveData<>();
+
+        public MutableLiveData<DriverProfileResponse> driverProfile = new MutableLiveData<>();
 
         public LiveData() {
+            getDriverProfile();
             compositeDisposable = new CompositeDisposable();
             user.setValue(MyApp.instance.user);
+        }
+
+        private void getSchoolProfile(String schoolId) {
+            EndpointObserver<MyResponse<GetSchoolResponce>> endpointObserver = MyApp.endPoints.getSchool(schoolId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new EndpointObserver<MyResponse<GetSchoolResponce>>() {
+                        @Override
+                        public void onComplete() {
+
+
+                        }
+
+                        @Override
+                        public void onData(MyResponse<GetSchoolResponce> schoolResponce) throws Exception {
+                            if (schoolResponce.status == 200 && schoolResponce.data != null) {
+                                LiveData.this.schoolResponce.setValue(schoolResponce.data);
+                            } else {
+                                throw new Exception(schoolResponce.status + "");
+                            }
+
+                        }
+
+                        @Override
+                        public void onHandledError(Throwable e) {
+
+                            e.printStackTrace();
+                        }
+                    });
+
+            compositeDisposable.add(endpointObserver);
+
         }
 
         public void startRide(ShiftItem shiftItem) {
@@ -601,6 +708,43 @@ public class HomeActivity extends BA {
 
         }
 
+        public void getDriverProfile() {
+            EndpointObserver<MyResponse<DriverProfileResponse>> endpointObserver = MyApp.endPoints
+                    .getDriverProfile(MyApp.instance.user.id + "")
+                    .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new EndpointObserver<MyResponse<DriverProfileResponse>>() {
+                        @Override
+                        public void onComplete() {
+//                            loader.setValue(false);
+
+                        }
+
+                        @Override
+                        public void onData(MyResponse<DriverProfileResponse> response) throws Exception {
+//                            loader.setValue(false);
+
+                            if (response.status == 200) {
+
+                                driverProfile.setValue(response.data);
+                                getSchoolProfile(response.data.school_id + "");
+
+                            } else {
+                                throw new Exception(response.status + "");
+                            }
+                        }
+
+                        @Override
+                        public void onHandledError(Throwable e) {
+                            e.printStackTrace();
+//                            loader.setValue(false);
+//                            errorListener.setValue(new Event<>(e));
+
+
+                        }
+                    });
+            compositeDisposable.add(endpointObserver);
+        }
+
 
     }
 
@@ -642,9 +786,7 @@ public class HomeActivity extends BA {
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        mFusedLocationClient.requestLocationUpdates(getLocatonRequest(),
-                mLocationCallback,
-                null /* Looper */);
+        mFusedLocationClient.requestLocationUpdates(getLocatonRequest(), mLocationCallback, null /* Looper */);
     }
 
     private LocationRequest getLocatonRequest() {
@@ -719,7 +861,73 @@ public class HomeActivity extends BA {
                 Toast.makeText(HomeActivity.this, "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+
+        List<Point> points = new ArrayList<>();
+        for (Student point : wayPoints) {
+            points.add(Point.fromLngLat(point.lng, point.lat));
+        }
+
+//        MapboxMatrix directionsMatrixClient = MapboxMatrix.builder()
+//                .accessToken(MAPBOX_TOKEN)
+//                .profile(DirectionsCriteria.PROFILE_DRIVING)
+//                .coordinates(points)
+//                .build();
+//        directionsMatrixClient.enqueueCall(new Callback<MatrixResponse>() {
+//            @Override
+//            public void onResponse(Call<MatrixResponse> call, Response<MatrixResponse> response) {
+//
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<MatrixResponse> call, Throwable t) {
+//
+//                t.printStackTrace();
+//            }
+//        });
+
+
     }
 
+    private void fetchRoute(Point origin, Point destination, List<Student> students) {
+
+        NavigationRoute.Builder builder = NavigationRoute.builder(this)
+                .accessToken(Mapbox.getAccessToken())
+                .origin(origin)
+
+                .destination(destination)
+                .alternatives(true);
+
+//        builder.addWaypointTargets(students.toArray(students));
+
+        for (Student point : students) {
+
+            builder.addWaypoint(Point.fromLngLat(point.lng, point.lat));
+
+
+        }
+
+        builder
+                .build()
+                .getRoute(new Callback<DirectionsResponse>() {
+                    @Override
+                    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+
+                        navigationRoute = response.body().routes().get(0);
+//                        startNavigation(navigationRoute);
+
+                        bottomNavigationView.setSelectedItemId(R.id.bottomNavigationMap);
+                    }
+
+                    @Override
+                    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                        t.printStackTrace();
+
+                        MyApp.showToast(t.getMessage());
+                    }
+                });
+
+    }
 
 }

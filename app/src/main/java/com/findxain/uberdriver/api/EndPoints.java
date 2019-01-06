@@ -1,5 +1,6 @@
 package com.findxain.uberdriver.api;
 
+import com.findxain.uberdriver.api.model.GetSchoolResponce;
 import com.findxain.uberdriver.api.model.Student;
 import com.findxain.uberdriver.api.model.DriverProfileResponse;
 import com.findxain.uberdriver.api.model.LoginResponse;
@@ -47,4 +48,7 @@ public interface EndPoints {
 
     @GET("school/shift/list")
     Observable<MyResponse<List<ShiftItem>>> listShift();
+
+    @GET("admin/school/{school_id}")
+    Observable<MyResponse<GetSchoolResponce>> getSchool(@Path("school_id") String SchoolId);
 }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="?android:attr/actionBarSize"
-    tools:context=".fragment.MapFragment">
+    tools:context=".fragment.NavigationFragment">
 
     <!--<fragment xmlns:android="http://schemas.android.com/apk/res/android"-->
     <!--xmlns:map="http://schemas.android.com/apk/res-auto"-->
@@ -22,14 +22,14 @@
     <!--map:layout_constraintVertical_bias="0.0"-->
     <!--tools:context=".activity.MapsActivity" />-->
 
-    <com.mapbox.mapboxsdk.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.mapbox.services.android.navigation.ui.v5.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/mapView"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        map:layout_constraintBottom_toTopOf="@+id/textViewFinishRide"
+        map:layout_constraintBottom_toTopOf="@+id/constraintLayout"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintHorizontal_bias="0.0"
         map:layout_constraintStart_toStartOf="parent"
@@ -71,8 +71,8 @@
 
     <ImageView
         android:id="@+id/imageView9"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/textViewFinishRide"

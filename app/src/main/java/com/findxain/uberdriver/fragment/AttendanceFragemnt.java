@@ -125,8 +125,12 @@ public class AttendanceFragemnt extends BFragment {
     }
 
     private List<Student> getStudents() {
-        Ride ride = ((HomeActivity) getActivity()).liveData.ride.getValue();
+        Ride ride = getRide();
         return ride != null ? ride.students : new ArrayList<>();
+    }
+
+    private Ride getRide() {
+        return ((HomeActivity) getActivity()).liveData.ride.getValue();
     }
 
     public class VH extends RecyclerView.ViewHolder {
@@ -191,6 +195,32 @@ public class AttendanceFragemnt extends BFragment {
             imageViewGreenSelected.setVisibility(View.GONE);
             setTextColorWhite();
             getStudents().get(getAdapterPosition()).present = Student.ABSENT;
+
+
+            updateStudentStatus();
+
+        }
+
+        private void updateStudentStatus() {
+            Ride ride = getRide();
+            if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+
+                ride.students.get(getAdapterPosition()).status = Student.STATUS_MORNING_ONTHEWAY;
+
+
+            } else {
+                if (ride.students.get(getAdapterPosition()).status < Student.STATUS_AFTERNOON_INTHEBUS) {
+
+                    ride.students.get(getAdapterPosition()).status = Student.STATUS_AFTERNOON_INTHEBUS;
+                } else {
+
+                }
+
+            }
+
+            HomeActivity activity = (HomeActivity) getActivity();
+            activity.liveData.ride.setValue(ride);
+            activity.updateAttendance();
         }
 
         private void markPresent() {
@@ -198,7 +228,7 @@ public class AttendanceFragemnt extends BFragment {
             imageViewGreenSelected.setVisibility(View.VISIBLE);
             setTextColorWhite();
             getStudents().get(getAdapterPosition()).present = Student.PRESENT;
-            ((HomeActivity) getActivity()).updateAttendance();
+            updateStudentStatus();
 
 
         }
