@@ -9,18 +9,18 @@
 
         <variable
             name="modal"
-            type="com.findxain.uberdriver.fragment.ParentProfileFragment.VM" />
+            type="com.bincee.driver.fragment.DriverProfileFragment.VM" />
 
         <variable
             name="handlers"
-            type="com.findxain.uberdriver.fragment.ParentProfileFragment.MyListners" />
+            type="com.bincee.driver.fragment.DriverProfileFragment.MyListners" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".fragment.ParentProfileFragment">
+        tools:context=".fragment.DriverProfileFragment">
 
         <ImageView
             android:id="@+id/imageView13"
@@ -54,6 +54,27 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/circleImageViewProfile" />
 
+        <EditText
+            android:id="@+id/editTextName"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/blue_button_height"
+            android:background="@drawable/rectangle_rounded_white_background"
+            android:inputType="text"
+
+            android:lines="1"
+            android:paddingStart="20dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="5dp"
+            android:text="@{modal.name}"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/editTextContact"
+            app:layout_constraintEnd_toEndOf="@+id/buttonEdit"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/buttonEdit"
+            app:layout_constraintTop_toTopOf="@+id/textViewName"
+            app:layout_constraintVertical_chainStyle="packed" />
+
 
         <TextView
             android:id="@+id/textViewNumber"
@@ -62,6 +83,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="0dp"
             android:layout_marginEnd="8dp"
+
             android:fontFamily="@font/gotham_book"
             android:text="@{modal.contact}"
             android:textColor="@color/_232323_dialog_subtext"
@@ -71,6 +93,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewName" />
 
+        <EditText
+            android:id="@+id/editTextContact"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/blue_button_height"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/rectangle_rounded_white_background"
+            android:inputType="phone"
+            android:paddingStart="20dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="5dp"
+            android:text="@{modal.contact}"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewNumber"
+            app:layout_constraintEnd_toEndOf="@+id/editTextName"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/editTextName"
+            app:layout_constraintTop_toBottomOf="@+id/editTextName" />
+
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/circleImageViewProfile"
@@ -78,7 +119,7 @@
             android:layout_height="100dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="50dp"
             app:civ_border_color="@color/sky_blue"
             app:civ_border_width="2dp"
             app:imageUrl="@{modal.profileUrl}"
@@ -87,7 +128,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.39"
+            app:layout_constraintVertical_bias="0.37"
             app:layout_constraintVertical_chainStyle="packed" />
 
 
@@ -101,13 +142,14 @@
             app:layout_constraintTop_toTopOf="@+id/circleImageViewProfile" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/buttonEdit"
             style="@style/dialogButtonBlue"
             android:layout_width="@dimen/blue_butoon_width"
             android:layout_height="@dimen/blue_button_height"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="35dp"
             android:layout_marginEnd="8dp"
+            android:onClick="@{handlers::onEditClicked}"
             android:text="EDIT"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.497"
@@ -115,14 +157,14 @@
             app:layout_constraintTop_toBottomOf="@+id/textViewNumber" />
 
 
-        <com.findxain.uberdriver.customview.MyProgress
+        <com.bincee.driver.customview.MyProgress
+            android:id="@+id/progressBar"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:clickable="true"
             android:focusable="true"
             android:translationZ="10dp"
             android:visibility="gone"
-            android:id="@+id/progressBar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

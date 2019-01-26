@@ -1,4 +1,4 @@
-package com.findxain.uberdriver;
+package com.bincee.driver;
 
 import org.junit.Test;
 

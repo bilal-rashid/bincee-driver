@@ -7,7 +7,7 @@
 
         <variable
             name="model"
-            type="com.findxain.uberdriver.fragment.HomeFragment.VM" />
+            type="com.bincee.driver.fragment.HomeFragment.VM" />
 
     </data>
 
@@ -73,6 +73,7 @@
             android:layout_marginEnd="50dp"
             android:background="@drawable/spinner_bg"
             android:maxWidth="200dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/spinnerCarNumber"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -83,14 +84,16 @@
 
         <Spinner
             android:id="@+id/spinnerCarNumber"
-            android:layout_width="0dp"
+            android:layout_width="250dp"
             android:layout_height="@dimen/blue_button_height"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/spinner_bg"
             app:layout_constraintBottom_toTopOf="@+id/buttonStartRide"
-            app:layout_constraintEnd_toEndOf="@+id/spinnerSchoolName"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/spinnerSchoolName"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/spinnerSchoolName">
 
         </Spinner>

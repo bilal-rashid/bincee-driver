@@ -1,4 +1,4 @@
-package com.findxain.uberdriver;
+package com.bincee.driver;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.findxain.uberdriver", appContext.getPackageName());
+        assertEquals("com.bincee.driver", appContext.getPackageName());
     }
 }

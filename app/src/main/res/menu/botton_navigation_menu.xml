@@ -11,6 +11,6 @@
     <item
         android:id="@+id/bottomNavigationPowerScreen"
         android:icon="@drawable/bottemnavigation_power_selector"
-        android:title="PowerScreen" />
+        android:title="Absent" />
 
 </menu>
