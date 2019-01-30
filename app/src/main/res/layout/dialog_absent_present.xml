@@ -89,9 +89,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="40dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="40dp"
-                android:layout_marginBottom="30dp"
+                android:layout_marginBottom="20dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
 
                 android:background="@drawable/rectangle_white_border"
                 android:gravity="center_horizontal"

@@ -27,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
-                android:src="@drawable/send_notification_bg" />
+                android:src="@drawable/send_alert_bg" />
 
             <TextView
                 style="@style/dialogTitle"
@@ -44,7 +44,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
-                android:text="Dear Parent!\n\nYour kid reached the school safely!" />
+                android:text="Dear Parent!\n\nYour kid has arrived at your location.\nPlease open the door."
+                android:textAlignment="viewStart" />
 
 
             <Button
@@ -56,7 +57,7 @@
                 android:layout_marginTop="40dp"
                 android:layout_marginEnd="40dp"
                 android:background="@drawable/circle_rectangle_blue"
-                android:text="SEND TO ALL"
+                android:text="SEND"
 
                 />
 
@@ -66,8 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="20dp"
+                android:padding="20dp"
                 android:text="CANCEL" />
 
 
