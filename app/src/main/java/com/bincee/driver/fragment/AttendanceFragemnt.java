@@ -50,6 +50,7 @@ import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.bincee.driver.api.firestore.Ride.SHIFT_AFTERNOON;
 import static com.bincee.driver.api.model.notification.Notification.ATTANDACE;
 
 /**
@@ -154,24 +155,23 @@ public class AttendanceFragemnt extends BFragment {
         getRide().observe(getViewLifecycleOwner(), new Observer<Ride>() {
             @Override
             public void onChanged(Ride ride) {
-                if (ride != null && ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
+                if (ride != null && ride.shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
+                    buttonStartRide.setVisibility(View.VISIBLE);
 
-                    if (ride.students != null && ride.students.size() > 0 && getHomeActivity().currentRoute == null) {
+                    if (ride.students != null && ride.students.size() > 0 && getHomeActivity().liveData.currentRoute.getValue() == null) {
 
 
-                        for (Student student : ride.students) {
-                            if (student.present == Student.UNKNOWN) {
-                                buttonStartRide.setVisibility(View.GONE);
-
-                                return;
-                            }
-
-                        }
-                        buttonStartRide.setVisibility(View.VISIBLE);
+//                        for (Student student : ride.students) {
+//                            if (student.present == Student.UNKNOWN) {
+//                                buttonStartRide.setVisibility(View.GONE);
+//
+//                                return;
+//                            }
+//
+//                        }
 
 
                     } else {
-                        buttonStartRide.setVisibility(View.GONE);
 
                     }
 
@@ -182,13 +182,8 @@ public class AttendanceFragemnt extends BFragment {
                 }
 
 
-
             }
         });
-
-
-
-
 
 
     }
@@ -196,22 +191,34 @@ public class AttendanceFragemnt extends BFragment {
     @OnClick(R.id.buttonStartRide)
     public void onViewClicked() {
 
+        HomeActivity.LiveData liveData = getHomeActivity().liveData;
+        Ride ride = liveData.ride.getValue();
+        if (ride.shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
 
-        MarkStudentAbdentDialog absentDialog = new MarkStudentAbdentDialog(getContext(), getHomeActivity().liveData.getAbsentStudents());
-        absentDialog.setListner(new MarkStudentAbdentDialog.Listner() {
-            @Override
-            public void yes() {
+            if (getHomeActivity().liveData.currentRoute.getValue() != null) return;
 
-                getHomeActivity().startRide(true);
+            if (!liveData.isAttandanceMarked()) {
+                MyApp.showToast("Please mark all students before proceeding");
+            } else {
+                MarkStudentAbdentDialog absentDialog = new MarkStudentAbdentDialog(getContext(), getHomeActivity().liveData.getAbsentStudents());
+                absentDialog.setListner(new MarkStudentAbdentDialog.Listner() {
+                    @Override
+                    public void yes() {
 
+                        getHomeActivity().startRide(true);
+
+                    }
+
+                    @Override
+                    public void no() {
+
+                    }
+                });
+                absentDialog.show();
             }
 
-            @Override
-            public void no() {
 
-            }
-        });
-        absentDialog.show();
+        }
 
 
     }
@@ -322,9 +329,6 @@ public class AttendanceFragemnt extends BFragment {
             getStudents().get(getAdapterPosition()).present = Student.ABSENT;
 
 
-            updateStudentStatus();
-
-
         }
 
         private void updateStudentStatus() {
@@ -335,12 +339,12 @@ public class AttendanceFragemnt extends BFragment {
 
             } else {
 
-                if (ride.students.get(getAdapterPosition()).status < Student.STATUS_AFTERNOON_INTHEBUS) {
-
-                    ride.students.get(getAdapterPosition()).status = Student.STATUS_AFTERNOON_INTHEBUS;
-                } else {
-
-                }
+//                if (ride.students.get(getAdapterPosition()).status < Student.STATUS_AFTERNOON_INTHEBUS) {
+//
+//                    ride.students.get(getAdapterPosition()).status = Student.STATUS_AFTERNOON_INTHEBUS;
+//                } else {
+//
+//                }
 
             }
 
@@ -354,7 +358,6 @@ public class AttendanceFragemnt extends BFragment {
             imageViewGreenSelected.setAlpha(1f);
             setTextColorWhite();
             getStudents().get(getAdapterPosition()).present = Student.PRESENT;
-            updateStudentStatus();
 
 
         }
@@ -430,12 +433,16 @@ public class AttendanceFragemnt extends BFragment {
 
         @OnClick(R.id.rootView)
         public void onRootViewClicked() {
+
             showAttDialog();
 
         }
 
 
         private void showAttDialog() {
+
+            if (getHomeActivity().liveData.ride.getValue().shift.equalsIgnoreCase(SHIFT_AFTERNOON))
+                return;
 
 
             MarkAttendanceDialog markAttendanceDialog = new MarkAttendanceDialog(getContext())
@@ -445,6 +452,8 @@ public class AttendanceFragemnt extends BFragment {
                         public void markAbsent() {
                             VH.this.markAbsent();
                             if (getRide().getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+                                updateStudentStatus();
+
                                 Student student = getStudents().get(getAdapterPosition());
                                 sendNotification(getStudents().get(getAdapterPosition()).parent_id, "Kid is absent", student.fullname + " is absent ");
 
@@ -459,13 +468,14 @@ public class AttendanceFragemnt extends BFragment {
                             VH.this.markPresent();
 
                             if (getRide().getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+                                updateStudentStatus();
+
                                 Student student = getStudents().get(getAdapterPosition());
-                                sendNotification(getStudents().get(getAdapterPosition()).parent_id, "In the bus", student.fullname + " is in the bus and will reach in around ETA " + Math.abs(student.duration));
+                                sendNotification(getStudents().get(getAdapterPosition()).parent_id, "On the way", " Bus is on the way to school and will be there in ETA " + Math.round(student.duration) + " minutes");
 
                             } else {
 //                                sendNotification(getStudents().get(getAdapterPosition()).parent_id, "In the bus", student.fullname + " is in the bus and will reach in around ETA " + Math.abs(student.duration));
                             }
-//                            sendNotification(getStudents().get(getAdapterPosition()).parent_id, "Kind is Present", "Your Kid is Present");
 
 
                         }
@@ -510,10 +520,20 @@ public class AttendanceFragemnt extends BFragment {
         public void swiped(int direction) {
             if (direction == ItemTouchHelper.LEFT) {
 
-                showAttDialog();
-            } else if (direction == ItemTouchHelper.RIGHT) {
-                showAttDialog();
+                if (getHomeActivity().liveData.ride.getValue().shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
 
+                    markAbsent();
+                } else {
+                    showAttDialog();
+                }
+            } else if (direction == ItemTouchHelper.RIGHT) {
+//                showAttDialog();
+                if (getHomeActivity().liveData.ride.getValue().shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
+
+                    markPresent();
+                } else {
+                    showAttDialog();
+                }
             }
         }
     }

@@ -20,6 +20,7 @@ public class SendNotificationDialog extends BDialog {
     TextView buttonCancel;
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
+    private Listner listner;
 
     public SendNotificationDialog(Context context) {
         super(context);
@@ -30,18 +31,34 @@ public class SendNotificationDialog extends BDialog {
 
     @OnClick(R.id.buttonSend)
     public void onButtonSendClicked() {
+        listner.send();
         dismiss();
     }
 
     @OnClick(R.id.buttonCancel)
     public void onButtonCancelClicked() {
+        listner.cancel();
         dismiss();
 
     }
 
     @OnClick(R.id.imageViewCross)
     public void onImageViewCrossClicked() {
+        listner.cancel();
+
         dismiss();
 
+    }
+
+    public SendNotificationDialog setListner(Listner listner) {
+        this.listner = listner;
+        return this;
+
+    }
+
+    public interface Listner {
+        public void send();
+
+        public void cancel();
     }
 }

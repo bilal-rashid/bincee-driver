@@ -35,14 +35,14 @@ public class FinishRideDialog extends BDialog {
     @OnClick(R.id.buttonLogout)
     public void onButtonLogoutClicked() {
         dismiss();
-        listner.startNewShft();
+        listner.logout();
 
     }
 
     @OnClick(R.id.buttonCancel)
     public void onButtonCancelClicked() {
         dismiss();
-        listner.logOut();
+        listner.cancel();
 
     }
 
@@ -59,9 +59,9 @@ public class FinishRideDialog extends BDialog {
 
 
     public interface Listner {
-        void startNewShft();
+        void logout();
 
-        void logOut();
+        void cancel();
 
     }
 }

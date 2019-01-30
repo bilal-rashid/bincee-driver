@@ -8,11 +8,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bincee.driver.R;
+import com.bincee.driver.api.model.Student;
 import com.bincee.driver.base.BDialog;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,6 +32,7 @@ public class SendNotificationToAll extends BDialog {
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
     private Listner listner;
+    private List<Student> students = new ArrayList<>();
 
     public SendNotificationToAll(Context context) {
         super(context);
@@ -48,14 +53,18 @@ public class SendNotificationToAll extends BDialog {
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
+
+//                holder.bind();
+
             }
 
             @Override
             public int getItemCount() {
-                return 3;
+                return students.size();
             }
         });
 
+        recycleView.setVisibility(View.GONE);
 
     }
 
@@ -81,6 +90,10 @@ public class SendNotificationToAll extends BDialog {
 
     public void setListner(Listner listner) {
         this.listner = listner;
+    }
+
+    public void setStudents(List<Student> students) {
+        this.students = students;
     }
 
     public interface Listner {

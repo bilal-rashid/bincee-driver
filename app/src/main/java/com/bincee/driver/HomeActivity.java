@@ -40,6 +40,7 @@ import com.bincee.driver.databinding.ActivityHomeBinding;
 import com.bincee.driver.dialog.FinishRideDialog;
 import com.bincee.driver.dialog.SelectRouteDialog;
 import com.bincee.driver.dialog.SelectRouteDialogBuilder;
+import com.bincee.driver.dialog.SendNotificationDialog;
 import com.bincee.driver.dialog.SendNotificationToAll;
 import com.bincee.driver.fragment.AbsentFragment;
 import com.bincee.driver.fragment.AttendanceFragemnt;
@@ -87,6 +88,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
@@ -111,6 +114,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.bincee.driver.api.model.Student.PRESENT;
+import static com.bincee.driver.api.model.Student.STATUS_AFTERNOON_INTHEBUS;
 import static com.bincee.driver.api.model.notification.Notification.RIDE;
 import static com.bincee.driver.api.model.notification.Notification.UPDATE_STATUS;
 import static com.bincee.driver.fragment.MapFragment.MAPBOX_TOKEN;
@@ -208,7 +213,6 @@ public class HomeActivity extends BA {
     /**
      * The Current route.
      */
-    public DirectionsRoute currentRoute;
     private boolean creatingRoute = false;
     private ProgressDialog createRouteDialog;
     private Observer<Location> tempMyLocationObserver;
@@ -219,6 +223,10 @@ public class HomeActivity extends BA {
     public DirectionsRoute navigationRoute;
     private int REQUEST_CHECK_SETTINGS = 963;
     private SendNotificationToAll sendNotificationToAll;
+    private SendNotificationDialog sendNotificationDialog;
+    private TimerTask creatRouteTask;
+    Timer timer = new Timer();
+
 
     /**
      * Start.
@@ -440,7 +448,7 @@ public class HomeActivity extends BA {
 
                                 for (Student student : ride.students) {
 
-                                    if (student.status == Student.STATUS_MORNING_LEFTFROMSCHOOL) {
+                                    if (student.status == Student.STATUS_MORNING_BUS_IS_COMMING) {
 
                                         Location studentLocation = new Location("studentLocation");
                                         studentLocation.setLatitude(student.lat);
@@ -450,7 +458,6 @@ public class HomeActivity extends BA {
                                             //send notification to student
                                             Log.d(TAG, "At Student Location" + student.fullname);
                                             student.status = Student.STATUS_MORNING_ATYOURLOCATION;
-
                                             liveData.sentNotificationToStudent(student, "Bus is here", "Bus has arrived to pickup " + student.fullname + " and will leave in 5 minutes");
 
                                         }
@@ -462,10 +469,16 @@ public class HomeActivity extends BA {
                                     GeoPoint schoolLatLng = value.schoolLatLng;
 
                                     Location school = LatLngHelper.toLocation(schoolLatLng);
-                                    if (myLocation.distanceTo(school) < 200 && value.rechtoSchoolNotificationSent) {
+                                    if (myLocation.distanceTo(school) < 200 && !value.rechtoSchoolNotificationSent) {
+
+                                        for (Student student : ride.students) {
+                                            student.status = Student.STATUS_MORNING_REACHED;
+                                        }
+
 
                                         if (sendNotificationToAll == null || !sendNotificationToAll.isShowing()) {
                                             sendNotificationToAll = new SendNotificationToAll(HomeActivity.this);
+                                            sendNotificationToAll.setStudents(ride.students);
                                             sendNotificationToAll.setListner(new SendNotificationToAll.Listner() {
                                                 @Override
                                                 public void yes() {
@@ -480,6 +493,11 @@ public class HomeActivity extends BA {
 
                                                 @Override
                                                 public void cancel() {
+                                                    liveData.sendNotificationToAll("Reached", "Bus has Reached the school");
+                                                    Ride ride = liveData.ride.getValue();
+                                                    ride.rechtoSchoolNotificationSent = true;
+                                                    liveData.ride.setValue(ride);
+
 
                                                 }
                                             });
@@ -497,21 +515,45 @@ public class HomeActivity extends BA {
 
                                 for (Student student : ride.students) {
 
-                                    if (student.status == Student.STATUS_AFTERNOON_INTHEBUS) {
+                                    if (student.status == STATUS_AFTERNOON_INTHEBUS) {
 
+                                        Location studentLocation = new Location("studentLocation");
+                                        studentLocation.setLatitude(student.lat);
+                                        studentLocation.setLongitude(student.lng);
+
+
+                                        if (myLocation.distanceTo(studentLocation) < 500) {
+
+                                            student.status = Student.STATUS_AFTERNOON_ALMOSTTHERE;
+                                            liveData.sentNotificationToStudent(student, "Almost there", student.fullname + "  will reach home in " + Math.round(student.duration) + " minutes");
+
+                                        }
+                                    } else if (student.status == Student.STATUS_AFTERNOON_ALMOSTTHERE) {
                                         Location studentLocation = new Location("studentLocation");
                                         studentLocation.setLatitude(student.lat);
                                         studentLocation.setLongitude(student.lng);
 
                                         if (myLocation.distanceTo(studentLocation) < 200) {
                                             //send notification to student
-                                            Log.d(TAG, "At Student Location" + student.fullname);
                                             student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
 
-                                            liveData.sentNotificationToStudent(student, "Almost there", student.fullname + "  will reach home in " + student.duration + " minutes");
+                                            sendNotificationDialog = new SendNotificationDialog(HomeActivity.this);
+                                            sendNotificationDialog.setListner(new SendNotificationDialog.Listner() {
+                                                @Override
+                                                public void send() {
+
+                                                    liveData.sentNotificationToStudent(student, "At your doorstep", "Please open the door " + student.fullname + " is waiting outside");
+
+                                                }
+
+                                                @Override
+                                                public void cancel() {
+
+                                                }
+                                            }).show();
+
 
                                         }
-//                                        return;
                                     }
                                 }
 
@@ -521,17 +563,8 @@ public class HomeActivity extends BA {
 
                         rideDocument.set(ride).addOnCompleteListener(task ->
                                 Log.d(TAG, "Updated"));
-//                        for (Student student : ride.students) {
-//
-//
-//                            Location sLoc = new Location("sd");
-//                            sLoc.setLatitude(student.lat);
-//                            sLoc.setLongitude(student.lng);
-//
-//                            float distance = location.distanceTo(sLoc);
-//
-//
-//                        }
+
+
                     }
 
 
@@ -607,7 +640,23 @@ public class HomeActivity extends BA {
 
 
             if (liveData.ride.getValue().shift.equals(Ride.SHIFT_MORNING) || liveData.isAttandanceMarked()) {
+
+                if (creatRouteTask != null) {
+                    creatRouteTask.cancel();
+                }
+
                 createRoute(students, myLocation, sendNotification);
+
+
+                creatRouteTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        createRoute(students, myLocation, false);
+
+                    }
+                };
+                timer.scheduleAtFixedRate(creatRouteTask, 60 * 1000, 60 * 1000);
+
 //            fetchRoute(mylocation, lastLocation, students);
             } else {
                 bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
@@ -641,6 +690,14 @@ public class HomeActivity extends BA {
         getRoute(mylocation, lastLocation, students, sendNotification);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (creatRouteTask != null) {
+            creatRouteTask.cancel();
+        }
+        timer.cancel();
+    }
 
     private void setupBottemNavListner() {
         bottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
@@ -711,7 +768,10 @@ public class HomeActivity extends BA {
      * Finish ride.
      */
     public void finishRide() {
-        currentRoute = null;
+
+        creatRouteTask.cancel();
+
+        liveData.currentRoute.setValue(null);
         Ride ride = liveData.ride.getValue();
         ride.rideInProgress = false;
         ride.endTime = Timestamp.now();
@@ -736,16 +796,15 @@ public class HomeActivity extends BA {
 
         new FinishRideDialog(this).setListner(new FinishRideDialog.Listner() {
             @Override
-            public void startNewShft() {
-                recreate();
+            public void logout() {
+                logout();
 
 
             }
 
             @Override
-            public void logOut() {
-                logout();
-
+            public void cancel() {
+                recreate();
 
             }
         }).show();
@@ -848,6 +907,7 @@ public class HomeActivity extends BA {
          * The My locaton.
          */
         public MutableLiveData<Location> myLocaton = new MutableLiveData<>();
+        public MutableLiveData<DirectionsRoute> currentRoute = new MutableLiveData<>();
         private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
         /**
@@ -1142,9 +1202,12 @@ public class HomeActivity extends BA {
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
 
                     if (documentSnapshot != null && documentSnapshot.exists() && documentSnapshot.getString("token") != null) {
+                        Notification.Notific notification = new Notification.Notific(title, message, RIDE);
+                        notification.data = new Notification.Data(student.id);
+
                         MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL
                                 , new SendNotificationBody(documentSnapshot.getString("token")
-                                        , new Notification.Notific(title, message, RIDE)))
+                                        , notification))
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new EndpointObserver<SendNotificationResponce>() {
@@ -1188,7 +1251,8 @@ public class HomeActivity extends BA {
         public void sendNotificationToAllStudents() {
 
 
-            List<Student> students = ride.getValue().students;
+            Ride value = ride.getValue();
+            List<Student> students = value.students;
 
 
             for (Student student : students) {
@@ -1198,11 +1262,21 @@ public class HomeActivity extends BA {
 //                            , "Bus is on its way to pickup minutes");
                             , "Bus is on its way to pickup " + student.fullname + " and will be there in ETA (" + Math.round(student.duration) + ") minutes");
                 } else {
-                    sentNotificationToStudent(student
-                            , "School is over"
-                            , "School is over and bus is waiting for " + student.fullname + " to hop in");
+
+
+                    if (student.present == PRESENT) {
+
+                        sentNotificationToStudent(student
+                                , "In the bus"
+                                , student.fullname + " is in the bus and will reach around ETA " + Math.round(student.duration) + " minutes");
+                    }
+                    student.status = STATUS_AFTERNOON_INTHEBUS;
+
                 }
             }
+
+            value.students = students;
+            ride.setValue(value);
 
 
         }
@@ -1220,7 +1294,7 @@ public class HomeActivity extends BA {
                     return false;
                 }
             }
-            return false;
+            return true;
         }
 
         public boolean isAttandanceMarked() {
@@ -1366,11 +1440,17 @@ public class HomeActivity extends BA {
                 .build();
 
         creatingRoute = true;
-        createRouteDialog = new ProgressDialog(this);
-        createRouteDialog.setCancelable(false);
-        createRouteDialog.setMessage("Creating Route");
-        createRouteDialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
+                createRouteDialog = new ProgressDialog(HomeActivity.this);
+                createRouteDialog.setCancelable(false);
+                createRouteDialog.setMessage("Creating Route");
+                createRouteDialog.show();
+
+            }
+        });
 
         client.enqueueCall(new Callback<DirectionsResponse>() {
             @Override
@@ -1379,12 +1459,12 @@ public class HomeActivity extends BA {
 
 
                 createRouteDialog.dismiss();
-                currentRoute = response.body().routes().get(0);
-                Toast.makeText(HomeActivity.this, currentRoute.distance() + "", Toast.LENGTH_SHORT).show();
+                liveData.currentRoute.setValue(response.body().routes().get(0));
+                Toast.makeText(HomeActivity.this, liveData.currentRoute.getValue().distance() + "", Toast.LENGTH_SHORT).show();
 
                 Ride ride = liveData.ride.getValue();
 
-                List<RouteLeg> legs = currentRoute.legs();
+                List<RouteLeg> legs = liveData.currentRoute.getValue().legs();
                 double sumDistance = 0;
                 double sumDuration = 0;
                 for (int i = 0; i < legs.size() - 1; i++) {
@@ -1400,9 +1480,16 @@ public class HomeActivity extends BA {
                 liveData.ride.setValue(ride);
 
                 if (sendNotification) {
+
                     liveData.sendNotificationToAllStudents();
                 }
-                setupBottemNavListner();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setupBottemNavListner();
+
+                    }
+                });
 
             }
 

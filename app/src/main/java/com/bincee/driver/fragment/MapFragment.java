@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,39 +40,30 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.Polyline;
-import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
-import com.mapbox.mapboxsdk.style.light.Position;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
-import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
-import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback;
-import com.mapbox.turf.TurfMeasurement;
+import com.mapbox.mapboxsdk.style.sources.Source;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-import static com.mapbox.core.constants.Constants.PRECISION_6;
-import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineCap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineDasharray;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineTranslate;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 
 /**
@@ -147,7 +137,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        HomeActivity homeActivity = (HomeActivity) getActivity();
+        HomeActivity homeActivity = getHomeActivity();
 
         homeActivity.liveData.ride.observe(this, new Observer<Ride>() {
             @Override
@@ -200,21 +190,20 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         textViewName.setText(student.fullname);
         textViewTime.setText(student.address);
         if (student.distance != null) {
-            textViewNameKM.setText("ETA: " + Math.round(student.distance) + " Minutes");
+            textViewNameKM.setText("ETA: " + Math.round(student.duration) + " Minutes");
         }
 
         ImageBinder.setImageUrl(imageView9, student.photo);
     }
 
-    private void setupRoute() {
-        HomeActivity homeActivity = (HomeActivity) getActivity();
+    private void setupRoute(DirectionsRoute currentRoute) {
+        HomeActivity homeActivity = getHomeActivity();
 //
 
 
         MutableLiveData<Location> myLocaton = homeActivity.liveData.myLocaton;
-        if (homeActivity.currentRoute != null && myLocaton.getValue() != null) {
+        if (currentRoute != null && myLocaton.getValue() != null) {
 
-            DirectionsRoute currentRoute = homeActivity.currentRoute;
 
             List<Student> students = homeActivity.liveData.ride.getValue().students;
 
@@ -236,37 +225,35 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             Point lastLocation = Point.fromLngLat(school.lng, school.lat);
 
 
-            Polyline polyline = mapboxMap.addPolyline(new PolylineOptions()
-                    .addAll(pointsLtLng)
-                    .color(Color.BLACK).width(5f));
+//            Polyline polyline = mapboxMap.addPolyline(new PolylineOptions()
+//                    .addAll(pointsLtLng)
+//                    .color(Color.BLACK).width(5f));
 
 //
-//            List<Feature> directionsRouteFeatureList = new ArrayList<>();
-//            for (int i = 0; i < points.size(); i++) {
-//                directionsRouteFeatureList.add(Feature.fromGeometry(LineString.fromLngLats(points)));
-//            }
-//
-//            FeatureCollection dashedLineDirectionsFeatureCollection = FeatureCollection.fromFeatures(directionsRouteFeatureList);
-//
-//
-//            GeoJsonSource geoJsonSource = new GeoJsonSource("SOURCE_ID", dashedLineDirectionsFeatureCollection);
-//            LineLayer dashedDirectionsRouteLayer = new LineLayer(
-//                    "DIRECTIONS_LAYER_ID", "SOURCE_ID");
-//            dashedDirectionsRouteLayer.withProperties(
-//                    lineWidth(4.5f),
-//                    lineColor(Color.BLACK),
-//                    lineTranslate(new Float[]{0f, 4f}),
-//                    lineDasharray(new Float[]{1.2f, 1.2f})
-//            );
-//
-//
-//            mapboxMap.addLayer(dashedDirectionsRouteLayer);
+            List<Feature> directionsRouteFeatureList = new ArrayList<>();
+            for (int i = 0; i < points.size(); i++) {
+                directionsRouteFeatureList.add(Feature.fromGeometry(LineString.fromLngLats(points)));
+            }
+
+            FeatureCollection dashedLineDirectionsFeatureCollection = FeatureCollection.fromFeatures(directionsRouteFeatureList);
 
 
-//            GeoJsonSource source = mapboxMap.getSourceAs("SOURCE_ID");
-//            if (source != null) {
-//                source.setGeoJson(dashedLineDirectionsFeatureCollection);
-//            }
+            LineString lineString = LineString.fromLngLats(points);
+            FeatureCollection featureCollection =
+                    FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(lineString)});
+            Source geoJsonSource = new GeoJsonSource("line-source", featureCollection);
+            mapboxMap.addSource(geoJsonSource);
+            LineLayer lineLayer = new LineLayer("linelayer", "line-source");
+
+
+            lineLayer.setProperties(
+                    PropertyFactory.lineDasharray(new Float[]{0.01f, 3f}),
+                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                    PropertyFactory.lineWidth(3f),
+                    PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
+            );
+            mapboxMap.addLayer(lineLayer);
 
 
             if (markers != null && markers.size() > 0) {
@@ -311,6 +298,10 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             }
 
         }
+    }
+
+    private HomeActivity getHomeActivity() {
+        return (HomeActivity) getActivity();
     }
 
     @Override
@@ -384,7 +375,15 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
         initSource();
         initLayers();
-        setupRoute();
+
+
+        getHomeActivity().liveData.currentRoute.observe(getViewLifecycleOwner(), new Observer<DirectionsRoute>() {
+            @Override
+            public void onChanged(DirectionsRoute directionsRoute) {
+                setupRoute(directionsRoute);
+                getHomeActivity().liveData.currentRoute.removeObserver(this);
+            }
+        });
 
 
     }
@@ -395,6 +394,12 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         LocationComponent locationComponent = mapboxMap.getLocationComponent();
         locationComponent.activateLocationComponent(getContext());
         locationComponent.setLocationComponentEnabled(true);
+//        locationComponent.applyStyle(LocationComponentOptions.builder(getContext())
+//                .gpsDrawable(R.drawable.map_marker_dark)
+//                .foregroundDrawable(R.drawable.bus_marker)
+//                .bearingDrawable(R.drawable.map_marker_dark)
+//                .backgroundDrawable(R.drawable.bus_marker)
+//                .build());
         locationComponent.setCameraMode(CameraMode.TRACKING);
         locationComponent.zoomWhileTracking((mapboxMap.getMaxZoomLevel() - 5));
 
@@ -459,7 +464,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     @OnClick(R.id.textViewFinishRide)
     public void onViewClicked() {
 
-        ((HomeActivity) getActivity()).finishRide();
+        (getHomeActivity()).finishRide();
 
     }
 }

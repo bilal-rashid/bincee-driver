@@ -55,7 +55,9 @@ public class LoginActivity extends BA {
         chechBoxRememberMe.setTypeface(ResourcesCompat.getFont(this, R.font.gotham_book));
 
 
-        editTextUsername.setText("johnd1");
+//        editTextUsername.setText("johnd1");
+//        editTextPassword.setText("ChangeMe@2");
+        editTextUsername.setText("test_driverd1");
         editTextPassword.setText("ChangeMe@2");
 
 
