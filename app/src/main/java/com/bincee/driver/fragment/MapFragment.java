@@ -102,6 +102,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     //    private Point origin;
     private List<com.mapbox.mapboxsdk.annotations.Marker> markers = new ArrayList<>();
     private Unbinder bind;
+    String LINE_SOURCE = "line-source";
+    String LINE_LAYER = "linelayer";
     //    private DirectionsRoute currentRoute;
 //    private Point destination;
 
@@ -210,19 +212,17 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             List<Point> points = LineString.fromPolyline(currentRoute.geometry(), Constants.PRECISION_6).coordinates();
 
 
-            List<LatLng> pointsLtLng = new ArrayList<>();
+//            List<LatLng> pointsLtLng = new ArrayList<>();
+//
+//            for (Point point : points) {
+//                pointsLtLng.add(LatLngHelper.toLatLng(point));
+//            }
 
-            for (Point point : points) {
-                pointsLtLng.add(LatLngHelper.toLatLng(point));
-            }
 
-
-            Student lastStudent = students.get((students.size() - 1));
-            Point mylocation = Point.fromLngLat(myLocaton.getValue().getLongitude(), myLocaton.getValue().getLatitude());
 
 
             GetSchoolResponce school = homeActivity.liveData.schoolResponce.getValue();
-            Point lastLocation = Point.fromLngLat(school.lng, school.lat);
+            Point schoolLocation = Point.fromLngLat(school.lng, school.lat);
 
 
 //            Polyline polyline = mapboxMap.addPolyline(new PolylineOptions()
@@ -230,30 +230,35 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //                    .color(Color.BLACK).width(5f));
 
 //
-            List<Feature> directionsRouteFeatureList = new ArrayList<>();
-            for (int i = 0; i < points.size(); i++) {
-                directionsRouteFeatureList.add(Feature.fromGeometry(LineString.fromLngLats(points)));
-            }
-
-            FeatureCollection dashedLineDirectionsFeatureCollection = FeatureCollection.fromFeatures(directionsRouteFeatureList);
+//            List<Feature> directionsRouteFeatureList = new ArrayList<>();
+//            for (int i = 0; i < points.size(); i++) {
+//                directionsRouteFeatureList.add(Feature.fromGeometry(LineString.fromLngLats(points)));
+//            }
 
 
             LineString lineString = LineString.fromLngLats(points);
             FeatureCollection featureCollection =
                     FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(lineString)});
-            Source geoJsonSource = new GeoJsonSource("line-source", featureCollection);
-            mapboxMap.addSource(geoJsonSource);
-            LineLayer lineLayer = new LineLayer("linelayer", "line-source");
 
 
-            lineLayer.setProperties(
-                    PropertyFactory.lineDasharray(new Float[]{0.01f, 3f}),
-                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-                    PropertyFactory.lineWidth(3f),
-                    PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
-            );
-            mapboxMap.addLayer(lineLayer);
+//            Source geoJsonSource = new GeoJsonSource("line-source", featureCollection);
+//            mapboxMap.addSource(geoJsonSource);
+//            LineLayer lineLayer = new LineLayer("linelayer", "line-source");
+//
+//
+//            lineLayer.setProperties(
+//                    PropertyFactory.lineDasharray(new Float[]{0.01f, 3f}),
+//                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+//                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+//                    PropertyFactory.lineWidth(3f),
+//                    PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
+//            );
+//            mapboxMap.addLayer(lineLayer);
+
+
+            GeoJsonSource lineSource = mapboxMap.getSourceAs(LINE_SOURCE);
+
+            lineSource.setGeoJson(featureCollection);
 
 
             if (markers != null && markers.size() > 0) {
@@ -273,8 +278,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //                    .setTitle("Start")
 //            );
             com.mapbox.mapboxsdk.annotations.Marker marker1 = mapboxMap.addMarker(new MarkerOptions()
-                    .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(lastLocation.latitude()
-                            , lastLocation.longitude()))
+                    .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(schoolLocation.latitude()
+                            , schoolLocation.longitude()))
                     .setTitle("School")
 
             );
@@ -373,15 +378,33 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 //        origin = Point.fromLngLat(-3.588098, 37.176164);
 
-        initSource();
-        initLayers();
+//        initSource();
+//        initLayers();
+
+
+        FeatureCollection featureCollection =
+                FeatureCollection.fromFeatures(new Feature[]{});
+
+        Source geoJsonSource = new GeoJsonSource(LINE_SOURCE, featureCollection);
+        mapboxMap.addSource(geoJsonSource);
+        LineLayer lineLayer = new LineLayer(LINE_LAYER, LINE_SOURCE);
+
+
+        lineLayer.setProperties(
+                PropertyFactory.lineDasharray(new Float[]{0.01f, 3f}),
+                PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                PropertyFactory.lineWidth(3f),
+                PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
+        );
+        mapboxMap.addLayer(lineLayer);
 
 
         getHomeActivity().liveData.currentRoute.observe(getViewLifecycleOwner(), new Observer<DirectionsRoute>() {
             @Override
             public void onChanged(DirectionsRoute directionsRoute) {
                 setupRoute(directionsRoute);
-                getHomeActivity().liveData.currentRoute.removeObserver(this);
+//                getHomeActivity().liveData.currentRoute.removeObserver(this);
             }
         });
 

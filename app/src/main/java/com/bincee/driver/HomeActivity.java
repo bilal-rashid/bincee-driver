@@ -285,7 +285,7 @@ public class HomeActivity extends BA {
                         if (ride != null) {
                             liveData.ride.setValue(ride);
 
-                            startRide(false);
+                            startRide(false, false);
 
                         }
 
@@ -378,31 +378,43 @@ public class HomeActivity extends BA {
                         .addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: User Ride Stated Succefully"))
                         .addOnFailureListener(HomeActivity.this, Throwable::printStackTrace);
 
+//
+//                SelectRouteDialog selectRouteDialog = new SelectRouteDialogBuilder()
+//                        .setContext(HomeActivity.this)
+//                        .setListner(i -> {
+//
+//                            switch (i) {
+//                                case 1:
+//
+//                                    customRoot = false;
+//                                    if (liveData.ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)){
+//                                        startRide(true, true);
+//
+//                                    }else {
+//                                        startRide(true, false);
+//
+//                                    }
+//
+//
+//                                    break;
+//                                case 2:
+//
+//                                    customRoot = true;
+//                                    break;
+//                            }
+//
+//                        })
+//                        .createSelectRouteDialog();
+//                selectRouteDialog.show();
 
-                SelectRouteDialog selectRouteDialog = new SelectRouteDialogBuilder()
-                        .setContext(HomeActivity.this)
-                        .setListner(i -> {
 
-                            switch (i) {
-                                case 1:
+                if (liveData.ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+                    startRide(true, true);
 
-                                    customRoot = false;
-                                    startRide(true);
+                } else {
+                    startRide(true, false);
 
-
-                                    break;
-                                case 2:
-
-                                    customRoot = true;
-                                    break;
-                            }
-
-                            bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
-
-
-                        })
-                        .createSelectRouteDialog();
-                selectRouteDialog.show();
+                }
 
 
             }
@@ -614,7 +626,7 @@ public class HomeActivity extends BA {
                                     public void onHandledError(Throwable e) {
 
                                         e.printStackTrace();
-                                        MyApp.showToast("Notification Sent Failed" + student.fullname);
+//                                        MyApp.showToast("Notification Sent Failed" + student.fullname);
 
                                     }
                                 });
@@ -631,7 +643,7 @@ public class HomeActivity extends BA {
      *
      * @param sendNotification
      */
-    public void startRide(boolean sendNotification) {
+    public void startRide(boolean sendNotification, boolean movetoMap) {
         List<Student> students = liveData.ride.getValue().students;
 
         Student lastStudent = students.get((students.size() - 1));
@@ -645,13 +657,19 @@ public class HomeActivity extends BA {
                     creatRouteTask.cancel();
                 }
 
-                createRoute(students, myLocation, sendNotification);
+
+                createRouteDialog = new ProgressDialog(HomeActivity.this);
+                createRouteDialog.setCancelable(false);
+                createRouteDialog.setMessage("Creating Route");
+                createRouteDialog.show();
+
+                createRoute(students, myLocation, sendNotification, movetoMap,false);
 
 
                 creatRouteTask = new TimerTask() {
                     @Override
                     public void run() {
-                        createRoute(students, myLocation, false);
+                        createRoute(students, liveData.myLocaton.getValue(), false, false,true);
 
                     }
                 };
@@ -669,7 +687,7 @@ public class HomeActivity extends BA {
                 public void onChanged(Location location) {
                     HomeActivity.this.waiting_for_locationDialog.dismiss();
                     liveData.myLocaton.removeObserver(tempMyLocationObserver);
-                    startRide(sendNotification);
+                    startRide(sendNotification, movetoMap);
                 }
             };
             waiting_for_locationDialog = new AlertDialog.Builder(HomeActivity.this)
@@ -683,11 +701,11 @@ public class HomeActivity extends BA {
         }
     }
 
-    private void createRoute(List<Student> students, Location myLocation, boolean sendNotification) {
+    private void createRoute(List<Student> students, Location myLocation, boolean sendNotification, boolean movetoMap,boolean refreshRoute) {
         Point mylocation = Point.fromLngLat(myLocation.getLongitude(), myLocation.getLatitude());
         GeoPoint schoolLatLng = liveData.ride.getValue().schoolLatLng;
         Point lastLocation = Point.fromLngLat(schoolLatLng.getLongitude(), schoolLatLng.getLatitude());
-        getRoute(mylocation, lastLocation, students, sendNotification);
+        getRoute(mylocation, lastLocation, students, sendNotification, movetoMap,refreshRoute);
     }
 
     @Override
@@ -769,7 +787,9 @@ public class HomeActivity extends BA {
      */
     public void finishRide() {
 
-        creatRouteTask.cancel();
+        if (creatRouteTask != null) {
+            creatRouteTask.cancel();
+        }
 
         liveData.currentRoute.setValue(null);
         Ride ride = liveData.ride.getValue();
@@ -797,7 +817,7 @@ public class HomeActivity extends BA {
         new FinishRideDialog(this).setListner(new FinishRideDialog.Listner() {
             @Override
             public void logout() {
-                logout();
+                HomeActivity.this.logout();
 
 
             }
@@ -824,10 +844,13 @@ public class HomeActivity extends BA {
      */
     public void routeSelected() {
         customRoot = false;
-        startRide(true);
+        if (liveData.ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+            startRide(true, true);
 
+        } else {
+            startRide(true, false);
+        }
 
-        bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
     }
 
     /**
@@ -1177,7 +1200,7 @@ public class HomeActivity extends BA {
 
                                         e.printStackTrace();
 
-                                        MyApp.showToast("Notification Failed Sent to All");
+//                                        MyApp.showToast("Notification Failed Sent to All");
 
 
                                     }
@@ -1229,7 +1252,7 @@ public class HomeActivity extends BA {
 
                                         e.printStackTrace();
 
-                                        MyApp.showToast("Notification Failed Sent to All");
+//                                        MyApp.showToast("Notification Failed Sent to All");
 
 
                                     }
@@ -1419,8 +1442,9 @@ public class HomeActivity extends BA {
      * @param origin           the starting point of the route
      * @param destination      the desired finish point of the route
      * @param sendNotification
+     * @param movetoMap
      */
-    private void getRoute(Point origin, Point destination, List<Student> wayPoints, boolean sendNotification) {
+    private void getRoute(Point origin, Point destination, List<Student> wayPoints, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
 
         MapboxDirections.Builder builder = MapboxDirections.builder()
                 .origin(origin)
@@ -1440,17 +1464,7 @@ public class HomeActivity extends BA {
                 .build();
 
         creatingRoute = true;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
 
-                createRouteDialog = new ProgressDialog(HomeActivity.this);
-                createRouteDialog.setCancelable(false);
-                createRouteDialog.setMessage("Creating Route");
-                createRouteDialog.show();
-
-            }
-        });
 
         client.enqueueCall(new Callback<DirectionsResponse>() {
             @Override
@@ -1460,7 +1474,7 @@ public class HomeActivity extends BA {
 
                 createRouteDialog.dismiss();
                 liveData.currentRoute.setValue(response.body().routes().get(0));
-                Toast.makeText(HomeActivity.this, liveData.currentRoute.getValue().distance() + "", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(HomeActivity.this, liveData.currentRoute.getValue().distance() + "", Toast.LENGTH_SHORT).show();
 
                 Ride ride = liveData.ride.getValue();
 
@@ -1483,13 +1497,24 @@ public class HomeActivity extends BA {
 
                     liveData.sendNotificationToAllStudents();
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setupBottemNavListner();
 
-                    }
-                });
+                if (!refreshRoute) {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (movetoMap) {
+                                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationMap);
+
+                            } else {
+                                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
+
+                            }
+
+                        }
+                    });
+                }
 
             }
 
