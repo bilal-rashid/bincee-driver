@@ -15,6 +15,7 @@ import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
@@ -94,7 +95,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 
     public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
-    public static final int DURATION = 1000;
+    public static final int DURATION = 3000;
     private static MapFragment mapFragment;
     @BindView(R.id.mapView)
     MapView mapView;
@@ -394,7 +395,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //        setupMyLocation(mapboxMap);
 
 
-
         FeatureCollection featureCollection =
                 FeatureCollection.fromFeatures(new Feature[]{});
 
@@ -454,21 +454,58 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                     double displacemnet = oldLocation.distanceTo(nowLocation);
 
                     if (displacemnet > 1) {
-                    double nowBearing = bearingBetweenLocations(oldLocation, nowLocation);
+                        double nowBearing = bearingBetweenLocations(oldLocation, nowLocation);
 
-                    smothRotation(busLayer, nowBearing, lastBearing);
-                    animateMarker(oldLocation, nowLocation, busSource);
-                    lastBearing = nowBearing;
+//                    smothRotation(busLayer, nowBearing, lastBearing);
+//                    animateMarker(oldLocation, nowLocation, busSource);
+
+//                        markerView.setPosition(nowLocation);
+                        markerView.setRotation((float) nowBearing);
+
+
+                        ValueAnimator rotationAnimator = new ValueAnimator();
+                        rotationAnimator.setObjectValues(Float.parseFloat(lastBearing + ""), nowBearing);
+                        rotationAnimator.setDuration(DURATION);
+                        rotationAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animator) {
+
+                                markerView.setRotation((Float) animator.getAnimatedValue());
+
+                            }
+                        });
+                        rotationAnimator.start();
+
+
+
+
+                        ValueAnimator markerAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), (Object[]) new LatLng[]{oldLocation, nowLocation});
+                        markerAnimator.setDuration(DURATION);
+                        markerAnimator.setRepeatCount(0);
+                        markerAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+                        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animation) {
+                                if (markerView != null) {
+                                    markerView.setPosition((LatLng) animation.getAnimatedValue());
+                                }
+                            }
+                        });
+                        markerAnimator.start();
+
+
+
+                        lastBearing = nowBearing;
                     }
 
 
-                }else {
-                    busSource.setGeoJson(busCollectionSource);
+                } else {
+//                    busSource.setGeoJson(busCollectionSource);
+                    markerView = mapboxMap.addMarker(new MarkerViewOptions().icon(iconBusMyLoc).position(nowLocation));
 
                 }
                 oldLocation = nowLocation;
-
-
 
 
             }
@@ -478,7 +515,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         getHomeActivity().liveData.currentRoute.observe(getViewLifecycleOwner(), new Observer<DirectionsRoute>() {
             @Override
             public void onChanged(DirectionsRoute directionsRoute) {
-                mapboxMap.removeAnnotations();
+//                mapboxMap.removeAnnotations();
                 setupRoute(directionsRoute);
 //                getHomeActivity().liveData.currentRoute.removeObserver(this);
 //                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mylocationMarker.getPosition(),14));
