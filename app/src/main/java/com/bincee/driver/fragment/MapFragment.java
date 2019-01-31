@@ -2,14 +2,21 @@ package com.bincee.driver.fragment;
 
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,7 +36,7 @@ import com.bincee.driver.api.model.Student;
 import com.bincee.driver.base.BFragment;
 import com.bincee.driver.helper.ImageBinder;
 import com.bincee.driver.helper.LatLngHelper;
-import com.google.android.gms.maps.model.Marker;
+import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Feature;
@@ -39,19 +46,30 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerView;
+import com.mapbox.mapboxsdk.annotations.MarkerViewManager;
+import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Projection;
+import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.Source;
+import com.mapbox.mapboxsdk.utils.BitmapUtils;
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +79,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconRotate;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineCap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
@@ -73,6 +94,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 
     public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
+    public static final int DURATION = 1000;
     private static MapFragment mapFragment;
     @BindView(R.id.mapView)
     MapView mapView;
@@ -91,12 +113,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     //    private Location myLocaton;
     private Marker mylocationMarker;
 
-    private static final String ROUTE_LAYER_ID = "route-layer-id";
-    private static final String ROUTE_SOURCE_ID = "route-source-id";
-    private static final String ICON_LAYER_ID = "icon-layer-id";
-    private static final String ICON_SOURCE_ID = "icon-source-id";
-    private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
-
 
     private MapboxMap mapboxMap;
     //    private Point origin;
@@ -104,6 +120,13 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     private Unbinder bind;
     String LINE_SOURCE = "line-source";
     String LINE_LAYER = "linelayer";
+    private Icon iconBusMyLoc;
+    private MarkerView markerView;
+    private String BUS_ICON_LAYER = "bus-icon-layer";
+    private String BUS_ICON_SOURCE = "bus-icon_source";
+    private String BUS_ICON = "bus-icon";
+    private LatLng oldLocation;
+    private double lastBearing = 0;
     //    private DirectionsRoute currentRoute;
 //    private Point destination;
 
@@ -128,6 +151,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         bind = ButterKnife.bind(this, view);
 
+        iconBusMyLoc = IconFactory.getInstance(getContext()).fromResource(R.drawable.bus_marker);
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -138,6 +162,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
 
         HomeActivity homeActivity = getHomeActivity();
 
@@ -219,8 +244,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //            }
 
 
-
-
             GetSchoolResponce school = homeActivity.liveData.schoolResponce.getValue();
             Point schoolLocation = Point.fromLngLat(school.lng, school.lat);
 
@@ -269,14 +292,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             }
 
             IconFactory getInstance = IconFactory.getInstance(getContext());
-            Icon busIcon = getInstance.fromResource(R.drawable.map_icon_bus);
 
-
-//            com.mapbox.mapboxsdk.annotations.Marker marker = mapboxMap.addMarker(new MarkerOptions()
-//                    .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(mylocation.latitude(),
-//                            mylocation.longitude()))
-//                    .setTitle("Start")
-//            );
             com.mapbox.mapboxsdk.annotations.Marker marker1 = mapboxMap.addMarker(new MarkerOptions()
                     .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(schoolLocation.latitude()
                             , schoolLocation.longitude()))
@@ -368,18 +384,15 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+        this.mapboxMap.getUiSettings().setRotateGesturesEnabled(false);
 
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 44);
             return;
         }
-        setupMyLocation(mapboxMap);
+//        setupMyLocation(mapboxMap);
 
-//        origin = Point.fromLngLat(-3.588098, 37.176164);
-
-//        initSource();
-//        initLayers();
 
 
         FeatureCollection featureCollection =
@@ -400,79 +413,234 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         mapboxMap.addLayer(lineLayer);
 
 
+        FeatureCollection iconFeatureCollection = FeatureCollection.fromFeatures(new Feature[]{
+        });
+
+        GeoJsonSource iconGeoJsonSource = new GeoJsonSource(BUS_ICON_SOURCE, iconFeatureCollection);
+        mapboxMap.addSource(iconGeoJsonSource);
+
+        mapboxMap.addImage(BUS_ICON, BitmapUtils.getBitmapFromDrawable(
+                getResources().getDrawable(R.drawable.bus_marker)));
+
+        SymbolLayer startEndIconLayer = new SymbolLayer(BUS_ICON_LAYER, BUS_ICON_SOURCE);
+        startEndIconLayer.setProperties(
+                iconImage(BUS_ICON),
+                iconIgnorePlacement(true),
+                iconIgnorePlacement(true));
+
+        mapboxMap.addLayer(startEndIconLayer);
+
+
+        getHomeActivity().liveData.myLocaton.observe(getViewLifecycleOwner(), new Observer<Location>() {
+            @Override
+            public void onChanged(Location location) {
+
+
+                LatLng nowLocation = LatLngHelper.toLatLng(location);
+
+                FeatureCollection busCollectionSource = FeatureCollection.fromFeatures(new Feature[]{
+                        Feature.fromGeometry(Point.fromLngLat(nowLocation.getLongitude(), nowLocation.getLatitude())),
+//                Feature.fromGeometry(Point.fromLngLat(destination.longitude(), destination.latitude()))
+
+                });
+
+                GeoJsonSource busSource = mapboxMap.getSourceAs(BUS_ICON_SOURCE);
+
+                SymbolLayer busLayer = mapboxMap.getLayerAs(BUS_ICON_LAYER);
+
+
+                if (oldLocation != null) {
+
+                    double displacemnet = oldLocation.distanceTo(nowLocation);
+
+                    if (displacemnet > 1) {
+                    double nowBearing = bearingBetweenLocations(oldLocation, nowLocation);
+
+                    smothRotation(busLayer, nowBearing, lastBearing);
+                    animateMarker(oldLocation, nowLocation, busSource);
+                    lastBearing = nowBearing;
+                    }
+
+
+                }else {
+                    busSource.setGeoJson(busCollectionSource);
+
+                }
+                oldLocation = nowLocation;
+
+
+
+
+            }
+        });
+
+
         getHomeActivity().liveData.currentRoute.observe(getViewLifecycleOwner(), new Observer<DirectionsRoute>() {
             @Override
             public void onChanged(DirectionsRoute directionsRoute) {
+                mapboxMap.removeAnnotations();
                 setupRoute(directionsRoute);
 //                getHomeActivity().liveData.currentRoute.removeObserver(this);
+//                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mylocationMarker.getPosition(),14));
+
+
             }
         });
 
 
     }
 
+    public void animateMarker(final LatLng marker, final LatLng toPosition, GeoJsonSource busSource) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+
+
+        final LatLng startLatLng = marker;
+        final long duration = DURATION;
+
+        final Interpolator interpolator = new LinearInterpolator();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * toPosition.getLongitude() + (1 - t)
+                        * startLatLng.getLongitude();
+                double lat = t * toPosition.getLatitude() + (1 - t)
+                        * startLatLng.getLatitude();
+
+
+                FeatureCollection busCollectionSource = FeatureCollection.fromFeatures(new Feature[]{
+                        Feature.fromGeometry(Point.fromLngLat(lng, lat)),
+
+                });
+
+                busSource.setGeoJson(busCollectionSource);
+//                marker.setPosition(new LatLng(lat, lng));
+
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+
+                } else {
+//                    if (hideMarker) {
+//                        marker.setVisible(false);
+//                    } else {
+//                        marker.setVisible(true);
+//                    }
+                }
+            }
+        });
+    }
+
+    private void smothRotation(final SymbolLayer marker, double nowBearing, double lastBearing) {
+        ValueAnimator markerAnimator = new ValueAnimator();
+        markerAnimator.setObjectValues(Float.parseFloat(lastBearing + ""), nowBearing);
+        markerAnimator.setDuration(DURATION);
+        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+//                marker.setProperties(
+//                        PropertyFactory.iconSize((float) animator.getAnimatedValue())
+//                );
+
+
+                marker.setProperties(
+                        iconImage(BUS_ICON),
+                        iconIgnorePlacement(true),
+                        iconIgnorePlacement(true),
+                        iconRotate((float) animator.getAnimatedValue())
+                );
+
+            }
+        });
+        markerAnimator.start();
+    }
+
+    private double bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
+
+        double PI = 3.14159;
+        double lat1 = latLng1.getLatitude() * PI / 180;
+        double long1 = latLng1.getLongitude() * PI / 180;
+        double lat2 = latLng2.getLatitude() * PI / 180;
+        double long2 = latLng2.getLongitude() * PI / 180;
+
+        double dLon = (long2 - long1);
+
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+                * Math.cos(lat2) * Math.cos(dLon);
+
+        double brng = Math.atan2(y, x);
+
+        brng = Math.toDegrees(brng);
+        brng = (brng + 360) % 360;
+
+        return brng;
+    }
 
     @SuppressLint("MissingPermission")
     private void setupMyLocation(MapboxMap mapboxMap) {
         LocationComponent locationComponent = mapboxMap.getLocationComponent();
+
+        LocationComponentOptions locationComponentOptions = locationComponent.getLocationComponentOptions();
+
         locationComponent.activateLocationComponent(getContext());
         locationComponent.setLocationComponentEnabled(true);
-//        locationComponent.applyStyle(LocationComponentOptions.builder(getContext())
-//                .gpsDrawable(R.drawable.map_marker_dark)
-//                .foregroundDrawable(R.drawable.bus_marker)
-//                .bearingDrawable(R.drawable.map_marker_dark)
-//                .backgroundDrawable(R.drawable.bus_marker)
-//                .build());
+        LocationComponentOptions.Builder builder = LocationComponentOptions.builder(getContext());
+        locationComponent.applyStyle(builder
+                .gpsDrawable(R.drawable.bus_marker)
+
+//                .foregroundDrawable(R.drawable.map_icon_bus)
+//                .backgroundDrawable(R.drawable.map_icon_bus)
+
+                .bearingDrawable(R.drawable.bus_marker)
+
+                .compassAnimationEnabled(true)
+                .accuracyAnimationEnabled(false)
+
+
+                .build());
         locationComponent.setCameraMode(CameraMode.TRACKING);
         locationComponent.zoomWhileTracking((mapboxMap.getMaxZoomLevel() - 5));
 
-
+        locationComponent.activateLocationComponent(getContext(), builder.build());
+        locationComponent.setRenderMode(RenderMode.GPS);
     }
 
-    /**
-     * Add the route and marker sources to the map
-     */
-    private void initSource() {
-        GeoJsonSource routeGeoJsonSource = new GeoJsonSource(ROUTE_SOURCE_ID,
-                FeatureCollection.fromFeatures(new Feature[]{}));
-        mapboxMap.addSource(routeGeoJsonSource);
 
-        FeatureCollection iconFeatureCollection = FeatureCollection.fromFeatures(new Feature[]{
-//                Feature.fromGeometry(Point.fromLngLat(origin.longitude(), origin.latitude())),
-//                Feature.fromGeometry(Point.fromLngLat(destination.longitude(), destination.latitude()))
-        });
+    @SuppressLint("MissingPermission")
+    private void setupMyLocation(MapboxMap mapboxMap, DirectionsRoute directionsRoute) {
+        LocationComponent locationComponent = mapboxMap.getLocationComponent();
 
-        GeoJsonSource iconGeoJsonSource = new GeoJsonSource(ICON_SOURCE_ID, iconFeatureCollection);
-        mapboxMap.addSource(iconGeoJsonSource);
-    }
+        LocationComponentOptions locationComponentOptions = locationComponent.getLocationComponentOptions();
 
-    /**
-     * Add the route and maker icon layers to the map
-     */
-    private void initLayers() {
-        LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID);
+        locationComponent.activateLocationComponent(getContext());
+        locationComponent.setLocationComponentEnabled(true);
+        LocationComponentOptions.Builder builder = LocationComponentOptions.builder(getContext());
+        locationComponent.applyStyle(builder
+                .gpsDrawable(R.drawable.bus_marker)
 
-        // Add the LineLayer to the map. This layer will display the directions route.
-        routeLayer.setProperties(
-                lineCap(Property.LINE_CAP_ROUND),
-                lineJoin(Property.LINE_JOIN_ROUND),
-                lineWidth(5f),
-                lineColor(Color.parseColor("#009688"))
-        );
-        mapboxMap.addLayer(routeLayer);
+//                .foregroundDrawable(R.drawable.map_icon_bus)
+//                .backgroundDrawable(R.drawable.map_icon_bus)
 
-//        // Add the red marker icon image to the map
-//        mapboxMap.addImage(RED_PIN_ICON_ID, BitmapUtils.getBitmapFromDrawable(
-//                getResources().getDrawable(R.drawable.red_marker)));
-//
-//        // Add the red marker icon SymbolLayer to the map
-//        SymbolLayer startEndIconLayer = new SymbolLayer(ICON_LAYER_ID, ICON_SOURCE_ID);
-//        startEndIconLayer.setProperties(
-//                iconImage(RED_PIN_ICON_ID),
-//                iconIgnorePlacement(true),
-//                iconIgnorePlacement(true));
-//
-//        mapboxMap.addLayer(startEndIconLayer);
+                .bearingDrawable(R.drawable.bus_marker)
+
+                .compassAnimationEnabled(true)
+                .accuracyAnimationEnabled(false)
+
+
+                .build());
+        locationComponent.setCameraMode(CameraMode.TRACKING);
+        locationComponent.zoomWhileTracking((mapboxMap.getMaxZoomLevel() - 5));
+
+        locationComponent.activateLocationComponent(getContext(), builder.build());
+        locationComponent.setRenderMode(RenderMode.GPS);
+
+
     }
 
 
@@ -489,5 +657,21 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
         (getHomeActivity()).finishRide();
 
+    }
+
+
+    private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
+// Method is used to interpolate the marker animation.
+
+        private LatLng latLng = new LatLng();
+
+        @Override
+        public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
+            latLng.setLatitude(startValue.getLatitude()
+                    + ((endValue.getLatitude() - startValue.getLatitude()) * fraction));
+            latLng.setLongitude(startValue.getLongitude()
+                    + ((endValue.getLongitude() - startValue.getLongitude()) * fraction));
+            return latLng;
+        }
     }
 }

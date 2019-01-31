@@ -43,4 +43,13 @@ public class LatLngHelper {
 
         return location;
     }
+
+    public static LatLng toLatLng(Location loc) {
+        LatLng location = new LatLng();
+
+        location.setLatitude(loc.getLatitude());
+        location.setLongitude(loc.getLongitude());
+
+        return location;
+    }
 }
