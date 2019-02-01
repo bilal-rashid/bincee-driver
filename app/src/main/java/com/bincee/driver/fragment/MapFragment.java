@@ -507,6 +507,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                 }
                 oldLocation = nowLocation;
 
+                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nowLocation,14));
 
             }
         });

@@ -669,6 +669,7 @@ public class HomeActivity extends BA {
                 creatRouteTask = new TimerTask() {
                     @Override
                     public void run() {
+
                         createRoute(students, liveData.myLocaton.getValue(), false, false,true);
 
                     }
