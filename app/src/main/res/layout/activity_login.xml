@@ -97,15 +97,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:button="@drawable/login_checkbox_selector"
         android:checked="false"
         android:fontFamily="@font/gotham_book"
         android:text="Remember Me "
         android:textColor="@color/black_474747"
         android:textSize="10sp"
         android:textStyle=""
+
         app:layout_constraintBottom_toBottomOf="@+id/textViewPassword"
         app:layout_constraintStart_toStartOf="@+id/editTextPassword"
-        app:layout_constraintTop_toTopOf="@+id/textViewPassword" />
+        app:layout_constraintTop_toTopOf="@+id/textViewPassword"
+        app:layout_constraintVertical_bias="0.363" />
 
     <TextView
         android:id="@+id/textViewPassword"
@@ -117,7 +120,7 @@
         android:layout_marginBottom="20dp"
         android:fontFamily="@font/gotham_book"
         android:text="Forgot Password?"
-        android:textColor="#0684fc"
+        android:textColor="@color/sky_blue"
         android:textSize="10sp"
         app:layout_constraintBottom_toTopOf="@+id/buttonLogin"
         app:layout_constraintEnd_toEndOf="@+id/editTextPassword"
@@ -137,6 +140,7 @@
         android:textAllCaps="true"
         android:textColor="#fff"
         android:textSize="12sp"
+        android:translationZ="8dp"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
         app:layout_constraintEnd_toEndOf="@+id/editTextPassword"
         app:layout_constraintStart_toStartOf="@+id/editTextPassword"

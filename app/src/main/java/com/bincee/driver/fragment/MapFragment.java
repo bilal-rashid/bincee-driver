@@ -13,6 +13,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -35,6 +38,7 @@ import com.bincee.driver.api.firestore.Ride;
 import com.bincee.driver.api.model.GetSchoolResponce;
 import com.bincee.driver.api.model.Student;
 import com.bincee.driver.base.BFragment;
+import com.bincee.driver.dialog.SendAlertDialog;
 import com.bincee.driver.helper.ImageBinder;
 import com.bincee.driver.helper.LatLngHelper;
 import com.mapbox.android.core.location.LocationEngine;
@@ -130,6 +134,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     private String BUS_ICON = "bus-icon";
     private LatLng oldLocation;
     private double lastBearing = 0;
+    private int padding = 500;
     //    private DirectionsRoute currentRoute;
 //    private Point destination;
 
@@ -144,6 +149,12 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         return new MapFragment();
     }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -410,8 +421,9 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                 PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                 PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                 PropertyFactory.lineWidth(3f),
-                PropertyFactory.lineColor(Color.parseColor("#e55e5e"))
-        );
+                PropertyFactory.lineColor(getResources().getColor(R.color.sky_blue)));
+
+
         mapboxMap.addLayer(lineLayer);
 
 
@@ -480,8 +492,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                         rotationAnimator.start();
 
 
-
-
                         ValueAnimator markerAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), (Object[]) new LatLng[]{oldLocation, nowLocation});
                         markerAnimator.setDuration(DURATION);
                         markerAnimator.setRepeatCount(0);
@@ -497,7 +507,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                         markerAnimator.start();
 
 
-
                         lastBearing = nowBearing;
                     }
 
@@ -509,7 +518,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                 }
                 oldLocation = nowLocation;
 
-                if (directionRoute!=null) {
+                if (directionRoute != null) {
                     mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
                             .includes(LatLngHelper.toLatLng(directionRoute.routeOptions().coordinates()))
                             .build(), 5));
@@ -527,10 +536,12 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //                getHomeActivity().liveData.currentRoute.removeObserver(this);
 //                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mylocationMarker.getPosition(),14));
 
-                MapFragment.this.directionRoute=directionsRoute;
-                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
-                        .includes(LatLngHelper.toLatLng(directionsRoute.routeOptions().coordinates()))
-                        .build(),5));
+                MapFragment.this.directionRoute = directionsRoute;
+                if (directionsRoute != null) {
+                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
+                            .includes(LatLngHelper.toLatLng(directionsRoute.routeOptions().coordinates()))
+                            .build(), padding));
+                }
 
             }
         });
@@ -707,6 +718,44 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
     }
 
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.map_menu, menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.map_menu_notification) {
+
+            new SendAlertDialog(getContext())
+                    .setListner(new SendAlertDialog.Listner() {
+                        @Override
+                        public void send(String text) {
+
+                            sendNotificationTOAllPresentStudents(text);
+                        }
+
+                        @Override
+                        public void cancel() {
+
+                        }
+                    })
+                    .show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void sendNotificationTOAllPresentStudents(String text) {
+        
+
+        getHomeActivity().liveData.sendNotificationTOALlPresentStudents(text);
+
+
+    }
 
     private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
 // Method is used to interpolate the marker animation.

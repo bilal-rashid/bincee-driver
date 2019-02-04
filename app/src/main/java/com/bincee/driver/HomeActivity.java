@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.bincee.driver.activity.ContectUsActivity;
 import com.bincee.driver.activity.ProfileActivity;
+import com.bincee.driver.activity.RouteDesignerActivity;
 import com.bincee.driver.activity.SplashActivity;
 import com.bincee.driver.api.EndPoints;
 import com.bincee.driver.api.firestore.Ride;
@@ -227,6 +228,7 @@ public class HomeActivity extends BA {
     private SendNotificationDialog sendNotificationDialog;
     private TimerTask creatRouteTask;
     Timer timer = new Timer();
+    private String ROUTE_DESIGNER = "- Route Designer";
 
 
     /**
@@ -313,10 +315,10 @@ public class HomeActivity extends BA {
 
 //        menuItem.add(MY_POWER);
         menuItem.add(MY_PROFILE);
-//        menuItem.add("- Route Designer");
-        menuItem.add("- FAQ");
+        menuItem.add(ROUTE_DESIGNER);
+//        menuItem.add("- FAQ");
         menuItem.add(CONTACT_US);
-        menuItem.add(UPDATE_MY_LOCATION);
+//        menuItem.add(UPDATE_MY_LOCATION);
         menuItem.add(LOGOUT);
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
@@ -914,8 +916,10 @@ public class HomeActivity extends BA {
             } else if (text.equalsIgnoreCase(UPDATE_MY_LOCATION)) {
 
 
+            } else if (text.equalsIgnoreCase(ROUTE_DESIGNER)) {
 
 
+                RouteDesignerActivity.start(HomeActivity.this);
 
             }
 
@@ -1352,6 +1356,39 @@ public class HomeActivity extends BA {
             }
 
             return students;
+        }
+
+        public void sendNotificationTOALlPresentStudents(String text) {
+
+
+            List<Student> students = ride.getValue().students;
+
+
+            for (Student student : students) {
+
+//                if (ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+//
+//                    sentNotificationToStudent(student
+//                            , "Bus is coming"
+////                            , "Bus is on its way to pickup minutes");
+//                            , "Bus is on its way to pickup " + student.fullname + " and will be there in ETA (" + Math.round(student.duration) + ") minutes");
+//
+//                } else {
+
+
+                if (student.present == PRESENT) {
+
+                    sentNotificationToStudent(student, "Alert", text);
+
+
+                }
+
+
+//                }
+
+
+            }
+
         }
     }
 

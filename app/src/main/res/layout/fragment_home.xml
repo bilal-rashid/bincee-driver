@@ -33,7 +33,6 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             app:imageUrl="@{model.driverProfile.photo}"
             app:layout_constraintBottom_toTopOf="@+id/textView2"
@@ -41,7 +40,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.32"
+            app:layout_constraintVertical_bias="0.19"
             app:layout_constraintVertical_chainStyle="packed" />
 
 
@@ -87,7 +86,7 @@
             android:layout_width="250dp"
             android:layout_height="@dimen/blue_button_height"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="50dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/spinner_bg"
             app:layout_constraintBottom_toTopOf="@+id/buttonStartRide"

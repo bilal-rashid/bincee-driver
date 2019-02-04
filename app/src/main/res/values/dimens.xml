@@ -32,6 +32,7 @@
     <dimen name="thirty_dp">30dp</dimen>
     <dimen name="dialog_cross_translation">5dp</dimen>
     <dimen name="mypower_box_size">120dp</dimen>
+    <dimen name="edittext_round_radius">30dp</dimen>
 
 
 </resources>

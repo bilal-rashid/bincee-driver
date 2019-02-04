@@ -34,13 +34,19 @@ public class ContectUsActivity extends BA {
 
 
         setSupportActionBar(viewDataBinding.include.toolbar);
-//        getSupportActionBar().setTitle("");
+        getSupportActionBar().setTitle("");
         textViewTitle.setText("CONTACT US");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout, new ContectUsFragment())
                 .commit();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
     }
 

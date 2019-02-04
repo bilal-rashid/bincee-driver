@@ -1,12 +1,7 @@
 package com.bincee.driver.dialog;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,6 +11,7 @@ import com.bincee.driver.base.BDialog;
 
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatSpinner;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -31,6 +27,7 @@ public class SendAlertDialog extends BDialog {
     TextView buttonCancel;
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
+    private Listner listner;
 
     public SendAlertDialog(Context context) {
         super(context);
@@ -43,10 +40,17 @@ public class SendAlertDialog extends BDialog {
     @OnClick(R.id.buttonSend)
     public void onButtonSendClicked() {
 
+        String text = editTextMessage.getText().toString();
+        if (!text.isEmpty()) {
+            listner.send(text);
+            dismiss();
+        }
+
     }
 
     @OnClick(R.id.buttonCancel)
     public void onButtonCancelClicked() {
+        listner.cancel();
         dismiss();
     }
 
@@ -56,4 +60,14 @@ public class SendAlertDialog extends BDialog {
         dismiss();
     }
 
+    public SendAlertDialog setListner(Listner listner) {
+        this.listner = listner;
+        return this;
+    }
+
+    public interface Listner {
+        void send(String text);
+
+        void cancel();
+    }
 }

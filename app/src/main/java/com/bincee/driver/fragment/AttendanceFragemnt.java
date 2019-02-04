@@ -191,6 +191,8 @@ public class AttendanceFragemnt extends BFragment {
     @OnClick(R.id.buttonStartRide)
     public void onViewClicked() {
 
+//   TODO     162352
+
         HomeActivity.LiveData liveData = getHomeActivity().liveData;
         Ride ride = liveData.ride.getValue();
         if (ride.shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
@@ -215,7 +217,7 @@ public class AttendanceFragemnt extends BFragment {
                     }
                 });
                 absentDialog.show();
-            }else {
+            } else {
                 getHomeActivity().startRide(true, true);
 
             }
@@ -328,6 +330,10 @@ public class AttendanceFragemnt extends BFragment {
         private void markAbsent() {
             imageViewRedSelected.setAlpha(1f);
             imageViewGreenSelected.setAlpha(0f);
+            imageViewCheck.setImageBitmap(null);
+            imageViewCross.setImageDrawable(getResources().getDrawable(R.drawable.corss));
+
+
             setTextColorWhite();
             getStudents().get(getAdapterPosition()).present = Student.ABSENT;
 
@@ -359,6 +365,10 @@ public class AttendanceFragemnt extends BFragment {
         private void markPresent() {
             imageViewRedSelected.setAlpha(0f);
             imageViewGreenSelected.setAlpha(1f);
+
+            imageViewCheck.setImageDrawable(getResources().getDrawable(R.drawable.check));
+            imageViewCross.setImageBitmap(null);
+
             setTextColorWhite();
             getStudents().get(getAdapterPosition()).present = Student.PRESENT;
 

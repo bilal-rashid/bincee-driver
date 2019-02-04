@@ -153,7 +153,7 @@ public class DriverProfileFragment extends BFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.profile_menu,menu);
+//        inflater.inflate(R.menu.profile_menu,menu);
     }
 
     @Override
