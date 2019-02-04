@@ -141,6 +141,7 @@ public class HomeActivity extends BA {
      * The constant CONTACT_US.
      */
     public static final String CONTACT_US = "- Contact Bincee";
+    public static final String UPDATE_MY_LOCATION = "- Update My location";
     public static final String LOGOUT = "- Logout";
 
     /**
@@ -315,6 +316,7 @@ public class HomeActivity extends BA {
 //        menuItem.add("- Route Designer");
         menuItem.add("- FAQ");
         menuItem.add(CONTACT_US);
+        menuItem.add(UPDATE_MY_LOCATION);
         menuItem.add(LOGOUT);
 
         recycleView.setLayoutManager(new LinearLayoutManager(this));
@@ -663,14 +665,14 @@ public class HomeActivity extends BA {
                 createRouteDialog.setMessage("Creating Route");
                 createRouteDialog.show();
 
-                createRoute(students, myLocation, sendNotification, movetoMap,false);
+                createRoute(students, myLocation, sendNotification, movetoMap, false);
 
 
                 creatRouteTask = new TimerTask() {
                     @Override
                     public void run() {
 
-                        createRoute(students, liveData.myLocaton.getValue(), false, false,true);
+                        createRoute(students, liveData.myLocaton.getValue(), false, false, true);
 
                     }
                 };
@@ -702,11 +704,11 @@ public class HomeActivity extends BA {
         }
     }
 
-    private void createRoute(List<Student> students, Location myLocation, boolean sendNotification, boolean movetoMap,boolean refreshRoute) {
+    private void createRoute(List<Student> students, Location myLocation, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
         Point mylocation = Point.fromLngLat(myLocation.getLongitude(), myLocation.getLatitude());
         GeoPoint schoolLatLng = liveData.ride.getValue().schoolLatLng;
         Point lastLocation = Point.fromLngLat(schoolLatLng.getLongitude(), schoolLatLng.getLatitude());
-        getRoute(mylocation, lastLocation, students, sendNotification, movetoMap,refreshRoute);
+        getRoute(mylocation, lastLocation, students, sendNotification, movetoMap, refreshRoute);
     }
 
     @Override
@@ -888,28 +890,34 @@ public class HomeActivity extends BA {
         public void onMenuItemClicked() {
 
             drawerLayout.closeDrawer(Gravity.LEFT);
-            if (textView.getText().toString().equalsIgnoreCase(MY_POWER)) {
+            String text = textView.getText().toString();
+            if (text.equalsIgnoreCase(MY_POWER)) {
 
 
 //                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationPowerScreen);
 
-            } else if (textView.getText().toString().equalsIgnoreCase(HOME)) {
+            } else if (text.equalsIgnoreCase(HOME)) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.frameLayout, HomeFragment.getInstance())
                         .commit();
-            } else if (textView.getText().toString().equalsIgnoreCase(MY_POWER)) {
+            } else if (text.equalsIgnoreCase(MY_POWER)) {
                 ProfileActivity.start(HomeActivity.this);
 
-            } else if (textView.getText().toString().equalsIgnoreCase(CONTACT_US)) {
+            } else if (text.equalsIgnoreCase(CONTACT_US)) {
                 ContectUsActivity.start(HomeActivity.this);
-            } else if (textView.getText().toString().equalsIgnoreCase(MY_PROFILE)) {
+            } else if (text.equalsIgnoreCase(MY_PROFILE)) {
                 ProfileActivity.start(HomeActivity.this);
-            } else if (textView.getText().toString().equalsIgnoreCase(LOGOUT)) {
+            } else if (text.equalsIgnoreCase(LOGOUT)) {
 
                 logout();
 
-            }
+            } else if (text.equalsIgnoreCase(UPDATE_MY_LOCATION)) {
 
+
+
+
+
+            }
 
         }
     }

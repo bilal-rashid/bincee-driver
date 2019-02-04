@@ -7,6 +7,9 @@ import com.google.firebase.firestore.GeoPoint;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LatLngHelper {
     public static Location toLocation(Student student) {
         Location location = new Location("student");
@@ -51,5 +54,16 @@ public class LatLngHelper {
         location.setLongitude(loc.getLongitude());
 
         return location;
+    }
+
+    public static List<LatLng> toLatLng(List<Point> coordinates) {
+        List<LatLng> list = new ArrayList<>();
+
+        for (Point point :
+                coordinates) {
+            list.add(toLatLng(point));
+        }
+
+        return list;
     }
 }

@@ -54,6 +54,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerViewManager;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -97,6 +98,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
     public static final int DURATION = 3000;
     private static MapFragment mapFragment;
+    private DirectionsRoute directionRoute;
     @BindView(R.id.mapView)
     MapView mapView;
     @BindView(R.id.textViewFinishRide)
@@ -507,7 +509,11 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                 }
                 oldLocation = nowLocation;
 
-                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nowLocation,14));
+                if (directionRoute!=null) {
+                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
+                            .includes(LatLngHelper.toLatLng(directionRoute.routeOptions().coordinates()))
+                            .build(), 5));
+                }
 
             }
         });
@@ -521,6 +527,10 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //                getHomeActivity().liveData.currentRoute.removeObserver(this);
 //                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mylocationMarker.getPosition(),14));
 
+                MapFragment.this.directionRoute=directionsRoute;
+                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
+                        .includes(LatLngHelper.toLatLng(directionsRoute.routeOptions().coordinates()))
+                        .build(),5));
 
             }
         });
