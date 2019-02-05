@@ -750,7 +750,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     }
 
     private void sendNotificationTOAllPresentStudents(String text) {
-        
+
 
         getHomeActivity().liveData.sendNotificationTOALlPresentStudents(text);
 
@@ -758,7 +758,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     }
 
     private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
-// Method is used to interpolate the marker animation.
+
+        // Method is used to interpolate the marker animation.
 
         private LatLng latLng = new LatLng();
 

@@ -37,5 +37,15 @@ public class Notification {
         }
     }
 
+    public static class OuterData {
+
+        public int studentId;
+        public int type;
+
+        public OuterData(Notific notification) {
+            studentId = notification.data.studentId;
+            type = notification.type;
+        }
+    }
 
 }
