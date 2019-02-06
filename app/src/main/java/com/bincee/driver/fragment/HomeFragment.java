@@ -165,7 +165,7 @@ public class HomeFragment extends BFragment {
 
         private void getShifts() {
             loaderGetShift.setValue(true);
-            EndpointObserver<MyResponse<List<ShiftItem>>> endpointObserver = MyApp.endPoints.listShift()
+            EndpointObserver<MyResponse<List<ShiftItem>>> endpointObserver = MyApp.endPoints.listShift(MyApp.instance.user.id+"")
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new EndpointObserver<MyResponse<List<ShiftItem>>>() {

@@ -63,8 +63,8 @@ public interface EndPoints {
     Observable<MyResponse<List<Student>>> createRide(@Field("driver_id") int driver_id, @Field("shifts") int shiftId);
 
 
-    @GET("school/shift/list")
-    Observable<MyResponse<List<ShiftItem>>> listShift();
+    @GET("driver/getShifts/{driverId}")
+    Observable<MyResponse<List<ShiftItem>>> listShift(@Path("driverId") String driverId);
 
     @GET("admin/school/{school_id}")
     Observable<MyResponse<GetSchoolResponce>> getSchool(@Path("school_id") String SchoolId);

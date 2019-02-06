@@ -16,7 +16,7 @@ public class Notification {
         public String body;
         public Data data;
         public int type;
-
+        public String click_action = ".HomeActivity";
 
         public Notific(String title, String message, int type) {
             this.title = title;
