@@ -43,14 +43,16 @@
                 android:layout_height="@dimen/blue_button_height"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/rectangle_blue_border">
+                android:background="@drawable/rectangle_blue_border"
+                android:visibility="gone">
 
                 <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/spinnerSelectMessage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingStart="20dp"
-                    android:paddingEnd="20dp">
+                    android:paddingEnd="20dp"
+                    android:visibility="gone">
 
 
                 </androidx.appcompat.widget.AppCompatSpinner>
@@ -69,7 +71,6 @@
                 android:fontFamily="@font/gotham_book"
                 android:gravity="top"
                 android:padding="5dp"
-                android:text="Dear Parent,  School bus will be late today due to traffic jam "
                 android:textSize="12sp" />
 
             <Button

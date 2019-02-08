@@ -25,6 +25,7 @@ import com.bincee.driver.activity.ProfileActivity;
 import com.bincee.driver.activity.RouteDesignerActivity;
 import com.bincee.driver.activity.SplashActivity;
 import com.bincee.driver.api.EndPoints;
+import com.bincee.driver.api.firestore.FireStoreHelper;
 import com.bincee.driver.api.firestore.Ride;
 import com.bincee.driver.api.model.AbsenteStdent;
 import com.bincee.driver.api.model.DriverProfileResponse;
@@ -89,6 +90,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -117,6 +119,7 @@ import retrofit2.Response;
 
 import static com.bincee.driver.api.model.Student.PRESENT;
 import static com.bincee.driver.api.model.Student.STATUS_AFTERNOON_INTHEBUS;
+import static com.bincee.driver.api.model.notification.Notification.ATTANDACE;
 import static com.bincee.driver.api.model.notification.Notification.RIDE;
 import static com.bincee.driver.api.model.notification.Notification.UPDATE_STATUS;
 import static com.bincee.driver.fragment.MapFragment.MAPBOX_TOKEN;
@@ -598,50 +601,6 @@ public class HomeActivity extends BA {
     }
 
 
-    private void sendNotification(Student student, String title, String body) {
-        FirebaseFirestore.getInstance().collection("token")
-                .document(student.parent_id + "").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot != null) {
-
-
-                    String token = documentSnapshot.getString("token");
-                    if (token != null) {
-
-                        Notification.Notific notification = new Notification.Notific(title, body, UPDATE_STATUS);
-                        notification.data = new Notification.Data(student.id);
-                        MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL, new SendNotificationBody(token, notification))
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new EndpointObserver<SendNotificationResponce>() {
-                                    @Override
-                                    public void onComplete() {
-
-                                    }
-
-                                    @Override
-                                    public void onData(SendNotificationResponce o) throws Exception {
-
-//                                        MyApp.showToast("Notification Sent " + student.fullname);
-                                    }
-
-                                    @Override
-                                    public void onHandledError(Throwable e) {
-
-                                        e.printStackTrace();
-//                                        MyApp.showToast("Notification Sent Failed" + student.fullname);
-
-                                    }
-                                });
-
-                    }
-                }
-
-            }
-        });
-    }
-
     /**
      * Start ride.
      *
@@ -791,6 +750,7 @@ public class HomeActivity extends BA {
      * Finish ride.
      */
     public void finishRide() {
+
 
         if (creatRouteTask != null) {
             creatRouteTask.cancel();
@@ -1146,7 +1106,84 @@ public class HomeActivity extends BA {
         }
 
 
-        private void sendNotificationToAll(String title, String message) {
+        //        private void sendNotificationToAll(String title, String message) {
+//
+//            Ride ride = this.ride.getValue();
+//            List<Student> studentsObj = ride.students;
+//            List<Integer> studentParentIds = new ArrayList<>();
+//
+//            for (Student student : studentsObj) {
+//
+//                studentParentIds.add(student.parent_id);
+//            }
+//
+//
+//            CollectionReference token = FirebaseFirestore.getInstance()
+//                    .collection("token");
+//
+//
+//            token.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+//                @Override
+//                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+//
+//                    List<String> tokens = new ArrayList<>();
+//
+//
+//                    for (DocumentSnapshot parentToken : queryDocumentSnapshots.getDocuments()) {
+//
+//
+//                        try {
+//                            Integer parentId = Integer.parseInt(parentToken.getId());
+//
+//                            if (studentParentIds.contains(parentId)) {
+//                                String token = parentToken.getString("token");
+//                                tokens.add(token);
+//                            }
+//
+//                        } catch (NumberFormatException e) {
+//                            e.printStackTrace();
+//                        }
+//
+//
+//                    }
+//                    if (tokens.size() > 0)
+//                        MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL
+//                                , new SendNotificationBody(tokens, new Notification.Notific(title, message, RIDE)))
+//                                .subscribeOn(Schedulers.io())
+//                                .observeOn(AndroidSchedulers.mainThread())
+//                                .subscribe(new EndpointObserver<SendNotificationResponce>() {
+//                                    @Override
+//                                    public void onComplete() {
+//
+//                                    }
+//
+//                                    @Override
+//                                    public void onData(SendNotificationResponce o) throws Exception {
+//
+//                                        Log.d(TAG, "Notification Sent to All");
+////                                        MyApp.showToast("Notification Sent to All");
+//
+//                                    }
+//
+//                                    @Override
+//                                    public void onHandledError(Throwable e) {
+//
+//                                        e.printStackTrace();
+//
+////                                        MyApp.showToast("Notification Failed Sent to All");
+//
+//
+//                                    }
+//
+//                                });
+//
+//
+//                }
+//            });
+//
+//
+//        }
+        public void sendNotificationToAll(String title, String message) {
 
             Ride ride = this.ride.getValue();
             List<Student> studentsObj = ride.students;
@@ -1155,127 +1192,208 @@ public class HomeActivity extends BA {
             for (Student student : studentsObj) {
 
                 studentParentIds.add(student.parent_id);
+
+
+//                FirebaseFirestore.getInstance().collection("tokenTesting")
+//                        .document(student.parent_id + "")
+//                        .collection("tokens")
+//                        .get()
+
+                FireStoreHelper.getToken(student.parent_id + "")
+                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
+
+
+                                List<String> tokens = new ArrayList<>();
+
+                                for (DocumentSnapshot documentSnapshot : documents) {
+
+                                    if (documentSnapshot != null) {
+
+                                        String token = documentSnapshot.getString("token");
+                                        if (token != null) {
+                                            tokens.add(token);
+
+                                        }
+                                    }
+                                }
+
+                                if (tokens.size() > 0) {
+
+
+                                    Notification.Notific notification = new Notification.Notific(title, message, RIDE);
+                                    notification.data = new Notification.Data(student.id);
+
+
+                                    MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL,
+                                            new SendNotificationBody(tokens, notification))
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe(new EndpointObserver<SendNotificationResponce>() {
+                                                @Override
+                                                public void onComplete() {
+
+                                                }
+
+                                                @Override
+                                                public void onData(SendNotificationResponce o) throws Exception {
+//                                            MyApp.showToast("Notification Sent " + student.fullname);
+
+                                                }
+
+                                                @Override
+                                                public void onHandledError(Throwable e) {
+
+                                                    e.printStackTrace();
+//                                            MyApp.showToast("Notification Sent Failed " + student.fullname);
+
+                                                }
+                                            });
+                                }
+
+
+                            }
+                        });
+
             }
 
-
-            CollectionReference token = FirebaseFirestore.getInstance()
-                    .collection("token");
-
-//        for (Student student : students) {
-//            token.whereArrayContains("userId", student.parent_id);
-//        }
-
-            token.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+//            FirebaseFirestore
+//                    .getInstance()
+//                    .collection("tokenTesting")
+//                    .get()
+//                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+//                        @Override
+//                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 //
-                    List<String> tokens = new ArrayList<>();
-
-
-                    for (DocumentSnapshot parentToken : queryDocumentSnapshots.getDocuments()) {
-
-
-                        try {
-                            Integer parentId = Integer.parseInt(parentToken.getId());
-
-                            if (studentParentIds.contains(parentId)) {
-                                String token = parentToken.getString("token");
-                                tokens.add(token);
-                            }
-
-                        } catch (NumberFormatException e) {
-                            e.printStackTrace();
-                        }
-
-
-                    }
-                    if (tokens.size() > 0)
-                        MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL
-                                , new SendNotificationBody(tokens, new Notification.Notific(title, message, RIDE)))
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new EndpointObserver<SendNotificationResponce>() {
-                                    @Override
-                                    public void onComplete() {
-
-                                    }
-
-                                    @Override
-                                    public void onData(SendNotificationResponce o) throws Exception {
-
-                                        Log.d(TAG, "Notification Sent to All");
-//                                        MyApp.showToast("Notification Sent to All");
-
-                                    }
-
-                                    @Override
-                                    public void onHandledError(Throwable e) {
-
-                                        e.printStackTrace();
-
-//                                        MyApp.showToast("Notification Failed Sent to All");
-
-
-                                    }
-
-                                });
-
-
-                }
-            });
-
+//
+//                            List<String> tokens = new ArrayList<>();
+//
+//
+//                            for (DocumentSnapshot parentRefrance : queryDocumentSnapshots.getDocuments()) {
+//
+//
+//                                try {
+//                                    Integer parentId = Integer.parseInt(parentRefrance.getId());
+//
+//                                    if (studentParentIds.contains(parentId)) {
+//
+//
+//                                        Map<String, Object> data = parentRefrance.getData();
+//
+//
+////                                String token = parentRefrance.getString("token");
+//                                        tokens.add("");
+//
+//
+//                                    }
+//
+//                                } catch (NumberFormatException e) {
+//                                    e.printStackTrace();
+//                                }
+//
+//
+//                            }
+//                            if (tokens.size() > 0)
+//                                MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL
+//                                        , new SendNotificationBody(tokens, new Notification.Notific(title, message, RIDE)))
+//                                        .subscribeOn(Schedulers.io())
+//                                        .observeOn(AndroidSchedulers.mainThread())
+//                                        .subscribe(new EndpointObserver<SendNotificationResponce>() {
+//                                            @Override
+//                                            public void onComplete() {
+//                                            }
+//
+//                                            @Override
+//                                            public void onData(SendNotificationResponce o) throws Exception {
+//
+//                                                Log.d(TAG, "Notification Sent to All");
+////                                        MyApp.showToast("Notification Sent to All");
+//
+//                                            }
+//
+//                                            @Override
+//                                            public void onHandledError(Throwable e) {
+//
+//                                                e.printStackTrace();
+//
+//                                            }
+//
+//                                        });
+//
+//
+//                        }
+//                    });
 
         }
 
         private void sentNotificationToStudent(Student student, String title, String message) {
 
 
-            Task<DocumentSnapshot> token = FirebaseFirestore.getInstance()
-                    .collection("token").document(student.parent_id + "").get();
+            FireStoreHelper.getToken(student.parent_id + "")
+//            FirebaseFirestore.getInstance().collection("tokenTesting")
+//                    .document(student.parent_id + "")
+//                    .collection("tokens")
+//                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
-            token.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-                    if (documentSnapshot != null && documentSnapshot.exists() && documentSnapshot.getString("token") != null) {
-                        Notification.Notific notification = new Notification.Notific(title, message, RIDE);
-                        notification.data = new Notification.Data(student.id);
+                            if (queryDocumentSnapshots != null) {
 
-                        MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL
-                                , new SendNotificationBody(documentSnapshot.getString("token")
-                                        , notification))
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new EndpointObserver<SendNotificationResponce>() {
-                                    @Override
-                                    public void onComplete() {
+                                List<String> tokens = new ArrayList<>();
 
+                                for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
+
+                                    if (documentSnapshot != null) {
+
+                                        String token = documentSnapshot.getString("token");
+                                        if (token != null) {
+                                            tokens.add(token);
+
+                                        }
                                     }
+                                }
 
-                                    @Override
-                                    public void onData(SendNotificationResponce o) throws Exception {
 
-                                        Log.d(TAG, "Notification Sent to All");
+                                Notification.Notific notification = new Notification.Notific(title, message, RIDE);
+                                notification.data = new Notification.Data(student.id);
+
+                                MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL
+                                        , new SendNotificationBody(tokens, notification))
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(new EndpointObserver<SendNotificationResponce>() {
+                                            @Override
+                                            public void onComplete() {
+
+                                            }
+
+                                            @Override
+                                            public void onData(SendNotificationResponce o) throws Exception {
+
+                                                Log.d(TAG, "Notification Sent to All");
 //                                        MyApp.showToast("Notification Sent to All");
 
-                                    }
+                                            }
 
-                                    @Override
-                                    public void onHandledError(Throwable e) {
+                                            @Override
+                                            public void onHandledError(Throwable e) {
 
-                                        e.printStackTrace();
+                                                e.printStackTrace();
 
 //                                        MyApp.showToast("Notification Failed Sent to All");
 
 
-                                    }
+                                            }
 
-                                });
-                    }
+                                        });
+                            }
 
-
-                }
-            });
+                        }
+                    });
 
 
         }
@@ -1520,7 +1638,6 @@ public class HomeActivity extends BA {
 
                 createRouteDialog.dismiss();
                 liveData.currentRoute.setValue(response.body().routes().get(0));
-//                Toast.makeText(HomeActivity.this, liveData.currentRoute.getValue().distance() + "", Toast.LENGTH_SHORT).show();
 
                 Ride ride = liveData.ride.getValue();
 

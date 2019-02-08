@@ -87,8 +87,10 @@ public class LoginActivity extends BA {
                             HomeActivity.start(LoginActivity.this);
 
                             MyPref.SAVE_USER(LoginActivity.this, MyApp.instance.user);
-
                             finish();
+
+
+
                         } else {
                             MyApp.showToast(response.data.message);
                         }

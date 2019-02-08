@@ -188,14 +188,14 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
                 for (Student student : ride.students) {
 
-                    if (ride.shift == Ride.SHIFT_MORNING) {
+                    if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
 
                         //SHow Student which attandance is not marked
                         if (student.present == Student.UNKNOWN) {
                             setStudent(student);
                             return;
                         }
-                    } else {
+                    } else if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
 
                         //SHow Student which is in the bus state
 

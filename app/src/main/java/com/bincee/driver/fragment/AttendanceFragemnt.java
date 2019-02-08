@@ -19,6 +19,7 @@ import com.bincee.driver.HomeActivity;
 import com.bincee.driver.MyApp;
 import com.bincee.driver.R;
 import com.bincee.driver.api.EndPoints;
+import com.bincee.driver.api.firestore.FireStoreHelper;
 import com.bincee.driver.api.firestore.Ride;
 import com.bincee.driver.api.model.SendNotificationBody;
 import com.bincee.driver.api.model.SendNotificationResponce;
@@ -31,6 +32,7 @@ import com.bincee.driver.observer.EndpointObserver;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -378,51 +380,114 @@ public class AttendanceFragemnt extends BFragment {
         private void sendNotification(int parentId, String title, String body) {
 
 
-            FirebaseFirestore.getInstance().collection("token")
-                    .document(parentId + "").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    if (documentSnapshot != null) {
+//            FirebaseFirestore.getInstance().collection("token")
+//                    .document(parentId + "").get()
+//                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                        @Override
+//                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                            if (documentSnapshot != null) {
+//
+//
+//                                String token = documentSnapshot.getString("token");
+//                                if (token != null) {
+//
+//                                    Student student = getStudents().get(getAdapterPosition());
+//                                    Notification.Notific notification = new Notification.Notific(title, body, ATTANDACE);
+//                                    notification.data = new Notification.Data(student.id);
+//
+//                                    MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL,
+//                                            new SendNotificationBody(token, notification))
+//                                            .subscribeOn(Schedulers.io())
+//                                            .observeOn(AndroidSchedulers.mainThread())
+//                                            .subscribe(new EndpointObserver<SendNotificationResponce>() {
+//                                                @Override
+//                                                public void onComplete() {
+//
+//                                                }
+//
+//                                                @Override
+//                                                public void onData(SendNotificationResponce o) throws Exception {
+////                                            MyApp.showToast("Notification Sent " + student.fullname);
+//
+//                                                }
+//
+//                                                @Override
+//                                                public void onHandledError(Throwable e) {
+//
+//                                                    e.printStackTrace();
+////                                            MyApp.showToast("Notification Sent Failed " + student.fullname);
+//
+//                                                }
+//                                            });
+//
+//
+//                                }
+//                            }
+//
+//                        }
+//                    });
 
 
-                        String token = documentSnapshot.getString("token");
-                        if (token != null) {
+//            FirebaseFirestore.getInstance().collection("tokenTesting")
+//                    .document(parentId + "")
+//                    .collection("tokens")
+//                    .get()
 
-                            Student student = getStudents().get(getAdapterPosition());
-                            Notification.Notific notification = new Notification.Notific(title, body, ATTANDACE);
-                            notification.data = new Notification.Data(student.id);
+            FireStoreHelper.getToken(parentId + "")
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
 
-                            MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL,
-                                    new SendNotificationBody(token, notification))
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new EndpointObserver<SendNotificationResponce>() {
-                                        @Override
-                                        public void onComplete() {
 
-                                        }
+                            List<String> tokens = new ArrayList<>();
 
-                                        @Override
-                                        public void onData(SendNotificationResponce o) throws Exception {
+                            for (DocumentSnapshot documentSnapshot : documents) {
+
+                                if (documentSnapshot != null) {
+
+                                    String token = documentSnapshot.getString("token");
+                                    if (token != null) {
+                                        tokens.add(token);
+
+                                    }
+                                }
+                            }
+
+                            if (tokens.size() > 0) {
+                                Student student = getStudents().get(getAdapterPosition());
+                                Notification.Notific notification = new Notification.Notific(title, body, ATTANDACE);
+                                notification.data = new Notification.Data(student.id);
+
+                                MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL,
+                                        new SendNotificationBody(tokens, notification))
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(new EndpointObserver<SendNotificationResponce>() {
+                                            @Override
+                                            public void onComplete() {
+
+                                            }
+
+                                            @Override
+                                            public void onData(SendNotificationResponce o) throws Exception {
 //                                            MyApp.showToast("Notification Sent " + student.fullname);
 
-                                        }
+                                            }
 
-                                        @Override
-                                        public void onHandledError(Throwable e) {
+                                            @Override
+                                            public void onHandledError(Throwable e) {
 
-                                            e.printStackTrace();
+                                                e.printStackTrace();
 //                                            MyApp.showToast("Notification Sent Failed " + student.fullname);
 
-                                        }
-                                    });
+                                            }
+                                        });
+                            }
 
 
                         }
-                    }
-
-                }
-            });
+                    });
         }
 
         private void setTextColorWhite() {
@@ -468,10 +533,14 @@ public class AttendanceFragemnt extends BFragment {
                                 updateStudentStatus();
 
                                 Student student = getStudents().get(getAdapterPosition());
+//                                getHomeActivity().liveData.sendNotificationToAll("dsd","sdsds");
+
                                 sendNotification(getStudents().get(getAdapterPosition()).parent_id, "Kid is absent", student.fullname + " is absent ");
 
+                                //TODO
+
+
                             } else {
-//                                sendNotification(getStudents().get(getAdapterPosition()).parent_id, "In the bus", student.fullname + " is in the bus and will reach in around ETA " + Math.abs(student.duration));
                             }
 
                         }
@@ -485,6 +554,7 @@ public class AttendanceFragemnt extends BFragment {
 
                                 Student student = getStudents().get(getAdapterPosition());
                                 sendNotification(getStudents().get(getAdapterPosition()).parent_id, "On the way", " Bus is on the way to school and will be there in ETA " + Math.round(student.duration) + " minutes");
+
 
                             } else {
 //                                sendNotification(getStudents().get(getAdapterPosition()).parent_id, "In the bus", student.fullname + " is in the bus and will reach in around ETA " + Math.abs(student.duration));
