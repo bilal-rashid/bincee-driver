@@ -79,11 +79,10 @@
                 android:id="@+id/navigationView"
                 android:layout_width="300dp"
                 android:layout_height="match_parent"
-                android:background="#fff"
                 android:layout_gravity="start"
-                android:maxWidth="300dp"
-
-                android:fitsSystemWindows="true">
+                android:background="#fff"
+                android:fitsSystemWindows="true"
+                android:maxWidth="300dp">
                 <!--android:layout_gravity="start"-->
 
                 <FrameLayout

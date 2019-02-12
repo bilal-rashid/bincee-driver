@@ -1,6 +1,9 @@
 package com.bincee.driver;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 import com.bincee.driver.api.EndPoints;
@@ -42,12 +45,38 @@ public class MyApp extends Application {
 
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+
+        overRideSustemFont();
+
+
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        overRideSustemFont();
+
+    }
+
+    private void overRideSustemFont() {
+        Configuration configuration = getResources().getConfiguration();
+        configuration.fontScale = 1f;
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+        getBaseContext().getResources().updateConfiguration(configuration, metrics);
+    }
+
+
     private void setupRetrofit() {
         OkHttpClient client = new OkHttpClient
                 .Builder()
-                .connectTimeout(60,TimeUnit.SECONDS)
-                .readTimeout(60,TimeUnit.SECONDS)
-                .writeTimeout(60,TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .addInterceptor(chain -> {
                     Request.Builder builder = chain.request().newBuilder();

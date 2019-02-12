@@ -239,7 +239,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
     private void setupRoute(DirectionsRoute currentRoute) {
         HomeActivity homeActivity = getHomeActivity();
-//
+
+        if (homeActivity.liveData.ride.getValue() == null) return;
 
 
         MutableLiveData<Location> myLocaton = homeActivity.liveData.myLocaton;

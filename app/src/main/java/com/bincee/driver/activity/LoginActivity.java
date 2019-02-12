@@ -1,10 +1,13 @@
 package com.bincee.driver.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.bincee.driver.HomeActivity;
 import com.bincee.driver.MyApp;
@@ -14,18 +17,12 @@ import com.bincee.driver.base.BA;
 import com.bincee.driver.customview.MyProgress;
 import com.bincee.driver.helper.MyPref;
 import com.bincee.driver.observer.EndpointObserver;
-import com.bincee.driver.storage.MyStorage;
 import com.google.android.material.textfield.TextInputEditText;
-
-import androidx.appcompat.widget.AppCompatCheckBox;
-import androidx.core.content.res.ResourcesCompat;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends BA {
@@ -36,10 +33,12 @@ public class LoginActivity extends BA {
     TextInputEditText editTextUsername;
     @BindView(R.id.editTextPassword)
     TextInputEditText editTextPassword;
-    @BindView(R.id.chechBoxRememberMe)
+    @BindView(R.id.checkBox)
     AppCompatCheckBox chechBoxRememberMe;
     @BindView(R.id.progressBar)
     MyProgress progressBar;
+    @BindView(R.id.textViewPassword)
+    TextView textViewPassword;
 
     public static void start(SplashActivity splashActivity) {
         splashActivity.startActivity(new Intent(splashActivity, LoginActivity.class));
@@ -90,7 +89,6 @@ public class LoginActivity extends BA {
                             finish();
 
 
-
                         } else {
                             MyApp.showToast(response.data.message);
                         }
@@ -103,5 +101,10 @@ public class LoginActivity extends BA {
 
                     }
                 }));
+    }
+
+    @OnClick(R.id.textViewPassword)
+    public void onForgrtPasswordClicked() {
+        ForgetPasswordActivity.start(this);
     }
 }

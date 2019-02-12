@@ -28,6 +28,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="START RIDE"
+        android:translationZ="10dp"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
@@ -50,8 +51,6 @@
 
 
     </androidx.recyclerview.widget.RecyclerView>
-
-
 
 
     <TextView

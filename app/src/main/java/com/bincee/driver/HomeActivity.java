@@ -541,7 +541,7 @@ public class HomeActivity extends BA {
                                         studentLocation.setLongitude(student.lng);
 
 
-                                        if (myLocation.distanceTo(studentLocation) < 500) {
+                                        if (myLocation.distanceTo(studentLocation) < 1000) {
 
                                             student.status = Student.STATUS_AFTERNOON_ALMOSTTHERE;
                                             liveData.sentNotificationToStudent(student, "Almost there", student.fullname + "  will reach home in " + Math.round(student.duration) + " minutes");

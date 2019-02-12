@@ -379,59 +379,8 @@ public class AttendanceFragemnt extends BFragment {
 
         private void sendNotification(int parentId, String title, String body) {
 
+            Student student = getStudents().get(getAdapterPosition());
 
-//            FirebaseFirestore.getInstance().collection("token")
-//                    .document(parentId + "").get()
-//                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                        @Override
-//                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                            if (documentSnapshot != null) {
-//
-//
-//                                String token = documentSnapshot.getString("token");
-//                                if (token != null) {
-//
-//                                    Student student = getStudents().get(getAdapterPosition());
-//                                    Notification.Notific notification = new Notification.Notific(title, body, ATTANDACE);
-//                                    notification.data = new Notification.Data(student.id);
-//
-//                                    MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL,
-//                                            new SendNotificationBody(token, notification))
-//                                            .subscribeOn(Schedulers.io())
-//                                            .observeOn(AndroidSchedulers.mainThread())
-//                                            .subscribe(new EndpointObserver<SendNotificationResponce>() {
-//                                                @Override
-//                                                public void onComplete() {
-//
-//                                                }
-//
-//                                                @Override
-//                                                public void onData(SendNotificationResponce o) throws Exception {
-////                                            MyApp.showToast("Notification Sent " + student.fullname);
-//
-//                                                }
-//
-//                                                @Override
-//                                                public void onHandledError(Throwable e) {
-//
-//                                                    e.printStackTrace();
-////                                            MyApp.showToast("Notification Sent Failed " + student.fullname);
-//
-//                                                }
-//                                            });
-//
-//
-//                                }
-//                            }
-//
-//                        }
-//                    });
-
-
-//            FirebaseFirestore.getInstance().collection("tokenTesting")
-//                    .document(parentId + "")
-//                    .collection("tokens")
-//                    .get()
 
             FireStoreHelper.getToken(parentId + "")
                     .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -455,7 +404,6 @@ public class AttendanceFragemnt extends BFragment {
                             }
 
                             if (tokens.size() > 0) {
-                                Student student = getStudents().get(getAdapterPosition());
                                 Notification.Notific notification = new Notification.Notific(title, body, ATTANDACE);
                                 notification.data = new Notification.Data(student.id);
 

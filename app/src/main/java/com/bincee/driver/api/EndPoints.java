@@ -84,4 +84,18 @@ public interface EndPoints {
     @FormUrlEncoded
     @POST("ride/absentees")
     Observable<MyResponse<List<AbsenteStdent>>> getAbsentList(@Field("driver_id") int driver_id, @Field("shifts[0]") int shift);
+
+
+    @FormUrlEncoded
+    @POST("users/passwordreset")
+    Observable<MyResponse> forgetPassword(@Field("username") String username
+            , @Field("selected_option") String selected_option
+            , @Field("email") String email
+//            , @Field("phone_no") String phone_no
+            , @Field("type") String type);
+
+
 }
+
+
+
