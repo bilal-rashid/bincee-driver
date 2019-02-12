@@ -17,6 +17,7 @@ public class ShiftItem {
     public String shift_name;
     @SerializedName("shift_id")
     public int shift_id;
+   public String type;
 
     @NonNull
     @Override

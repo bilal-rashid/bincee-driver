@@ -26,19 +26,28 @@ public class DateHelper {
     }
 
     public static boolean isMorningShift(ShiftItem shift) throws ParseException {
-        SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+//        SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
-        Date date = fmt.parse(shift.start_time);
+//        Date date = fmt.parse(shift.start_time);
+//
+////        Date nowDate = new Date();
+////        date.setYear(nowDate.getYear());
+////        date.setMonth(nowDate.getMonth());
+////        date.setDate(nowDate.getDate());
+//
+//
+//        if (date.getHours() <= 10) {
+//            return true;
+//        } else
+//            return false;
 
-//        Date nowDate = new Date();
-//        date.setYear(nowDate.getYear());
-//        date.setMonth(nowDate.getMonth());
-//        date.setDate(nowDate.getDate());
 
-
-        if (date.getHours() <= 10) {
+        if (shift.type.equalsIgnoreCase("Pickup")) {
             return true;
-        } else
+        } else {
             return false;
+        }
+
+
     }
 }
