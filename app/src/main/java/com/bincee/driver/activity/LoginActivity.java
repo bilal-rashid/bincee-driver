@@ -82,10 +82,10 @@ public class LoginActivity extends BA {
                     public void onData(LoginResponse response) {
                         if (response.status == 200) {
                             response.data.save(LoginActivity.this);
-                            MyApp.instance.user = response.data;
+                            MyApp.instance.user .setValue(response.data);
                             HomeActivity.start(LoginActivity.this);
 
-                            MyPref.SAVE_USER(LoginActivity.this, MyApp.instance.user);
+                            MyPref.SAVE_USER(LoginActivity.this, MyApp.instance.user.getValue());
                             finish();
 
 

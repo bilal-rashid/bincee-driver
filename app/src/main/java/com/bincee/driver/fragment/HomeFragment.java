@@ -27,6 +27,7 @@ import com.bincee.driver.api.model.MyResponse;
 import com.bincee.driver.api.model.ShiftItem;
 import com.bincee.driver.base.BFragment;
 import com.bincee.driver.databinding.FragmentHomeBinding;
+import com.bincee.driver.helper.ImageBinder;
 import com.bincee.driver.observer.EndpointObserver;
 
 import java.util.List;
@@ -135,6 +136,7 @@ public class HomeFragment extends BFragment {
             }
         });
 
+        model.driverProfile.observe(getViewLifecycleOwner(), user -> ImageBinder.roundedCornerCenterCorpParent(binding.circleImageView, user.photo));
 
     }
 
@@ -165,7 +167,7 @@ public class HomeFragment extends BFragment {
 
         private void getShifts() {
             loaderGetShift.setValue(true);
-            EndpointObserver<MyResponse<List<ShiftItem>>> endpointObserver = MyApp.endPoints.listShift(MyApp.instance.user.id+"")
+            EndpointObserver<MyResponse<List<ShiftItem>>> endpointObserver = MyApp.endPoints.listShift(MyApp.instance.user.getValue().id + "")
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new EndpointObserver<MyResponse<List<ShiftItem>>>() {
@@ -203,7 +205,7 @@ public class HomeFragment extends BFragment {
         }
 
         private LoginResponse.User getUser() {
-            return MyApp.instance.user;
+            return MyApp.instance.user.getValue();
         }
 
         private void getStudents() {

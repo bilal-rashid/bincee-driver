@@ -256,7 +256,7 @@ public class HomeActivity extends BA {
             @Override
             public void onChanged(DriverProfileResponse driverProfileResponse) {
                 if (driverProfileResponse != null) {
-                    ImageBinder.setImageUrl(binding.userLayout.imageViewProfilePic, driverProfileResponse.photo);
+                    ImageBinder.roundedCornerCenterCorpParent(binding.userLayout.imageViewProfilePic, driverProfileResponse.photo);
                     binding.userLayout.textViewUsername.setText(driverProfileResponse.fullname);
                 }
 
@@ -267,7 +267,7 @@ public class HomeActivity extends BA {
 
         if (MyApp.instance.user == null) return;
 
-        rideDocument = db.collection("ride").document(MyApp.instance.user.id + "");
+        rideDocument = db.collection("ride").document(MyApp.instance.user.getValue().id + "");
         history = db.collection("history");
 
 
@@ -362,7 +362,7 @@ public class HomeActivity extends BA {
                 ride.startTime = Timestamp.now();
                 ride.rideInProgress = true;
                 ride.students = students;
-                ride.driverId = MyApp.instance.user.id;
+                ride.driverId = MyApp.instance.user.getValue().id;
                 ride.schoolLatLng = new GeoPoint(liveData.schoolResponce.getValue().lat, liveData.schoolResponce.getValue().lng);
                 ShiftItem shift = liveData.selectedShift.getValue();
                 ride.shiftId = shift.shift_id;
@@ -871,7 +871,22 @@ public class HomeActivity extends BA {
                 ProfileActivity.start(HomeActivity.this);
             } else if (text.equalsIgnoreCase(LOGOUT)) {
 
-                logout();
+                new FinishRideDialog(HomeActivity.this)
+                        .setListner(new FinishRideDialog.Listner() {
+                            @Override
+                            public void logout() {
+                                HomeActivity.this.logout();
+
+
+                            }
+
+                            @Override
+                            public void cancel() {
+                                recreate();
+
+                            }
+                        }).show();
+
 
             } else if (text.equalsIgnoreCase(UPDATE_MY_LOCATION)) {
 
@@ -892,6 +907,8 @@ public class HomeActivity extends BA {
         Intent intent = new Intent(HomeActivity.this, SplashActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        finish();
+
     }
 
     /**
@@ -947,7 +964,7 @@ public class HomeActivity extends BA {
          */
         public LiveData() {
             compositeDisposable = new CompositeDisposable();
-            user.setValue(MyApp.instance.user);
+            user.setValue(MyApp.instance.user.getValue());
         }
 
         private void getSchoolProfile(String schoolId) {
@@ -994,10 +1011,10 @@ public class HomeActivity extends BA {
             createRideListener.setValue(true);
 
 
-            CreateRideBody createRideBody = new CreateRideBody(MyApp.instance.user.id, shiftItem.shift_id);
+            CreateRideBody createRideBody = new CreateRideBody(MyApp.instance.user.getValue().id, shiftItem.shift_id);
 
             EndpointObserver<MyResponse<List<Student>>> endpointObserver = MyApp.endPoints
-                    .createRide(MyApp.instance.user.id, shiftItem.shift_id)
+                    .createRide(MyApp.instance.user.getValue().id, shiftItem.shift_id)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new EndpointObserver<MyResponse<List<Student>>>() {
@@ -1034,7 +1051,7 @@ public class HomeActivity extends BA {
 
         public void getAbsentList(int shiftId) {
 
-            MyApp.endPoints.getAbsentList(MyApp.instance.user.id, shiftId)
+            MyApp.endPoints.getAbsentList(MyApp.instance.user.getValue().id, shiftId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new EndpointObserver<MyResponse<List<AbsenteStdent>>>() {
@@ -1070,7 +1087,7 @@ public class HomeActivity extends BA {
          */
         public void getDriverProfile() {
             EndpointObserver<MyResponse<DriverProfileResponse>> endpointObserver = MyApp.endPoints
-                    .getDriverProfile(MyApp.instance.user.id + "")
+                    .getDriverProfile(MyApp.instance.user.getValue().id + "")
                     .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new EndpointObserver<MyResponse<DriverProfileResponse>>() {
                         @Override
@@ -1199,63 +1216,66 @@ public class HomeActivity extends BA {
 //                        .collection("tokens")
 //                        .get()
 
-                FireStoreHelper.getToken(student.parent_id + "")
-                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
+                if (student.present == PRESENT) {
+
+                    FireStoreHelper.getToken(student.parent_id + "")
+                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
 
 
-                                List<String> tokens = new ArrayList<>();
+                                    List<String> tokens = new ArrayList<>();
 
-                                for (DocumentSnapshot documentSnapshot : documents) {
+                                    for (DocumentSnapshot documentSnapshot : documents) {
 
-                                    if (documentSnapshot != null) {
+                                        if (documentSnapshot != null) {
 
-                                        String token = documentSnapshot.getString("token");
-                                        if (token != null) {
-                                            tokens.add(token);
+                                            String token = documentSnapshot.getString("token");
+                                            if (token != null) {
+                                                tokens.add(token);
 
+                                            }
                                         }
                                     }
-                                }
 
-                                if (tokens.size() > 0) {
-
-
-                                    Notification.Notific notification = new Notification.Notific(title, message, RIDE);
-                                    notification.data = new Notification.Data(student.id);
+                                    if (tokens.size() > 0) {
 
 
-                                    MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL,
-                                            new SendNotificationBody(tokens, notification))
-                                            .subscribeOn(Schedulers.io())
-                                            .observeOn(AndroidSchedulers.mainThread())
-                                            .subscribe(new EndpointObserver<SendNotificationResponce>() {
-                                                @Override
-                                                public void onComplete() {
+                                        Notification.Notific notification = new Notification.Notific(title, message, RIDE);
+                                        notification.data = new Notification.Data(student.id);
 
-                                                }
 
-                                                @Override
-                                                public void onData(SendNotificationResponce o) throws Exception {
+                                        MyApp.endPoints.sendNotification(EndPoints.FIREBAE_URL,
+                                                new SendNotificationBody(tokens, notification))
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(new EndpointObserver<SendNotificationResponce>() {
+                                                    @Override
+                                                    public void onComplete() {
+
+                                                    }
+
+                                                    @Override
+                                                    public void onData(SendNotificationResponce o) throws Exception {
 //                                            MyApp.showToast("Notification Sent " + student.fullname);
 
-                                                }
+                                                    }
 
-                                                @Override
-                                                public void onHandledError(Throwable e) {
+                                                    @Override
+                                                    public void onHandledError(Throwable e) {
 
-                                                    e.printStackTrace();
+                                                        e.printStackTrace();
 //                                            MyApp.showToast("Notification Sent Failed " + student.fullname);
 
-                                                }
-                                            });
+                                                    }
+                                                });
+                                    }
+
+
                                 }
-
-
-                            }
-                        });
+                            });
+                }
 
             }
 
@@ -1411,18 +1431,14 @@ public class HomeActivity extends BA {
 
             for (Student student : students) {
                 if (ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
-                    sentNotificationToStudent(student
-                            , "Bus is coming"
-//                            , "Bus is on its way to pickup minutes");
+                    sentNotificationToStudent(student, "Bus is coming"//                            , "Bus is on its way to pickup minutes");
                             , "Bus is on its way to pickup " + student.fullname + " and will be there in ETA (" + Math.round(student.duration) + ") minutes");
                 } else {
 
 
                     if (student.present == PRESENT) {
 
-                        sentNotificationToStudent(student
-                                , "In the bus"
-                                , student.fullname + " is in the bus and will reach around ETA " + Math.round(student.duration) + " minutes");
+                        sentNotificationToStudent(student, "In the bus", student.fullname + " is in the bus and will reach around ETA " + Math.round(student.duration) + " minutes");
                     }
                     student.status = STATUS_AFTERNOON_INTHEBUS;
 

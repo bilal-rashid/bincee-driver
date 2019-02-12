@@ -77,7 +77,7 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 LoginResponse.User user = MyPref.GET_USER(SplashActivity.this);
                 if (user != null) {
-                    MyApp.instance.user = user;
+                    MyApp.instance.user.setValue(user);
                     HomeActivity.start(SplashActivity.this);
                 } else {
                     LoginActivity.start(SplashActivity.this);

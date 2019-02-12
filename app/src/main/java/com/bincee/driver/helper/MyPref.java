@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 public class MyPref {
 
 
-    public static void SAVE_USER(LoginActivity loginActivity, LoginResponse.User user) {
+    public static void SAVE_USER(Context loginActivity, LoginResponse.User user) {
         SharedPreferences sharedPref = getSharedPref(loginActivity);
         sharedPref.edit().putString("user", new Gson().toJson(user)).apply();
 

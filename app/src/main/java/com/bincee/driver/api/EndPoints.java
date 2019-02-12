@@ -35,6 +35,7 @@ public interface EndPoints {
     //    String BaseUrl = "https://bincee-server.herokuapp.com/api/";
     String BaseUrl = "http://access.bincee.com/";
     String FIREBAE_URL = "http://fcm.googleapis.com/fcm/send";
+    String AVATAR_UPLOAD = "avatar/upload";
 
     @FormUrlEncoded
     @POST("auth/login")
@@ -45,7 +46,7 @@ public interface EndPoints {
     Observable<MyResponse<DriverProfileResponse>> getDriverProfile(@Path("driverId") String driverId);
 
     @Multipart
-    @POST("avatar/upload")
+    @POST(AVATAR_UPLOAD)
     Observable<MyResponse<UploadImageResponce>> uploadImage(@Part MultipartBody.Part image);
 
     @FormUrlEncoded

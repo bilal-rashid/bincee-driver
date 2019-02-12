@@ -736,7 +736,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                         @Override
                         public void send(String text) {
 
-                            sendNotificationTOAllPresentStudents(text);
+                            getHomeActivity().liveData.sendNotificationTOALlPresentStudents(text);
+
                         }
 
                         @Override
@@ -750,13 +751,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         return super.onOptionsItemSelected(item);
     }
 
-    private void sendNotificationTOAllPresentStudents(String text) {
 
-
-        getHomeActivity().liveData.sendNotificationTOALlPresentStudents(text);
-
-
-    }
 
     private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
 

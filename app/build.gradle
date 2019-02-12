@@ -89,5 +89,8 @@ dependencies {
     implementation 'com.intuit.ssp:ssp-android:1.0.6'
 
 
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
+
 }
 apply plugin: 'com.google.gms.google-services'

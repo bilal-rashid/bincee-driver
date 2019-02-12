@@ -6,6 +6,10 @@ import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
+import androidx.lifecycle.MutableLiveData;
+
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.gsonparserfactory.GsonParserFactory;
 import com.bincee.driver.api.EndPoints;
 import com.bincee.driver.api.model.LoginResponse;
 import com.google.gson.Gson;
@@ -27,7 +31,8 @@ public class MyApp extends Application {
     public static EndPoints endPoints;
     private static Toast toast;
     public Gson gson;
-    public LoginResponse.User user;
+
+    public MutableLiveData<LoginResponse.User> user;
 
     public static void showToast(String message) {
         if (toast != null) {
@@ -40,6 +45,7 @@ public class MyApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        user = new MutableLiveData<>();
         instance = this;
         setupRetrofit();
 
@@ -80,7 +86,7 @@ public class MyApp extends Application {
                 .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .addInterceptor(chain -> {
                     Request.Builder builder = chain.request().newBuilder();
-                    LoginResponse.User user = MyApp.instance.user;
+                    LoginResponse.User user = MyApp.instance.user.getValue();
                     if (user != null && user.token != null) {
                         builder.addHeader("Authorization", "Bearer " + user.token);
                     }
@@ -98,6 +104,9 @@ public class MyApp extends Application {
                 .client(client)
                 .build();
         endPoints = retrofit.create(EndPoints.class);
+
+        AndroidNetworking.initialize(getApplicationContext());
+        AndroidNetworking.setParserFactory(new GsonParserFactory());
 
     }
 }

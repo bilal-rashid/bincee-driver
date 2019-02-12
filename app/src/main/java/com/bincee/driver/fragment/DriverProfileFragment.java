@@ -19,12 +19,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.ParsedRequestListener;
 import com.bincee.driver.MyApp;
 import com.bincee.driver.R;
 import com.bincee.driver.activity.SplashActivity;
+import com.bincee.driver.api.EndPoints;
 import com.bincee.driver.api.model.DriverProfileResponse;
 import com.bincee.driver.api.model.Event;
+import com.bincee.driver.api.model.LoginResponse;
 import com.bincee.driver.api.model.MyResponse;
+import com.bincee.driver.api.model.UploadImageResponce;
 import com.bincee.driver.helper.MyPref;
 import com.bincee.driver.helper.StorageUtils;
 import com.bincee.driver.base.BFragment;
@@ -158,13 +164,13 @@ public class DriverProfileFragment extends BFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId()==R.id.menuItemLogout){
+        if (item.getItemId() == R.id.menuItemLogout) {
 
-            MyApp.instance.user=null;
+            MyApp.instance.user = null;
             MyPref.logout(getContext());
 
             Intent intent = new Intent(getActivity(), SplashActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
@@ -316,6 +322,12 @@ public class DriverProfileFragment extends BFragment {
         setActivityTitle("MY PROFILE");
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        AndroidNetworking.cancel(DriverProfileFragment.class.getSimpleName());
+    }
+
     public static class VM extends ViewModel {
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         public MutableLiveData<String> name = new MutableLiveData<>();
@@ -333,7 +345,7 @@ public class DriverProfileFragment extends BFragment {
         public void getProfile() {
             loader.setValue(true);
 
-            EndpointObserver<MyResponse<DriverProfileResponse>> endpointObserver = MyApp.endPoints.getDriverProfile(MyApp.instance.user.id + "")
+            EndpointObserver<MyResponse<DriverProfileResponse>> endpointObserver = MyApp.endPoints.getDriverProfile(MyApp.instance.user.getValue().id + "")
                     .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new EndpointObserver<MyResponse<DriverProfileResponse>>() {
                         @Override
@@ -351,8 +363,14 @@ public class DriverProfileFragment extends BFragment {
                                 profileUrl.setValue(response.data.photo);
                                 contact.setValue(response.data.phone_no);
 
-                                MyApp.instance.user.profilepic = (response.data.photo);
-                                MyApp.instance.user.fullName = (response.data.fullname);
+                                LoginResponse.User user = MyApp.instance.user.getValue();
+
+                                user.profilepic = (response.data.photo);
+                                user.fullName = (response.data.fullname);
+
+                                MyApp.instance.user.setValue(user);
+                                MyPref.SAVE_USER(getApplicationContext(), user);
+
 
                             } else {
                                 throw new Exception(response.status + "");
@@ -388,36 +406,88 @@ public class DriverProfileFragment extends BFragment {
 
             loader.setValue(true);
 
-            EndpointObserver<MyResponse> observer = MyApp.endPoints.uploadImage(body)
-                    .flatMap(uploadImageResponceResponse -> {
-//                                loader.setValue(true);
-                                return MyApp.endPoints.updateProfile(MyApp.instance.user.id + "", "" + uploadImageResponceResponse.data.path);
+//            EndpointObserver<MyResponse> observer = MyApp.endPoints.uploadImage(body)
+//                    .flatMap(uploadImageResponceResponse -> {
+////                                loader.setValue(true);
+//                                return MyApp.endPoints.updateProfile(MyApp.instance.user.id + "", "" + uploadImageResponceResponse.data.path);
+//                            }
+//                    )
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribeWith(new EndpointObserver<MyResponse>() {
+//                        @Override
+//                        public void onComplete() {
+//                            loader.setValue(false);
+//                        }
+//
+//                        @Override
+//                        public void onData(MyResponse o) {
+//
+//                            getProfile();
+//                        }
+//
+//                        @Override
+//                        public void onHandledError(Throwable e) {
+//                            e.printStackTrace();
+//                            loader.setValue(false);
+//                            parentErrorListner.setValue(new Event<>(e));
+//
+//
+//                        }
+//                    });
+//            compositeDisposable.add(observer);
+
+
+            AndroidNetworking.upload(EndPoints.BaseUrl + EndPoints.AVATAR_UPLOAD)
+                    .addMultipartFile("image", file)
+                    .setTag(DriverProfileFragment.class.getSimpleName())
+                    .build().getAsObject(UploadImageResponce.class
+                    , new ParsedRequestListener<UploadImageResponce>() {
+                        @Override
+                        public void onResponse(UploadImageResponce uploadImageResponceResponse) {
+
+                            if (uploadImageResponceResponse.status != 200) {
+//
+                                onError(new ANError(uploadImageResponceResponse.message));
+                                return;
                             }
-                    )
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(new EndpointObserver<MyResponse>() {
-                        @Override
-                        public void onComplete() {
-                            loader.setValue(false);
+                            EndpointObserver<MyResponse> endpointObserver = MyApp.endPoints
+                                    .updateProfile(MyApp.instance.user.getValue().id + "", "" + uploadImageResponceResponse.data.path)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribeWith(new EndpointObserver<MyResponse>() {
+                                        @Override
+                                        public void onComplete() {
+                                            loader.setValue(false);
+                                        }
+
+                                        @Override
+                                        public void onData(MyResponse o) throws Exception {
+
+                                            if (o.status == 200) {
+                                                getProfile();
+                                            } else {
+                                                throw new Exception(o.status + "");
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onHandledError(Throwable e) {
+                                            e.printStackTrace();
+                                            loader.setValue(false);
+                                            parentErrorListner.setValue(new Event<Throwable>(e));
+                                        }
+                                    });
+                            compositeDisposable.add(endpointObserver);
                         }
 
                         @Override
-                        public void onData(MyResponse o) {
-
-                            getProfile();
-                        }
-
-                        @Override
-                        public void onHandledError(Throwable e) {
-                            e.printStackTrace();
+                        public void onError(ANError anError) {
+                            anError.printStackTrace();
                             loader.setValue(false);
-                            parentErrorListner.setValue(new Event<>(e));
-
-
+                            parentErrorListner.setValue(new Event<Throwable>(anError));
                         }
                     });
-            compositeDisposable.add(observer);
 
 
         }
@@ -426,7 +496,7 @@ public class DriverProfileFragment extends BFragment {
             loader.setValue(true);
 
 
-            EndpointObserver<MyResponse> updateObserver = MyApp.endPoints.updateProfileText(MyApp.instance.user.id + "", contact, name)
+            EndpointObserver<MyResponse> updateObserver = MyApp.endPoints.updateProfileText(MyApp.instance.user.getValue().id + "", contact, name)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeWith(new EndpointObserver<MyResponse>() {
