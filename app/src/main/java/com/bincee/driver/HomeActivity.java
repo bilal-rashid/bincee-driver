@@ -1662,8 +1662,8 @@ public class HomeActivity extends BA {
                 double sumDuration = 0;
                 for (int i = 0; i < legs.size() - 1; i++) {
                     RouteLeg routeLeg = legs.get(i);
-                    sumDuration += (routeLeg.duration() / 60);
-                    sumDistance += (routeLeg.distance() / 1000);
+                    sumDuration = sumDuration + (routeLeg.duration() / 60);
+                    sumDistance = sumDistance + (routeLeg.distance() / 1000);
 
                     ride.students.get(i).distance = sumDistance;
                     ride.students.get(i).duration = sumDuration;

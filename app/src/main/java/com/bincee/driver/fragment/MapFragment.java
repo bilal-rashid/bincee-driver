@@ -752,7 +752,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     }
 
 
-
     private static class LatLngEvaluator implements TypeEvaluator<LatLng> {
 
         // Method is used to interpolate the marker animation.
