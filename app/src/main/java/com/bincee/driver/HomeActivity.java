@@ -40,6 +40,7 @@ import com.bincee.driver.api.model.notification.Notification;
 import com.bincee.driver.base.BA;
 import com.bincee.driver.databinding.ActivityHomeBinding;
 import com.bincee.driver.dialog.FinishRideDialog;
+import com.bincee.driver.dialog.MyProgressDialog;
 import com.bincee.driver.dialog.SelectRouteDialog;
 import com.bincee.driver.dialog.SelectRouteDialogBuilder;
 import com.bincee.driver.dialog.SendNotificationDialog;
@@ -121,6 +122,7 @@ import retrofit2.Response;
 
 import static com.bincee.driver.api.model.Student.PRESENT;
 import static com.bincee.driver.api.model.Student.STATUS_AFTERNOON_INTHEBUS;
+import static com.bincee.driver.api.model.Student.UNKNOWN;
 import static com.bincee.driver.api.model.notification.Notification.ATTANDACE;
 import static com.bincee.driver.api.model.notification.Notification.RIDE;
 import static com.bincee.driver.api.model.notification.Notification.UPDATE_STATUS;
@@ -210,7 +212,7 @@ public class HomeActivity extends BA {
      */
     public DocumentReference rideDocument;
     private boolean fetchingFromFS = false;
-    private ProgressDialog progressDialog;
+    private MyProgressDialog progressDialog;
     private CollectionReference history;
 
     /**
@@ -221,7 +223,7 @@ public class HomeActivity extends BA {
      * The Current route.
      */
     private boolean creatingRoute = false;
-    private ProgressDialog createRouteDialog;
+    private MyProgressDialog createRouteDialog;
     private Observer<Location> tempMyLocationObserver;
     private AlertDialog waiting_for_locationDialog;
     /**
@@ -273,7 +275,7 @@ public class HomeActivity extends BA {
         history = db.collection("history");
 
 
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new MyProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Wait...");
         progressDialog.show();
@@ -455,13 +457,11 @@ public class HomeActivity extends BA {
                     Location myLocation = locations.get(0);
                     HomeActivity.this.liveData.myLocaton.setValue(myLocation);
 
-                    MapFragment.getInstance().setMyLocation(liveData.myLocaton.getValue());
 
                     Ride ride = liveData.ride.getValue();
                     if (ride != null && ride.rideInProgress) {
 
                         ride.latLng = new GeoPoint(myLocation.getLatitude(), myLocation.getLongitude());
-                        liveData.ride.setValue(ride);
 
                         if (ride.students != null) {
 
@@ -616,6 +616,7 @@ public class HomeActivity extends BA {
                             }
                         }
 
+                        liveData.ride.setValue(ride);
 
                         rideDocument.set(ride).addOnCompleteListener(task ->
                                 Log.d(TAG, "Updated"));
@@ -646,7 +647,6 @@ public class HomeActivity extends BA {
     public void startRide(boolean sendNotification, boolean movetoMap) {
         List<Student> students = liveData.ride.getValue().students;
 
-        Student lastStudent = students.get((students.size() - 1));
         Location myLocation = liveData.myLocaton.getValue();
         if (myLocation != null) {
 
@@ -658,19 +658,19 @@ public class HomeActivity extends BA {
                 }
 
 
-                createRouteDialog = new ProgressDialog(HomeActivity.this);
+                createRouteDialog = new MyProgressDialog(HomeActivity.this);
                 createRouteDialog.setCancelable(false);
                 createRouteDialog.setMessage("Creating Route");
                 createRouteDialog.show();
 
-                createRoute(students, myLocation, sendNotification, movetoMap, false);
+                createRoute(myLocation, sendNotification, movetoMap, false);
 
 
                 creatRouteTask = new TimerTask() {
                     @Override
                     public void run() {
 
-                        createRoute(students, liveData.myLocaton.getValue(), false, false, true);
+                        createRoute(liveData.myLocaton.getValue(), false, false, true);
 
                     }
                 };
@@ -702,11 +702,11 @@ public class HomeActivity extends BA {
         }
     }
 
-    private void createRoute(List<Student> students, Location myLocation, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
+    private void createRoute(Location myLocation, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
         Point mylocation = Point.fromLngLat(myLocation.getLongitude(), myLocation.getLatitude());
         GeoPoint schoolLatLng = liveData.ride.getValue().schoolLatLng;
         Point lastLocation = Point.fromLngLat(schoolLatLng.getLongitude(), schoolLatLng.getLatitude());
-        getRoute(mylocation, lastLocation, students, sendNotification, movetoMap, refreshRoute);
+        getRoute(mylocation, lastLocation, sendNotification, movetoMap, refreshRoute);
     }
 
     @Override
@@ -1676,7 +1676,10 @@ public class HomeActivity extends BA {
      * @param sendNotification
      * @param movetoMap
      */
-    private void getRoute(Point origin, Point destination, List<Student> wayPoints, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
+    private void getRoute(Point origin, Point destination, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
+
+        Ride value = liveData.ride.getValue();
+
 
         MapboxDirections.Builder builder = MapboxDirections.builder()
                 .origin(origin)
@@ -1686,12 +1689,32 @@ public class HomeActivity extends BA {
                 .accessToken(MAPBOX_TOKEN);
 
 
-        for (Student point : wayPoints) {
+        List<Student> wayPoints = new ArrayList<>();
 
-            builder.addWaypoint(Point.fromLngLat(point.lng, point.lat));
+        for (Student student : value.students) {
+
+            if (value.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+
+                if (student.present == Student.UNKNOWN) {
+                    wayPoints.add(student);
+                }
+
+            } else if (value.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
+
+                if (student.status != Student.STATUS_AFTERNOON_ATYOURDOORSTEP) {
+                    wayPoints.add(student);
+                }
+
+            } else {
+                MyApp.showToast("Invalid Ride " + value.shift);
+                return;
+            }
 
         }
 
+        for (Student point : wayPoints) {
+            builder.addWaypoint(Point.fromLngLat(point.lng, point.lat));
+        }
         MapboxDirections client = builder
                 .build();
 
@@ -1710,6 +1733,7 @@ public class HomeActivity extends BA {
                 Ride ride = liveData.ride.getValue();
 
                 List<RouteLeg> legs = liveData.currentRoute.getValue().legs();
+
                 double sumDistance = 0;
                 double sumDuration = 0;
                 for (int i = 0; i < legs.size() - 1; i++) {
@@ -1717,9 +1741,44 @@ public class HomeActivity extends BA {
                     sumDuration = sumDuration + (routeLeg.duration() / 60);
                     sumDistance = sumDistance + (routeLeg.distance() / 1000);
 
-                    ride.students.get(i).distance = sumDistance;
-                    ride.students.get(i).duration = sumDuration;
+                    //update all waypoint students
+                    if (i < legs.size() - 1) {
+                        int wayPointStudentID = wayPoints.get(i).id;
 
+                        for (int j = 0; j < ride.students.size(); j++) {
+                            if (ride.students.get(j).id == wayPointStudentID) {
+                                ride.students.get(i).duration = sumDuration;
+                                ride.students.get(i).distance = sumDistance;
+                            }
+                        }
+//                        ride.students.get(i).distance = sumDistance;
+//                        ride.students.get(i).duration = sumDuration;
+                    }
+
+
+                }
+
+
+                //set duration of reached kids .... total duration and distance
+                for (int i = 0; i < ride.students.size(); i++) {
+                    if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+
+                        if (ride.students.get(i).present != UNKNOWN) {
+
+                            ride.students.get(i).duration = liveData.currentRoute.getValue().duration() / 60;
+                            ride.students.get(i).distance = liveData.currentRoute.getValue().distance() / 1000;
+
+                        }
+
+                    } else if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
+
+                        if (ride.students.get(i).status == Student.STATUS_AFTERNOON_ATYOURDOORSTEP) {
+
+                            ride.students.get(i).duration = liveData.currentRoute.getValue().duration() / 60;
+                            ride.students.get(i).distance = liveData.currentRoute.getValue().distance() / 1000;
+                        }
+
+                    }
                 }
 
                 liveData.ride.setValue(ride);

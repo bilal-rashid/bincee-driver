@@ -59,7 +59,7 @@
                             app:menu="@menu/botton_navigation_menu" />
                     </LinearLayout>
 
-                    <ProgressBar
+                    <com.bincee.driver.customview.MyProgress
                         android:id="@+id/progressBar"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"

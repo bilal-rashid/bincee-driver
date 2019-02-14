@@ -146,7 +146,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         if (mapFragment == null) {
             mapFragment = new MapFragment();
         }
-        return new MapFragment();
+        return mapFragment;
     }
 
 
@@ -165,7 +165,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         bind = ButterKnife.bind(this, view);
 
-        iconBusMyLoc = IconFactory.getInstance(getContext()).fromResource(R.drawable.bus_marker);
+        iconBusMyLoc = IconFactory.getInstance(getContext()).fromResource(R.drawable.bus_icon_green);
+
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -195,6 +196,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                             setStudent(student);
                             return;
                         }
+
                     } else if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
 
                         //SHow Student which is in the bus state
@@ -312,7 +314,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                     .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(schoolLocation.latitude()
                             , schoolLocation.longitude()))
                     .setTitle("School")
-
             );
 
 //            markers.add(marker);
@@ -703,14 +704,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
     }
 
-
-    public void setMyLocation(Location myLocaton) {
-//        this.myLocaton = myLocaton;
-//        if (mylocationMarker != null) {
-//            mylocationMarker.setPosition(new LatLng(myLocaton.getLatitude(), myLocaton.getLongitude()));
-//
-//        }
-    }
 
     @OnClick(R.id.textViewFinishRide)
     public void onViewClicked() {

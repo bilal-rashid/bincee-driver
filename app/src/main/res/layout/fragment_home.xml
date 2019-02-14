@@ -117,7 +117,6 @@
 
         <com.bincee.driver.customview.MyProgress
             android:id="@+id/progressBarShift"
-            style="?android:attr/progressBarStyle"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:translationZ="4dp"

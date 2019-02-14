@@ -49,6 +49,7 @@ public class Student {
         return super.equals(obj);
     }
 
+
     @Override
     public int hashCode() {
         return parent_id;
