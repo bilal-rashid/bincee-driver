@@ -72,17 +72,7 @@ public class HomeFragment extends BFragment {
         super.onCreate(savedInstanceState);
         model = ViewModelProviders.of(this).get(VM.class);
 
-        HomeActivity activity = (HomeActivity) getActivity();
-        if (activity != null && activity.liveData != null) {
-            activity.liveData.driverProfile.observe(this, new Observer<DriverProfileResponse>() {
-                @Override
-                public void onChanged(DriverProfileResponse driverProfileResponse) {
 
-                    model.driverProfile.setValue(driverProfileResponse);
-
-                }
-            });
-        }
 
     }
 
@@ -101,7 +91,18 @@ public class HomeFragment extends BFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        HomeActivity activity = (HomeActivity) getActivity();
+        if (activity != null && activity.liveData != null) {
+            activity.liveData.driverProfile.observe(this, new Observer<DriverProfileResponse>() {
+                @Override
+                public void onChanged(DriverProfileResponse driverProfileResponse) {
 
+                    ImageBinder.roundedCornerCenterCorpParent(binding.circleImageView, driverProfileResponse.photo);
+                    model.driverProfile.setValue(driverProfileResponse);
+
+                }
+            });
+        }
         model.loaderGetShift.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
@@ -136,7 +137,6 @@ public class HomeFragment extends BFragment {
             }
         });
 
-        model.driverProfile.observe(getViewLifecycleOwner(), user -> ImageBinder.roundedCornerCenterCorpParent(binding.circleImageView, user.photo));
 
     }
 

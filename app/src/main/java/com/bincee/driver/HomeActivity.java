@@ -79,6 +79,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.Gson;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -491,9 +492,13 @@ public class HomeActivity extends BA {
                                     Location school = LatLngHelper.toLocation(schoolLatLng);
                                     if (myLocation.distanceTo(school) < 200 && !value.rechtoSchoolNotificationSent) {
 
-                                        for (Student student : ride.students) {
-                                            student.status = Student.STATUS_MORNING_REACHED;
-                                        }
+
+//                                        [3:18 PM, 2/14/2019] Arslan Locopixel: acha next hai sir k jab tak popup ka button press na ho tab tak firebase bhi update na ho
+//[3:18 PM, 2/14/2019] Arslan Locopixel: jaise reached ka popup ata hai , ya at your doorstep ka
+
+//                                        for (Student student : ride.students) {
+//                                            student.status = Student.STATUS_MORNING_REACHED;
+//                                        }
 
 
                                         if (sendNotificationToAll == null || !sendNotificationToAll.isShowing()) {
@@ -502,6 +507,14 @@ public class HomeActivity extends BA {
                                             sendNotificationToAll.setListner(new SendNotificationToAll.Listner() {
                                                 @Override
                                                 public void yes() {
+
+                                                    //[3:18 PM, 2/14/2019] Arslan Locopixel: acha next hai sir k jab tak popup ka button press na ho tab tak firebase bhi update na ho
+                                                    //[3:18 PM, 2/14/2019] Arslan Locopixel: jaise reached ka popup ata hai , ya at your doorstep ka
+
+                                                    for (Student student : liveData.ride.getValue().students) {
+                                                        student.status = Student.STATUS_MORNING_REACHED;
+                                                    }
+
 
                                                     liveData.sendNotificationToAll("Reached", "Bus has Reached the school");
                                                     Ride ride = liveData.ride.getValue();
@@ -554,15 +567,38 @@ public class HomeActivity extends BA {
                                         studentLocation.setLongitude(student.lng);
 
                                         if (myLocation.distanceTo(studentLocation) < 200) {
+
+                                            //[3:18 PM, 2/14/2019] Arslan Locopixel: acha next hai sir k jab tak popup ka button press na ho tab tak firebase bhi update na ho
+                                            //[3:18 PM, 2/14/2019] Arslan Locopixel: jaise reached ka popup ata hai , ya at your doorstep ka
                                             //send notification to student
-                                            student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
+//                                            student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
 
                                             sendNotificationDialog = new SendNotificationDialog(HomeActivity.this);
                                             sendNotificationDialog.setListner(new SendNotificationDialog.Listner() {
                                                 @Override
                                                 public void send() {
 
+
+//                                                    [3:18 PM, 2/14/2019] Arslan Locopixel: acha next hai sir k jab tak popup ka button press na ho tab tak firebase bhi update na ho
+//                                                    [3:18 PM, 2/14/2019] Arslan Locopixel: jaise reached ka popup ata hai , ya at your doorstep ka
+                                                    //send notification to student
+
+                                                    Ride value = liveData.ride.getValue();
+//                                                    List<Student> students = value.students;
+                                                    for (int i = 0; i < value.students.size(); i++) {
+
+                                                        if (value.students.get(i).id == student.id) {
+                                                            student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
+                                                        }
+                                                    }
+
+
+                                                    liveData.ride.setValue(value);
+
                                                     liveData.sentNotificationToStudent(student, "At your doorstep", "Please open the door " + student.fullname + " is waiting outside");
+
+                                                    rideDocument.set(value).addOnCompleteListener(task ->
+                                                            Log.d(TAG, "Updated"));
 
                                                 }
 
@@ -675,6 +711,8 @@ public class HomeActivity extends BA {
 
     @Override
     protected void onDestroy() {
+        stopLocationUpdates();
+
         super.onDestroy();
         if (creatRouteTask != null) {
             creatRouteTask.cancel();
@@ -1030,7 +1068,20 @@ public class HomeActivity extends BA {
                         public void onData(MyResponse<List<Student>> data) throws Exception {
 
                             if (data.status == 200) {
-                                LiveData.this.students.setValue(data.data);
+
+                                List<Student> filterdStudents = new ArrayList<>();
+
+                                for (Student student : data.data
+                                ) {
+                                    if (student.lat == 0 && student.lng == 0) {
+                                        Log.d(TAG, "Student Excluded" + new Gson().toJson(student));
+                                    } else {
+                                        filterdStudents.add(student);
+
+                                    }
+
+                                }
+                                LiveData.this.students.setValue(filterdStudents);
                                 getAbsentList(shiftItem.shift_id);
                             } else {
                                 throw new Exception(data.status + "");
@@ -1557,8 +1608,8 @@ public class HomeActivity extends BA {
     @Override
     protected void onPause() {
         super.onPause();
-        stopLocationUpdates();
     }
+
 
     private void stopLocationUpdates() {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);

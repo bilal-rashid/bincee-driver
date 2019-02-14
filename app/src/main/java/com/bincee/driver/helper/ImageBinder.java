@@ -34,8 +34,7 @@ public final class ImageBinder {
                 .apply(new RequestOptions()
                         .placeholder(R.drawable.profile_avatar)
                         .transform(new MultiTransformation<>(new CenterCrop(), new RoundedCorners(18)))
-                        .error(R.drawable.profile_avatar)
-                )
+                        .error(R.drawable.profile_avatar))
 
                 .into(imageView);
     }

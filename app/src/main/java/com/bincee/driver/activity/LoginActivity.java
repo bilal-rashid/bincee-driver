@@ -85,12 +85,15 @@ public class LoginActivity extends BA {
                         if (response.status == 200) {
 
                             if (response.data.type != 3) {
-                                new AlertDialog.Builder(LoginActivity.this).setMessage("Only driver can login").setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        
-                                    }
-                                }).show();
+                                new AlertDialog.Builder(LoginActivity.this)
+                                        .setMessage("Only driver can login")
+                                        .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                                            }
+                                        })
+                                        .show();
 
                                 return;
                             }
