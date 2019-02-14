@@ -26,6 +26,9 @@
         <!--<item name="android:translationZ">10dp</item>-->
         <!--<item name="android:elevation">10dp</item>-->
         <item name="android:textSize">@dimen/_9ssp</item>
+        <item name="android:elevation">10dp</item>
+        <item name="android:translationZ">10dp</item>
+
     </style>
 
     <style name="dialogButtonWhite" parent="TextAppearance.AppCompat">
@@ -45,10 +48,9 @@
     <style name="dialogText" parent="TextAppearance.AppCompat">
         <item name="android:fontFamily">@font/gotham_book</item>
         <item name="android:textColor">@color/_232323_dialog_subtext</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/_11ssp</item>
         <item name="android:textAlignment">center</item>
     </style>
-
 
     <style name="BottomNavigationView">
         <item name="itemTextAppearanceActive">@style/TextAppearance.BottomNavigationView.Active

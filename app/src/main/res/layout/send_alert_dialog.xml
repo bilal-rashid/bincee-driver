@@ -70,14 +70,18 @@
                 android:background="@drawable/black_rectangle_border"
                 android:fontFamily="@font/gotham_book"
                 android:gravity="top"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:lineSpacingExtra="2dp"
                 android:padding="5dp"
                 android:textSize="12sp" />
 
             <Button
                 android:id="@+id/buttonSend"
                 style="@style/dialogButtonBlue"
-                android:layout_width="match_parent"
+                android:layout_width="@dimen/blue_butoon_width"
                 android:layout_height="@dimen/blue_button_height"
+                android:layout_gravity="center"
                 android:layout_marginStart="40dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="40dp"
@@ -87,14 +91,14 @@
                 />
 
             <TextView
+
                 android:id="@+id/buttonCancel"
-                android:padding="20dp"
                 style="@style/dialogButtonWhite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/blue_butoon_width"
+                android:layout_height="@dimen/blue_button_height"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="0dp"
-                android:layout_marginBottom="0dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
                 android:text="CANCEL" />
 
 

@@ -2,9 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="@dimen/blue_button_height"
-    android:id="@+id/rootView"
     android:layout_marginBottom="10dp"
     android:orientation="vertical">
 
@@ -13,9 +13,9 @@
         android:layout_height="match_parent">
 
         <View
-            android:background="@drawable/black_border_transparent_rectangle"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@drawable/black_border_transparent_rectangle"
             app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
             app:layout_constraintEnd_toEndOf="@+id/linearLayout"
             app:layout_constraintStart_toStartOf="@+id/linearLayout"
@@ -79,10 +79,10 @@
             android:layout_height="20dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:padding="6dp"
             android:layout_marginBottom="8dp"
-
             android:background="@drawable/swipe_red_dot"
+
+            android:padding="6dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -92,15 +92,14 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginTop="8dp"
-            android:padding="6dp"
-
             android:layout_marginEnd="8dp"
+
             android:layout_marginBottom="8dp"
             android:background="@drawable/swipe_green_dot"
+            android:padding="6dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
 
 
         <LinearLayout
@@ -126,7 +125,7 @@
                 android:text="Saleh Ayub"
                 android:textAlignment="center"
                 android:textColor="#000"
-                android:textSize="14sp" />
+                android:textSize="@dimen/_11ssp" />
 
             <TextView
                 android:id="@+id/textViewLocation"
@@ -137,7 +136,7 @@
                 android:text="@string/manama_building_behrain"
                 android:textAlignment="center"
                 android:textColor="#000"
-                android:textSize="12sp" />
+                android:textSize="@dimen/_10ssp" />
 
 
         </LinearLayout>

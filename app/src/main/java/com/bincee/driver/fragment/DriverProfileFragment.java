@@ -114,18 +114,20 @@ public class DriverProfileFragment extends BFragment {
             @Override
             public void onEditClicked(View view) {
 
-                if (binding.editTextName.getVisibility() != View.VISIBLE || binding.editTextContact.getVisibility() != View.VISIBLE) {
+                if (binding.imageViewProfileEdit.getVisibility() != View.VISIBLE) {
 
-                    binding.editTextName.setVisibility(View.VISIBLE);
-                    binding.editTextContact.setVisibility(View.VISIBLE);
+                    binding.editTextName.setVisibility(View.GONE);
+                    binding.editTextContact.setVisibility(View.GONE);
                     binding.buttonEdit.setText("SAVE");
+                    binding.imageViewProfileEdit.setVisibility(View.VISIBLE);
                 } else {
 
                     binding.editTextName.setVisibility(View.GONE);
                     binding.editTextContact.setVisibility(View.GONE);
                     binding.buttonEdit.setText("EDIT");
+                    binding.imageViewProfileEdit.setVisibility(View.GONE);
 
-                    vm.updateProfileText(binding.editTextName.getText().toString(), binding.editTextContact.getText().toString());
+//                    vm.updateProfileText(binding.editTextName.getText().toString(), binding.editTextContact.getText().toString());
 
                 }
 

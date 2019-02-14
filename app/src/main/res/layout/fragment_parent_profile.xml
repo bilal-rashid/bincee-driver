@@ -115,8 +115,8 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/circleImageViewProfile"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="@dimen/_80sdp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="50dp"
@@ -134,6 +134,7 @@
         <ImageView
             android:id="@+id/imageViewProfileEdit"
             android:layout_width="25dp"
+            android:visibility="gone"
             android:layout_height="25dp"
             android:onClick="@{handlers::onProfileClicked}"
             android:src="@drawable/edit_pencil"

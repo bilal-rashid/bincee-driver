@@ -1,6 +1,7 @@
 package com.bincee.driver.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
@@ -16,6 +17,7 @@ import com.bincee.driver.base.BA;
 import java.util.Objects;
 
 import androidx.fragment.app.Fragment;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -43,6 +45,25 @@ public class ContectUsFragment extends Fragment {
 
 
         textViewContextUs.setText(Html.fromHtml("<u>" + getResources().getString(R.string.u_contactus_bincee_com_u) + "</u>"));
+
+
+        textViewContextUs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                String[] addresses = {getResources().getString(R.string.u_contactus_bincee_com_u)};
+                intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+                intent.putExtra(Intent.EXTRA_SUBJECT, "");
+
+//                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(intent);
+//                }
+
+
+            }
+        });
         return view;
     }
 

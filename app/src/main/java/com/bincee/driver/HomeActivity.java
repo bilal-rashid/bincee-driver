@@ -77,6 +77,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
@@ -144,7 +145,7 @@ public class HomeActivity extends BA {
     /**
      * The constant CONTACT_US.
      */
-    public static final String CONTACT_US = "- Contact Bincee";
+    public static final String CONTACT_US = "- Contact Us";
     public static final String UPDATE_MY_LOCATION = "- Update My location";
     public static final String LOGOUT = "- Logout";
 
@@ -277,9 +278,10 @@ public class HomeActivity extends BA {
         progressDialog.show();
 
         fetchingFromFS = true;
-        rideDocument.get().addOnCompleteListener(this, new OnCompleteListener<DocumentSnapshot>() {
+        rideDocument.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (isDestroyed()) return;
                 fetchingFromFS = false;
                 progressDialog.dismiss();
 
@@ -305,7 +307,6 @@ public class HomeActivity extends BA {
 
             }
         });
-
 
         textViewTitle.setText("Home");
         setSupportActionBar(toolbar);

@@ -1,11 +1,13 @@
 package com.bincee.driver.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.core.content.res.ResourcesCompat;
 
@@ -54,11 +56,11 @@ public class LoginActivity extends BA {
         chechBoxRememberMe.setTypeface(ResourcesCompat.getFont(this, R.font.gotham_book));
 
 
-//        editTextUsername.setText("johnd1");
-//        editTextPassword.setText("ChangeMe@2");
+        editTextUsername.setText(MyPref.getUSER_NAME(this));
+        editTextPassword.setText(MyPref.getPASSWORD(this));
+
         editTextUsername.setText("test_driverd1");
         editTextPassword.setText("ChangeMe@2");
-
 
     }
 
@@ -81,11 +83,29 @@ public class LoginActivity extends BA {
                     @Override
                     public void onData(LoginResponse response) {
                         if (response.status == 200) {
+
+                            if (response.data.type != 3) {
+                                new AlertDialog.Builder(LoginActivity.this).setMessage("Only driver can login").setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        
+                                    }
+                                }).show();
+
+                                return;
+                            }
+
                             response.data.save(LoginActivity.this);
-                            MyApp.instance.user .setValue(response.data);
+                            MyApp.instance.user.setValue(response.data);
                             HomeActivity.start(LoginActivity.this);
 
                             MyPref.SAVE_USER(LoginActivity.this, MyApp.instance.user.getValue());
+                            if (chechBoxRememberMe.isChecked()) {
+                                MyPref.SAVE_CREDATIALS(LoginActivity.this, editTextUsername.getText().toString(),
+                                        editTextPassword.getText().toString());
+                            } else {
+                                MyPref.REMOVE_REMEBER(LoginActivity.this);
+                            }
                             finish();
 
 

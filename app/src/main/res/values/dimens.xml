@@ -18,7 +18,7 @@
     <dimen name="status_title_text">16sp</dimen>
     <dimen name="status_text_size">16sp</dimen>
     <dimen name="login_edittext_width">250</dimen>
-    <dimen name="_20dp_dialog_title">20sp</dimen>
+    <dimen name="_20dp_dialog_title">@dimen/_15ssp</dimen>
     <dimen name="dialog_margn">30sp</dimen>
     <dimen name="dialog_radius">10dp</dimen>
 

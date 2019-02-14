@@ -44,6 +44,7 @@
         android:fontFamily="@font/gotham_bold"
         android:text="WELCOME TO"
         android:textColor="#000"
+        android:visibility="gone"
         android:textSize="@dimen/_18ssp"
         app:layout_constraintBottom_toTopOf="@+id/imageView3"
         app:layout_constraintEnd_toEndOf="parent"
@@ -128,6 +129,8 @@
 
 
     <Button
+
+        style="@style/dialogButtonBlue"
         android:id="@+id/buttonLogin"
         android:layout_width="@dimen/_200sdp"
         android:layout_height="@dimen/blue_button_height"
@@ -139,7 +142,6 @@
         android:text="LOGIN"
         android:textAllCaps="true"
         android:textColor="#fff"
-        android:textSize="@dimen/_10ssp"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
         app:layout_constraintEnd_toEndOf="@+id/editTextPassword"
         app:layout_constraintStart_toStartOf="@+id/editTextPassword"

@@ -234,7 +234,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             textViewNameKM.setText("ETA: " + Math.round(student.duration) + " Minutes");
         }
 
-        ImageBinder.setImageUrl(imageView9, student.photo);
+        ImageBinder.roundedCornerCenterCorpKid(imageView9, student.photo);
     }
 
     private void setupRoute(DirectionsRoute currentRoute) {
