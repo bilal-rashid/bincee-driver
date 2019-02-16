@@ -21,8 +21,9 @@ public class Ride {
     public int driverId;
     public String shift;
     public GeoPoint schoolLatLng;
-    public boolean rechtoSchoolNotificationSent=false;
+    public boolean rechtoSchoolNotificationSent = false;
     public int shiftId;
+    public boolean routeCreated = false;
 
 
     public Ride() {

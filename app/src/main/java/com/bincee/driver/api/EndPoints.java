@@ -96,6 +96,10 @@ public interface EndPoints {
             , @Field("type") String type);
 
 
+    @GET("school/driver/bus/{driverId}")
+    Observable<MyResponse<BusInfo>> listBus(@Path("driverId") String driverId);
+
+
 }
 
 

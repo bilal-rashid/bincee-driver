@@ -204,12 +204,13 @@ public class AttendanceFragemnt extends BFragment {
             if (!liveData.isAttandanceMarked()) {
                 MyApp.showToast("Please mark all students before proceeding");
             } else if (getHomeActivity().liveData.getAbsentStudents().size() > 0) {
+
                 MarkStudentAbdentDialog absentDialog = new MarkStudentAbdentDialog(getContext(), getHomeActivity().liveData.getAbsentStudents());
                 absentDialog.setListner(new MarkStudentAbdentDialog.Listner() {
                     @Override
                     public void yes() {
 
-                        getHomeActivity().startRide(true, true);
+                        moveToRouteDesigner();
 
                     }
 
@@ -219,8 +220,10 @@ public class AttendanceFragemnt extends BFragment {
                     }
                 });
                 absentDialog.show();
+
             } else {
-                getHomeActivity().startRide(true, true);
+
+                moveToRouteDesigner();
 
             }
 
@@ -228,6 +231,15 @@ public class AttendanceFragemnt extends BFragment {
         }
 
 
+    }
+
+    public void moveToRouteDesigner() {
+        getHomeActivity().moveToRouteDesigner();
+    }
+
+    private void startRide() {
+
+        getHomeActivity().startRide(true, true);
     }
 
 //    public void setStudentList(List<Student> students) {

@@ -120,6 +120,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.bincee.driver.R.drawable.ic_arrow_head_casing;
 import static com.bincee.driver.api.model.Student.PRESENT;
 import static com.bincee.driver.api.model.Student.STATUS_AFTERNOON_INTHEBUS;
 import static com.bincee.driver.api.model.Student.UNKNOWN;
@@ -151,6 +152,7 @@ public class HomeActivity extends BA {
     public static final String CONTACT_US = "- Contact Us";
     public static final String UPDATE_MY_LOCATION = "- Update My location";
     public static final String LOGOUT = "- Logout";
+    public static final String ROUTE_DESIGNER = "- Route Designer";
 
     /**
      * The Image view profile pic.
@@ -191,7 +193,7 @@ public class HomeActivity extends BA {
      * The Bottom navigation view.
      */
     @BindView(R.id.bottomNavigationView)
-    BottomNavigationView bottomNavigationView;
+    public BottomNavigationView bottomNavigationView;
     private List<String> menuItem;
 
     /**
@@ -202,7 +204,6 @@ public class HomeActivity extends BA {
      * The Binding.
      */
     ActivityHomeBinding binding;
-    private FirebaseFirestore db;
     private LocationCallback mLocationCallback;
     private FusedLocationProviderClient mFusedLocationClient;
     private PermissionHelper permissionHelper;
@@ -218,7 +219,7 @@ public class HomeActivity extends BA {
     /**
      * The Custom root.
      */
-    public boolean customRoot = false;
+
     /**
      * The Current route.
      */
@@ -235,7 +236,6 @@ public class HomeActivity extends BA {
     private SendNotificationDialog sendNotificationDialog;
     private TimerTask creatRouteTask;
     Timer timer = new Timer();
-    private String ROUTE_DESIGNER = "- Route Designer";
 
 
     /**
@@ -267,12 +267,11 @@ public class HomeActivity extends BA {
             }
         });
 
-        db = FirebaseFirestore.getInstance();
 
         if (MyApp.instance.user == null) return;
 
-        rideDocument = db.collection("ride").document(MyApp.instance.user.getValue().id + "");
-        history = db.collection("history");
+        rideDocument = FireStoreHelper.getRide();
+        history = FireStoreHelper.getHistory();
 
 
         progressDialog = new MyProgressDialog(this);
@@ -322,7 +321,7 @@ public class HomeActivity extends BA {
 
 //        menuItem.add(MY_POWER);
         menuItem.add(MY_PROFILE);
-        menuItem.add(ROUTE_DESIGNER);
+//        menuItem.add(ROUTE_DESIGNER);
 //        menuItem.add("- FAQ");
         menuItem.add(CONTACT_US);
 //        menuItem.add(UPDATE_MY_LOCATION);
@@ -358,10 +357,7 @@ public class HomeActivity extends BA {
                 if (students == null || students.size() == 0) return;
 //                MyApp.showToast(students.size() + " Items");
 
-                Ride ride = null;
-                if (liveData.ride.getValue() == null) {
-                    ride = new Ride();
-                }
+                Ride ride = new Ride();
                 ride.rideId = UUID.randomUUID().toString();
                 ride.startTime = Timestamp.now();
                 ride.rideInProgress = true;
@@ -370,9 +366,7 @@ public class HomeActivity extends BA {
                 ride.schoolLatLng = new GeoPoint(liveData.schoolResponce.getValue().lat, liveData.schoolResponce.getValue().lng);
                 ShiftItem shift = liveData.selectedShift.getValue();
                 ride.shiftId = shift.shift_id;
-
-
-                liveData.ride.setValue(ride);
+                ride.routeCreated = false;
 
 
                 try {
@@ -384,49 +378,22 @@ public class HomeActivity extends BA {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
+                liveData.ride.setValue(ride);
 
-                rideDocument.set(ride)
-                        .addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: User Ride Stated Succefully"))
-                        .addOnFailureListener(HomeActivity.this, Throwable::printStackTrace);
-
-//
-//                SelectRouteDialog selectRouteDialog = new SelectRouteDialogBuilder()
-//                        .setContext(HomeActivity.this)
-//                        .setListner(i -> {
-//
-//                            switch (i) {
-//                                case 1:
-//
-//                                    customRoot = false;
-//                                    if (liveData.ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)){
-//                                        startRide(true, true);
-//
-//                                    }else {
-//                                        startRide(true, false);
-//
-//                                    }
-//
-//
-//                                    break;
-//                                case 2:
-//
-//                                    customRoot = true;
-//                                    break;
-//                            }
-//
-//                        })
-//                        .createSelectRouteDialog();
-//                selectRouteDialog.show();
+//                rideDocument.set(ride)
+//                        .addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: User Ride Stated Succefully"))
+//                        .addOnFailureListener(HomeActivity.this, Throwable::printStackTrace);
 
 
-                if (liveData.ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
-                    startRide(true, true);
+                if (liveData.ride.getValue().shift.equals(Ride.SHIFT_MORNING)) {
+
+                    moveToRouteDesigner();
 
                 } else {
-                    startRide(true, false);
+
+                    bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
 
                 }
-
 
             }
         });
@@ -578,7 +545,6 @@ public class HomeActivity extends BA {
                                                 @Override
                                                 public void send() {
 
-
 //                                                    [3:18 PM, 2/14/2019] Arslan Locopixel: acha next hai sir k jab tak popup ka button press na ho tab tak firebase bhi update na ho
 //                                                    [3:18 PM, 2/14/2019] Arslan Locopixel: jaise reached ka popup ata hai , ya at your doorstep ka
                                                     //send notification to student
@@ -638,6 +604,44 @@ public class HomeActivity extends BA {
 
     }
 
+    public void moveToRouteDesigner() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frameLayout, RouteDesignerFragment.getInstance())
+                .commit();
+    }
+
+    public void startRideAfterRouteDesigner() {
+
+        Ride ride = liveData.ride.getValue();
+
+        updateRideToFireBase(ride);
+
+//
+
+        if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+            startRide(true, true);
+
+        } else {
+            startRide(true, false);
+
+        }
+    }
+
+    public void updateRideToFireBase(Ride ride) {
+        rideDocument.set(ride)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: User Ride Stated Succefully"))
+                .addOnFailureListener(HomeActivity.this, Throwable::printStackTrace);
+    }
+
+
+    public void setThreeLine() {
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.threel_line);
+    }
+
+    public void setBackButton() {
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back);
+    }
 
     /**
      * Start ride.
@@ -645,41 +649,40 @@ public class HomeActivity extends BA {
      * @param sendNotification
      */
     public void startRide(boolean sendNotification, boolean movetoMap) {
-        List<Student> students = liveData.ride.getValue().students;
 
         Location myLocation = liveData.myLocaton.getValue();
         if (myLocation != null) {
 
 
-            if (liveData.ride.getValue().shift.equals(Ride.SHIFT_MORNING) || liveData.isAttandanceMarked()) {
+//            if (liveData.ride.getValue().shift.equals(Ride.SHIFT_MORNING) || liveData.isAttandanceMarked()) {
 
-                if (creatRouteTask != null) {
-                    creatRouteTask.cancel();
+            if (creatRouteTask != null) {
+                creatRouteTask.cancel();
+            }
+
+
+            createRouteDialog = new MyProgressDialog(HomeActivity.this);
+            createRouteDialog.setCancelable(false);
+            createRouteDialog.setMessage("Creating Route");
+            createRouteDialog.show();
+
+            createRoute(myLocation, sendNotification, movetoMap, false);
+
+
+            creatRouteTask = new TimerTask() {
+                @Override
+                public void run() {
+
+                    createRoute(liveData.myLocaton.getValue(), false, false, true);
+
                 }
-
-
-                createRouteDialog = new MyProgressDialog(HomeActivity.this);
-                createRouteDialog.setCancelable(false);
-                createRouteDialog.setMessage("Creating Route");
-                createRouteDialog.show();
-
-                createRoute(myLocation, sendNotification, movetoMap, false);
-
-
-                creatRouteTask = new TimerTask() {
-                    @Override
-                    public void run() {
-
-                        createRoute(liveData.myLocaton.getValue(), false, false, true);
-
-                    }
-                };
-                timer.scheduleAtFixedRate(creatRouteTask, 60 * 1000, 60 * 1000);
+            };
+            timer.scheduleAtFixedRate(creatRouteTask, 60 * 1000, 60 * 1000);
 
 //            fetchRoute(mylocation, lastLocation, students);
-            } else {
-                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
-            }
+//            } else {
+//                bottomNavigationView.setSelectedItemId(R.id.bottomNavigationAttendance);
+//            }
 
 
         } else {
@@ -746,11 +749,11 @@ public class HomeActivity extends BA {
 
                     Fragment instance;
 
-                    if (customRoot) {
-                        instance = RouteDesignerFragment.getInstance();
-                    } else {
-                        instance = AttendanceFragemnt.getInstance();
-                    }
+//                    if (customRoot) {
+//                        instance = RouteDesignerFragment.getInstance();
+//                    } else {
+                    instance = AttendanceFragemnt.getInstance();
+//                    }
 
 
                     getSupportFragmentManager().beginTransaction()
@@ -779,8 +782,19 @@ public class HomeActivity extends BA {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            drawerLayout.openDrawer(Gravity.LEFT, true);
-            return true;
+
+            Fragment instance = RouteDesignerFragment.getInstance();
+
+            if (instance != null && instance.isVisible()) {
+
+                instance.onOptionsItemSelected(item);
+                return true;
+
+            } else {
+                drawerLayout.openDrawer(Gravity.LEFT, true);
+                return true;
+            }
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -843,19 +857,6 @@ public class HomeActivity extends BA {
         rideDocument.set(liveData.ride.getValue());
     }
 
-    /**
-     * Route selected.
-     */
-    public void routeSelected() {
-        customRoot = false;
-        if (liveData.ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
-            startRide(true, true);
-
-        } else {
-            startRide(true, false);
-        }
-
-    }
 
     /**
      * The type Navigation vh.
@@ -1004,6 +1005,15 @@ public class HomeActivity extends BA {
         public LiveData() {
             compositeDisposable = new CompositeDisposable();
             user.setValue(MyApp.instance.user.getValue());
+
+            ride = new MutableLiveData<Ride>() {
+                @Override
+                public void setValue(Ride value) {
+                    super.setValue(value);
+
+                }
+            };
+
         }
 
         private void getSchoolProfile(String schoolId) {
@@ -1603,6 +1613,13 @@ public class HomeActivity extends BA {
                     }
                 }).request();
 //        }
+
+
+        Ride ride = liveData.ride.getValue();
+        if (ride != null && ride.rideInProgress) {
+            bottomNavigationView.setSelectedItemId(R.id.bottomNavigationMap);
+        }
+
     }
 
     @Override
@@ -1701,7 +1718,7 @@ public class HomeActivity extends BA {
 
             } else if (value.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
 
-                if (student.status != Student.STATUS_AFTERNOON_ATYOURDOORSTEP) {
+                if (student.present == Student.PRESENT && student.status != Student.STATUS_AFTERNOON_ATYOURDOORSTEP) {
                     wayPoints.add(student);
                 }
 
@@ -1715,11 +1732,11 @@ public class HomeActivity extends BA {
         for (Student point : wayPoints) {
             builder.addWaypoint(Point.fromLngLat(point.lng, point.lat));
         }
+
         MapboxDirections client = builder
                 .build();
 
         creatingRoute = true;
-
 
         client.enqueueCall(new Callback<DirectionsResponse>() {
             @Override

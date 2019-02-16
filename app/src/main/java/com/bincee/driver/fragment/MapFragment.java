@@ -118,7 +118,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     @BindView(R.id.textViewTime)
     TextView textViewTime;
     //    private Location myLocaton;
-    private Marker mylocationMarker;
 
 
     private MapboxMap mapboxMap;
@@ -128,13 +127,14 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     String LINE_SOURCE = "line-source";
     String LINE_LAYER = "linelayer";
     private Icon iconBusMyLoc;
-    private MarkerView markerView;
+    private Marker markerView;
     private String BUS_ICON_LAYER = "bus-icon-layer";
     private String BUS_ICON_SOURCE = "bus-icon_source";
     private String BUS_ICON = "bus-icon";
     private LatLng oldLocation;
     private double lastBearing = 0;
     private int padding = 500;
+    private Observer<Location> mylocationObserver;
     //    private DirectionsRoute currentRoute;
 //    private Point destination;
 
@@ -167,7 +167,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
         iconBusMyLoc = IconFactory.getInstance(getContext()).fromResource(R.drawable.bus_icon_green);
 
-
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
@@ -177,7 +176,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
 
         HomeActivity homeActivity = getHomeActivity();
 
@@ -201,14 +199,12 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
                         //SHow Student which is in the bus state
 
-                        if (student.status == Student.STATUS_AFTERNOON_INTHEBUS) {
+                        if (student.present == Student.PRESENT && student.status == Student.STATUS_AFTERNOON_INTHEBUS) {
                             setStudent(student);
                             return;
                         }
 
-
                     }
-
 
                 }
 
@@ -244,15 +240,12 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
         if (homeActivity.liveData.ride.getValue() == null) return;
 
-
         MutableLiveData<Location> myLocaton = homeActivity.liveData.myLocaton;
         if (currentRoute != null && myLocaton.getValue() != null) {
-
 
             List<Student> students = homeActivity.liveData.ride.getValue().students;
 
             List<Point> points = LineString.fromPolyline(currentRoute.geometry(), Constants.PRECISION_6).coordinates();
-
 
 //            List<LatLng> pointsLtLng = new ArrayList<>();
 //
@@ -378,6 +371,13 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     public void onDestroyView() {
         super.onDestroyView();
 //        bind.unbind();
+        if (mylocationObserver != null) {
+            getHomeActivity().liveData.myLocaton.removeObserver(mylocationObserver);
+        }
+        if (markerView != null) {
+            markerView.remove();
+            markerView = null;
+        }
         mapView.onDestroy();
 
 
@@ -436,7 +436,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         mapboxMap.addSource(iconGeoJsonSource);
 
         mapboxMap.addImage(BUS_ICON, BitmapUtils.getBitmapFromDrawable(
-                getResources().getDrawable(R.drawable.bus_marker)));
+                getResources().getDrawable(R.drawable.bus_icon_green)));
+
 
         SymbolLayer startEndIconLayer = new SymbolLayer(BUS_ICON_LAYER, BUS_ICON_SOURCE);
         startEndIconLayer.setProperties(
@@ -447,7 +448,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         mapboxMap.addLayer(startEndIconLayer);
 
 
-        getHomeActivity().liveData.myLocaton.observe(getViewLifecycleOwner(), new Observer<Location>() {
+        mylocationObserver = new Observer<Location>() {
             @Override
             public void onChanged(Location location) {
 
@@ -464,58 +465,63 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
                 SymbolLayer busLayer = mapboxMap.getLayerAs(BUS_ICON_LAYER);
 
+                ;
 
-                if (oldLocation != null) {
+                if (oldLocation != null && markerView != null) {
 
-                    double displacemnet = oldLocation.distanceTo(nowLocation);
+//                    double displacemnet = oldLocation.distanceTo(nowLocation);
 
-                    if (displacemnet > 1) {
-                        double nowBearing = bearingBetweenLocations(oldLocation, nowLocation);
+//                    if (displacemnet > 1) {
+//                    double nowBearing = bearingBetweenLocations(oldLocation, nowLocation);
 
 //                    smothRotation(busLayer, nowBearing, lastBearing);
 //                    animateMarker(oldLocation, nowLocation, busSource);
 
 //                        markerView.setPosition(nowLocation);
-                        markerView.setRotation((float) nowBearing);
+//                        markerView.setRotation((float) nowBearing);
 
 
-                        ValueAnimator rotationAnimator = new ValueAnimator();
-                        rotationAnimator.setObjectValues(Float.parseFloat(lastBearing + ""), nowBearing);
-                        rotationAnimator.setDuration(DURATION);
-                        rotationAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator animator) {
-
-                                markerView.setRotation((Float) animator.getAnimatedValue());
-
-                            }
-                        });
-                        rotationAnimator.start();
-
-
-                        ValueAnimator markerAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), (Object[]) new LatLng[]{oldLocation, nowLocation});
-                        markerAnimator.setDuration(DURATION);
-                        markerAnimator.setRepeatCount(0);
-                        markerAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-                        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator animation) {
-                                if (markerView != null) {
-                                    markerView.setPosition((LatLng) animation.getAnimatedValue());
-                                }
-                            }
-                        });
-                        markerAnimator.start();
+//                        ValueAnimator rotationAnimator = new ValueAnimator();
+//                        rotationAnimator.setObjectValues(Float.parseFloat(lastBearing + ""), nowBearing);
+//                        rotationAnimator.setDuration(DURATION);
+//                        rotationAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//
+//                            @Override
+//                            public void onAnimationUpdate(ValueAnimator animator) {
+//
+//                                markerView.setRotation((Float) animator.getAnimatedValue());
+//
+//                            }
+//                        });
+//                        rotationAnimator.start();
 
 
-                        lastBearing = nowBearing;
-                    }
+//                    ValueAnimator markerAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), (Object[]) new LatLng[]{oldLocation, nowLocation});
+//                    markerAnimator.setDuration(DURATION);
+//                    markerAnimator.setRepeatCount(0);
+//                    markerAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+//                    markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//                        @Override
+//                        public void onAnimationUpdate(ValueAnimator animation) {
+//                            if (markerView != null) {
+//
+//                                markerView.setPosition((LatLng) animation.getAnimatedValue());
+//
+//                            }
+//                        }
+//                    });
+//                    markerAnimator.start();
+                    markerView.setPosition(nowLocation);
+
+
+//                    lastBearing = nowBearing;
+//                    }
 
 
                 } else {
 //                    busSource.setGeoJson(busCollectionSource);
-                    markerView = mapboxMap.addMarker(new MarkerViewOptions().icon(iconBusMyLoc).position(nowLocation));
+                    markerView = MapFragment.this.mapboxMap.addMarker(new MarkerOptions()
+                            .icon(iconBusMyLoc).position(nowLocation));
 
                 }
                 oldLocation = nowLocation;
@@ -527,7 +533,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                 }
 
             }
-        });
+        };
 
 
         getHomeActivity().liveData.currentRoute.observe(getViewLifecycleOwner(), new Observer<DirectionsRoute>() {
@@ -547,6 +553,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
             }
         });
+
+        getHomeActivity().liveData.myLocaton.observe(MapFragment.this, mylocationObserver);
 
 
     }

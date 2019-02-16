@@ -1,5 +1,6 @@
 package com.bincee.driver.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
@@ -21,7 +22,7 @@ public class RouteDesignerActivity extends BA {
     @BindView(R.id.frameLayout)
     FrameLayout frameLayout;
 
-    public static void start(HomeActivity homeActivity) {
+    public static void start(Context homeActivity) {
         homeActivity.startActivity(new Intent(homeActivity, RouteDesignerActivity.class));
     }
 

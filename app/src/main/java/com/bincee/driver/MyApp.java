@@ -12,6 +12,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.gsonparserfactory.GsonParserFactory;
 import com.bincee.driver.api.EndPoints;
 import com.bincee.driver.api.model.LoginResponse;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 
 import java.util.concurrent.TimeUnit;
@@ -48,6 +49,9 @@ public class MyApp extends Application {
         user = new MutableLiveData<>();
         instance = this;
         setupRetrofit();
+
+        FirebaseFirestore.setLoggingEnabled(true);
+
 
     }
 

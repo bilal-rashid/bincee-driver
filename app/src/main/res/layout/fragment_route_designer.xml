@@ -12,9 +12,9 @@
         android:id="@+id/recycleView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="60dp"
         android:layout_marginTop="10dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="60dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/buttonStartRide"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,7 +25,7 @@
 
 
     <TextView
-        android:id="@+id/textView17"
+        android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -46,9 +46,9 @@
         android:layout_marginTop="5dp"
         android:text="Tap and hold to change the preferred routes"
         android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="@+id/textView17"
-        app:layout_constraintStart_toStartOf="@+id/textView17"
-        app:layout_constraintTop_toBottomOf="@+id/textView17" />
+        app:layout_constraintEnd_toEndOf="@+id/textViewTitle"
+        app:layout_constraintStart_toStartOf="@+id/textViewTitle"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTitle" />
 
     <Button
         android:id="@+id/buttonStartRide"

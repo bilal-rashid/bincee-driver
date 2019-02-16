@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import com.bincee.driver.HomeActivity;
 import com.bincee.driver.MyApp;
 import com.bincee.driver.R;
+import com.bincee.driver.api.BusInfo;
 import com.bincee.driver.api.model.DriverProfileResponse;
 import com.bincee.driver.api.model.Event;
 import com.bincee.driver.api.model.LoginResponse;
@@ -73,7 +74,6 @@ public class HomeFragment extends BFragment {
         model = ViewModelProviders.of(this).get(VM.class);
 
 
-
     }
 
     @Override
@@ -120,11 +120,30 @@ public class HomeFragment extends BFragment {
 
 
         binding.buttonStartRide.setEnabled(false);
+
+
         model.shiftList.observe(this, shiftItems -> {
+
             binding.spinnerCarNumber.setAdapter(new ArrayAdapter<ShiftItem>(getContext()
                     , android.R.layout.simple_list_item_1, shiftItems));
+
+
             binding.buttonStartRide.setEnabled(true);
+
+
         });
+        model.busList.observe(getViewLifecycleOwner(), new Observer<List<BusInfo.BusesEntity>>() {
+            @Override
+            public void onChanged(List<BusInfo.BusesEntity> busesEntities) {
+
+
+                binding.spinnerSchoolName.setAdapter(new ArrayAdapter<BusInfo.BusesEntity>(getContext()
+                        , android.R.layout.simple_list_item_1, busesEntities));
+
+                binding.buttonStartRide.setEnabled(true);
+            }
+        });
+
 
         binding.buttonStartRide.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +167,7 @@ public class HomeFragment extends BFragment {
 
         public MutableLiveData<Boolean> loader = new MutableLiveData<>();
         public MutableLiveData<Boolean> loaderGetShift = new MutableLiveData<>();
+        public MutableLiveData<List<BusInfo.BusesEntity>> busList = new MutableLiveData<>();
 
         private CompositeDisposable compositeDisposable;
 
@@ -195,6 +215,43 @@ public class HomeFragment extends BFragment {
                             loaderError.setValue(new Event<>(e));
                         }
                     });
+
+
+            EndpointObserver<MyResponse<BusInfo>> endpointObserver1 = MyApp.endPoints.listBus(MyApp.instance.user.getValue().id + "")
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeWith(new EndpointObserver<MyResponse<BusInfo>>() {
+                        @Override
+                        public void onComplete() {
+
+                            loaderGetShift.setValue(false);
+
+                        }
+
+                        @Override
+                        public void onData(MyResponse<BusInfo> o) throws Exception {
+
+                            if (o.status == 200) {
+
+                                busList.setValue(o.data.buses);
+
+
+                            } else {
+                                throw new Exception(o.message);
+                            }
+
+
+                        }
+
+                        @Override
+                        public void onHandledError(Throwable e) {
+
+                            e.printStackTrace();
+                        }
+                    });
+            compositeDisposable.add(endpointObserver1);
+
+
             compositeDisposable.add(endpointObserver);
         }
 
