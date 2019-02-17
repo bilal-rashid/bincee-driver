@@ -13,6 +13,8 @@ public class MyPref {
     public static final String CREDANTIALS = "credantials";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
+    private static final String REMEMBER_ME = "remember_me";
+
 
     public static void SAVE_USER(Context loginActivity, LoginResponse.User user) {
         SharedPreferences sharedPref = getSharedPref(loginActivity);
@@ -46,7 +48,11 @@ public class MyPref {
 
     public static void SAVE_CREDATIALS(LoginActivity loginActivity, String username, String pass) {
         SharedPreferences sharedPreferences = getRemeberMePrefrance(loginActivity);
-        sharedPreferences.edit().putString(USERNAME, username).putString(PASSWORD, pass).apply();
+        sharedPreferences.edit()
+                .putString(USERNAME, username)
+                .putString(PASSWORD, pass)
+                .putBoolean(REMEMBER_ME, true)
+                .apply();
 
 
     }
@@ -71,4 +77,11 @@ public class MyPref {
     private static SharedPreferences getRemeberMePrefrance(LoginActivity loginActivity) {
         return loginActivity.getSharedPreferences(CREDANTIALS, Context.MODE_PRIVATE);
     }
+
+    public static boolean getREMEMBERME(LoginActivity loginActivity) {
+        SharedPreferences sharedPreferences = getRemeberMePrefrance(loginActivity);
+        return sharedPreferences.getBoolean(REMEMBER_ME, false);
+
+    }
+
 }

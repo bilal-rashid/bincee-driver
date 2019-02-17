@@ -66,4 +66,9 @@ public class LatLngHelper {
 
         return list;
     }
+
+    public static GeoPoint toGeoPoint(Location value) {
+        if (value == null) return null;
+        return new GeoPoint(value.getLatitude(), value.getLongitude());
+    }
 }

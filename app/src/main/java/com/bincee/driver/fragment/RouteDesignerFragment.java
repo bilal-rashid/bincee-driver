@@ -171,7 +171,7 @@ public class RouteDesignerFragment extends BFragment {
         MyApp.showToast("Some student changed");
     }
 
-    private boolean allStudentsMatched(List<Student> studentsFirebase, List<Student> studentsRide) {
+    public static boolean allStudentsMatched(List<Student> studentsFirebase, List<Student> studentsRide) {
 
         for (Student studentFirebase : studentsFirebase) {
 
@@ -200,7 +200,7 @@ public class RouteDesignerFragment extends BFragment {
 
     }
 
-    private boolean isInList(Student studentFirebase, List<Student> studentsRide) {
+    public static boolean isInList(Student studentFirebase, List<Student> studentsRide) {
         for (Student studentRide : studentsRide) {
 
             if (studentFirebase.id == studentRide.id) {
@@ -255,6 +255,7 @@ public class RouteDesignerFragment extends BFragment {
             HashMap<String, List<Student>> stringListHashMap = new HashMap<>();
 
             stringListHashMap.put("students", ride.students);
+
             FireStoreHelper.getRouteDesigner(ride.shiftId + "")
                     .set(stringListHashMap);
 

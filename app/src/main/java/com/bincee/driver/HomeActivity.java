@@ -81,6 +81,7 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.MapboxDirections;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -128,6 +129,7 @@ import static com.bincee.driver.api.model.notification.Notification.ATTANDACE;
 import static com.bincee.driver.api.model.notification.Notification.RIDE;
 import static com.bincee.driver.api.model.notification.Notification.UPDATE_STATUS;
 import static com.bincee.driver.fragment.MapFragment.MAPBOX_TOKEN;
+import static com.bincee.driver.fragment.RouteDesignerFragment.allStudentsMatched;
 
 /**
  * The type Home activity.
@@ -362,6 +364,8 @@ public class HomeActivity extends BA {
                 ride.startTime = Timestamp.now();
                 ride.rideInProgress = true;
                 ride.students = students;
+                ride.latLng = LatLngHelper.toGeoPoint(liveData.myLocaton.getValue());
+
                 ride.driverId = MyApp.instance.user.getValue().id;
                 ride.schoolLatLng = new GeoPoint(liveData.schoolResponce.getValue().lat, liveData.schoolResponce.getValue().lng);
                 ShiftItem shift = liveData.selectedShift.getValue();
@@ -380,14 +384,13 @@ public class HomeActivity extends BA {
                 }
                 liveData.ride.setValue(ride);
 
-//                rideDocument.set(ride)
-//                        .addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: User Ride Stated Succefully"))
-//                        .addOnFailureListener(HomeActivity.this, Throwable::printStackTrace);
-
 
                 if (liveData.ride.getValue().shift.equals(Ride.SHIFT_MORNING)) {
 
-                    moveToRouteDesigner();
+
+                    checkIfRouteExists();
+
+//                    checkIfRouteExists();
 
                 } else {
 
@@ -563,8 +566,9 @@ public class HomeActivity extends BA {
 
                                                     liveData.sentNotificationToStudent(student, "At your doorstep", "Please open the door " + student.fullname + " is waiting outside");
 
-                                                    rideDocument.set(value).addOnCompleteListener(task ->
-                                                            Log.d(TAG, "Updated"));
+//                                                    rideDocument.set(value).addOnCompleteListener(task ->
+//                                                            Log.d(TAG, "Updated"));
+                                                    updateRideToFireBase(value);
 
                                                 }
 
@@ -584,8 +588,11 @@ public class HomeActivity extends BA {
 
                         liveData.ride.setValue(ride);
 
-                        rideDocument.set(ride).addOnCompleteListener(task ->
-                                Log.d(TAG, "Updated"));
+//                        rideDocument.set(ride).addOnCompleteListener(task ->
+//                                Log.d(TAG, "Updated"));
+
+
+                        updateRideToFireBase(ride);
 
 
                     }
@@ -604,7 +611,61 @@ public class HomeActivity extends BA {
 
     }
 
+    public void checkIfRouteExists() {
+
+        if (progressDialog == null) {
+            progressDialog = new MyProgressDialog(this);
+            progressDialog.setCancelable(false);
+        }
+        progressDialog.show();
+
+        FireStoreHelper
+                .getRouteDesigner(liveData.ride.getValue().shiftId + "")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (isDestroyed()) return;
+
+                        progressDialog.dismiss();
+                        if (task.isSuccessful()) {
+                            if (task.getResult().exists()) {
+
+                                DocumentSnapshot result = task.getResult();
+
+
+                                List<Student> students = new Gson().fromJson(new Gson().toJson(result.get("students")), new TypeToken<List<Student>>() {
+                                }.getType());
+
+
+                                if (allStudentsMatched(students, liveData.ride.getValue().students)) {
+
+                                    startRideAfterRouteDesigner();
+                                } else {
+                                    MyApp.showToast("Students not matched with old Designed Route");
+                                    moveToRouteDesigner();
+                                }
+
+                            } else {
+
+                                moveToRouteDesigner();
+
+                            }
+
+                        } else {
+                            MyApp.showToast(task.getException().getMessage());
+                            moveToRouteDesigner();
+
+                        }
+
+                    }
+                });
+
+    }
+
     public void moveToRouteDesigner() {
+
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frameLayout, RouteDesignerFragment.getInstance())
@@ -821,6 +882,8 @@ public class HomeActivity extends BA {
                 rideDocument.delete();
             }
         });
+
+
         history.add(ride).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
@@ -854,7 +917,10 @@ public class HomeActivity extends BA {
      * Update attendance.
      */
     public void updateAttendance() {
-        rideDocument.set(liveData.ride.getValue());
+//        rideDocument.set(liveData.ride.getValue());
+
+        updateRideToFireBase(liveData.ride.getValue());
+
     }
 
 
@@ -1804,6 +1870,9 @@ public class HomeActivity extends BA {
 
                     liveData.sendNotificationToAllStudents();
                 }
+
+
+                updateRideToFireBase(liveData.ride.getValue());
 
                 if (!refreshRoute) {
 

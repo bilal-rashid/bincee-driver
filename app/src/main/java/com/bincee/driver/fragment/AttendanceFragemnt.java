@@ -31,7 +31,6 @@ import com.bincee.driver.dialog.MarkStudentAbdentDialog;
 import com.bincee.driver.observer.EndpointObserver;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import androidx.annotation.NonNull;
@@ -210,7 +209,7 @@ public class AttendanceFragemnt extends BFragment {
                     @Override
                     public void yes() {
 
-                        moveToRouteDesigner();
+                        checkIfRouteExists();
 
                     }
 
@@ -223,7 +222,7 @@ public class AttendanceFragemnt extends BFragment {
 
             } else {
 
-                moveToRouteDesigner();
+                checkIfRouteExists();
 
             }
 
@@ -233,8 +232,8 @@ public class AttendanceFragemnt extends BFragment {
 
     }
 
-    public void moveToRouteDesigner() {
-        getHomeActivity().moveToRouteDesigner();
+    public void checkIfRouteExists() {
+        getHomeActivity().checkIfRouteExists();
     }
 
     private void startRide() {
