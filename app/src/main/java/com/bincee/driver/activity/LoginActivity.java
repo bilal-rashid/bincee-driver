@@ -61,8 +61,8 @@ public class LoginActivity extends BA {
 
         chechBoxRememberMe.setChecked(MyPref.getREMEMBERME(this));
 
-//        editTextUsername.setText("test_driverd1");
-//        editTextPassword.setText("ChangeMe@2");
+        editTextUsername.setText("test_driverd1");
+        editTextPassword.setText("ChangeMe@2");
 
     }
 

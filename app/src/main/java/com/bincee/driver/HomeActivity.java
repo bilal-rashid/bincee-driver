@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -49,6 +50,7 @@ import com.bincee.driver.fragment.AbsentFragment;
 import com.bincee.driver.fragment.AttendanceFragemnt;
 import com.bincee.driver.fragment.HomeFragment;
 import com.bincee.driver.fragment.MapFragment;
+import com.bincee.driver.fragment.NavigationFragment;
 import com.bincee.driver.fragment.RouteDesignerFragment;
 import com.bincee.driver.helper.DateHelper;
 import com.bincee.driver.helper.ImageBinder;
@@ -128,7 +130,6 @@ import static com.bincee.driver.api.model.Student.UNKNOWN;
 import static com.bincee.driver.api.model.notification.Notification.ATTANDACE;
 import static com.bincee.driver.api.model.notification.Notification.RIDE;
 import static com.bincee.driver.api.model.notification.Notification.UPDATE_STATUS;
-import static com.bincee.driver.fragment.MapFragment.MAPBOX_TOKEN;
 import static com.bincee.driver.fragment.RouteDesignerFragment.allStudentsMatched;
 
 /**
@@ -253,7 +254,7 @@ public class HomeActivity extends BA {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_home);
-        Mapbox.getInstance(this, MAPBOX_TOKEN);
+        Mapbox.getInstance(this, NavigationFragment.getToken());
         liveData = ViewModelProviders.of(this).get(LiveData.class);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home);
         binding.setVm(liveData);
@@ -557,7 +558,9 @@ public class HomeActivity extends BA {
                                                     for (int i = 0; i < value.students.size(); i++) {
 
                                                         if (value.students.get(i).id == student.id) {
-                                                            student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
+//                                                            student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
+                                                            value.students.get(i).status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
+
                                                         }
                                                     }
 
@@ -768,9 +771,9 @@ public class HomeActivity extends BA {
 
     private void createRoute(Location myLocation, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
         Point mylocation = Point.fromLngLat(myLocation.getLongitude(), myLocation.getLatitude());
-        GeoPoint schoolLatLng = liveData.ride.getValue().schoolLatLng;
-        Point lastLocation = Point.fromLngLat(schoolLatLng.getLongitude(), schoolLatLng.getLatitude());
-        getRoute(mylocation, lastLocation, sendNotification, movetoMap, refreshRoute);
+
+
+        getRoute(mylocation, sendNotification, movetoMap, refreshRoute);
     }
 
     @Override
@@ -1652,6 +1655,22 @@ public class HomeActivity extends BA {
             }
 
         }
+
+        public Point getLastPresentStudent() {
+            List<Student> students = ride.getValue().students;
+            int i1 = students.size() - 1;
+            for (int i = i1; i >= 0; i--) {
+
+                Student student = students.get(i);
+                if (student.present == PRESENT) {
+
+                    return Point.fromLngLat(student.lng, student.lat);
+
+                }
+
+            }
+            return null;
+        }
     }
 
     @Override
@@ -1750,18 +1769,31 @@ public class HomeActivity extends BA {
     }
 
 
-    /**
-     * Make a request to the Mapbox Directions API. Once successful, pass the route to the
-     * route layer.
-     *
-     * @param origin           the starting point of the route
-     * @param destination      the desired finish point of the route
-     * @param sendNotification
-     * @param movetoMap
-     */
-    private void getRoute(Point origin, Point destination, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
+    private void getRoute(Point origin, boolean sendNotification, boolean movetoMap, boolean refreshRoute) {
 
         Ride value = liveData.ride.getValue();
+
+        GeoPoint schoolLatLng = value.schoolLatLng;
+
+        Point destination;
+
+        if (liveData.ride.getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+
+            destination = Point.fromLngLat(schoolLatLng.getLongitude(), schoolLatLng.getLatitude());
+
+        } else {
+            //if ride is eving the last location will be last student
+
+            Point lasStudent = liveData.getLastPresentStudent();
+
+            if (lasStudent == null) {
+                MyApp.showToast("No Present Student in the bus then why to create a route ? go Home driver");
+                return;
+            }
+
+            destination = lasStudent;
+
+        }
 
 
         MapboxDirections.Builder builder = MapboxDirections.builder()
@@ -1769,7 +1801,7 @@ public class HomeActivity extends BA {
                 .destination(destination)
                 .overview(DirectionsCriteria.OVERVIEW_FULL)
                 .profile(DirectionsCriteria.PROFILE_DRIVING)
-                .accessToken(MAPBOX_TOKEN);
+                .accessToken(NavigationFragment.getToken());
 
 
         List<Student> wayPoints = new ArrayList<>();
@@ -1795,6 +1827,15 @@ public class HomeActivity extends BA {
 
         }
 
+        if (value.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
+            //remove last index of waypoint . we becasue we are using last student as destination
+
+            if (wayPoints.size() > 0) {
+                wayPoints.remove(wayPoints.size() - 1);
+            }
+        }
+
+
         for (Student point : wayPoints) {
             builder.addWaypoint(Point.fromLngLat(point.lng, point.lat));
         }
@@ -1811,7 +1852,8 @@ public class HomeActivity extends BA {
 
 
                 createRouteDialog.dismiss();
-                liveData.currentRoute.setValue(response.body().routes().get(0));
+                DirectionsRoute route = response.body().routes().get(0);
+                liveData.currentRoute.setValue(route);
 
                 Ride ride = liveData.ride.getValue();
 
@@ -1819,13 +1861,16 @@ public class HomeActivity extends BA {
 
                 double sumDistance = 0;
                 double sumDuration = 0;
+
                 for (int i = 0; i < legs.size() - 1; i++) {
+
                     RouteLeg routeLeg = legs.get(i);
                     sumDuration = sumDuration + (routeLeg.duration() / 60);
                     sumDistance = sumDistance + (routeLeg.distance() / 1000);
 
                     //update all waypoint students
                     if (i < legs.size() - 1) {
+
                         int wayPointStudentID = wayPoints.get(i).id;
 
                         for (int j = 0; j < ride.students.size(); j++) {
@@ -1834,8 +1879,6 @@ public class HomeActivity extends BA {
                                 ride.students.get(i).distance = sumDistance;
                             }
                         }
-//                        ride.students.get(i).distance = sumDistance;
-//                        ride.students.get(i).duration = sumDuration;
                     }
 
 
@@ -1863,6 +1906,25 @@ public class HomeActivity extends BA {
 
                     }
                 }
+
+                if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
+
+
+                    int i1 = ride.students.size() - 1;
+
+                    for (int i = i1; i >= 0; i--) {
+
+                        Student student = ride.students.get(i);
+                        if (student.present == PRESENT) {
+
+                            ride.students.get(i).distance = route.distance() / 1000;
+                            ride.students.get(i).duration = route.duration() / 60;
+
+                        }
+
+                    }
+                }
+
 
                 liveData.ride.setValue(ride);
 

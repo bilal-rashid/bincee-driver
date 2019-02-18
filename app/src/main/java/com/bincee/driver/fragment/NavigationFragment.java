@@ -62,8 +62,13 @@ public class NavigationFragment extends BFragment
 {
 
 
-    public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
-    private static NavigationFragment mapFragment;
+    public static String getToken() {
+
+        //client
+//        return "pk.eyJ1IjoiYmluY2VlIiwiYSI6ImNqc2E2Nm0wYjAwaGM0OXFjd3kxazBnNmYifQ.Wnu7rjFfU_qpl1Pmi062vg";
+        return "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
+
+    }    private static NavigationFragment mapFragment;
 //    @BindView(R.id.mapView)
 //    NavigationView mapView;
     @BindView(R.id.textViewFinishRide)
@@ -112,7 +117,7 @@ public class NavigationFragment extends BFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        Mapbox.getInstance(getContext(), MAPBOX_TOKEN);
+        Mapbox.getInstance(getContext(), getToken());
 
         View view = inflater.inflate(R.layout.fragment_navigation, container, false);
         bind = ButterKnife.bind(this, view);

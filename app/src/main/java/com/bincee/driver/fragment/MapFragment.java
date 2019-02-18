@@ -99,7 +99,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 
-    public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
+//    public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
     public static final int DURATION = 3000;
     private static MapFragment mapFragment;
     private DirectionsRoute directionRoute;
@@ -133,7 +133,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     private String BUS_ICON = "bus-icon";
     private LatLng oldLocation;
     private double lastBearing = 0;
-    private int padding = 500;
+    private int padding = 5;
     private Observer<Location> mylocationObserver;
     //    private DirectionsRoute currentRoute;
 //    private Point destination;
@@ -160,7 +160,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        Mapbox.getInstance(getContext(), MAPBOX_TOKEN);
+        Mapbox.getInstance(getContext(), NavigationFragment.getToken());
 
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         bind = ButterKnife.bind(this, view);
@@ -177,39 +177,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        HomeActivity homeActivity = getHomeActivity();
-
-        homeActivity.liveData.ride.observe(this, new Observer<Ride>() {
-            @Override
-            public void onChanged(Ride ride) {
-
-                if (ride == null || ride.students == null) return;
-
-                for (Student student : ride.students) {
-
-                    if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
-
-                        //SHow Student which attandance is not marked
-                        if (student.present == Student.UNKNOWN) {
-                            setStudent(student);
-                            return;
-                        }
-
-                    } else if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
-
-                        //SHow Student which is in the bus state
-
-                        if (student.present == Student.PRESENT && student.status == Student.STATUS_AFTERNOON_INTHEBUS) {
-                            setStudent(student);
-                            return;
-                        }
-
-                    }
-
-                }
-
-            }
-        });
 
 //        getRoute(mylocation, lastLocation, students);
 
@@ -226,13 +193,23 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
     private void setStudent(Student student) {
 
-        textViewName.setText(student.fullname);
-        textViewTime.setText(student.address);
-        if (student.distance != null) {
-            textViewNameKM.setText("ETA: " + Math.round(student.duration) + " Minutes");
-        }
+        if (student == null) {
+            textViewName.setText("");
+            textViewTime.setText("");
+//            if (student.distance != null) {
+            textViewNameKM.setText("");
+//            }
 
-        ImageBinder.roundedCornerCenterCorpKid(imageView9, student.photo);
+            ImageBinder.roundedCornerCenterCorpKid(imageView9, null);
+        } else {
+            textViewName.setText(student.fullname);
+            textViewTime.setText(student.address);
+            if (student.distance != null) {
+                textViewNameKM.setText("ETA: " + Math.round(student.duration) + " Minutes");
+            }
+
+            ImageBinder.roundedCornerCenterCorpKid(imageView9, student.photo);
+        }
     }
 
     private void setupRoute(DirectionsRoute currentRoute) {
@@ -243,7 +220,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         MutableLiveData<Location> myLocaton = homeActivity.liveData.myLocaton;
         if (currentRoute != null && myLocaton.getValue() != null) {
 
-            List<Student> students = homeActivity.liveData.ride.getValue().students;
+            Ride ride = homeActivity.liveData.ride.getValue();
+            List<Student> students = ride.students;
 
             List<Point> points = LineString.fromPolyline(currentRoute.geometry(), Constants.PRECISION_6).coordinates();
 
@@ -252,10 +230,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //            for (Point point : points) {
 //                pointsLtLng.add(LatLngHelper.toLatLng(point));
 //            }
-
-
-            GetSchoolResponce school = homeActivity.liveData.schoolResponce.getValue();
-            Point schoolLocation = Point.fromLngLat(school.lng, school.lat);
 
 
 //            Polyline polyline = mapboxMap.addPolyline(new PolylineOptions()
@@ -303,31 +277,54 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
             IconFactory getInstance = IconFactory.getInstance(getContext());
 
-            com.mapbox.mapboxsdk.annotations.Marker marker1 = mapboxMap.addMarker(new MarkerOptions()
-                    .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(schoolLocation.latitude()
-                            , schoolLocation.longitude()))
-                    .setTitle("School")
-            );
 
-//            markers.add(marker);
-            markers.add(marker1);
+            if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+                //dont show school marker in evenign
+                GetSchoolResponce school = homeActivity.liveData.schoolResponce.getValue();
+                Point schoolLocation = Point.fromLngLat(school.lng, school.lat);
+                com.mapbox.mapboxsdk.annotations.Marker schoolMarker = mapboxMap.addMarker(new MarkerOptions()
+                        .setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(schoolLocation.latitude()
+                                , schoolLocation.longitude()))
+                        .setTitle("School")
+                );
+                markers.add(schoolMarker);
+            }
 
-            Icon icon = getInstance.fromResource(R.drawable.map_icon_home);
 
             for (Student student : students) {
 
+                if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
 
-                com.mapbox.mapboxsdk.annotations.Marker markerStudent = mapboxMap.addMarker(new MarkerOptions().setPosition(new com.mapbox.mapboxsdk.geometry.LatLng(student.lat,
-                        student.lng))
-                        .setIcon(icon)
-                        .setTitle(student.fullname));
+                    if (student.present == Student.UNKNOWN) {
+                        addMarkerStudent(student.lat, student.lng, student.fullname);
+                    }
 
-                markers.add(markerStudent);
 
+                } else {
+
+                    if (student.present == Student.PRESENT && student.status < Student.STATUS_AFTERNOON_ATYOURDOORSTEP) {
+
+                        addMarkerStudent(student.lat, student.lng, student.fullname);
+                    }
+
+
+                }
 
             }
 
+
         }
+    }
+
+    private void addMarkerStudent(double lat, double lng, String fullname) {
+        Icon icon = IconFactory.getInstance(getContext()).fromResource(R.drawable.map_icon_home);
+
+        Marker markerStudent = mapboxMap.addMarker(new MarkerOptions().setPosition(new LatLng(lat,
+                lng))
+                .setIcon(icon)
+                .setTitle(fullname));
+
+        markers.add(markerStudent);
     }
 
     private HomeActivity getHomeActivity() {
@@ -496,22 +493,22 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //                        rotationAnimator.start();
 
 
-//                    ValueAnimator markerAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), (Object[]) new LatLng[]{oldLocation, nowLocation});
-//                    markerAnimator.setDuration(DURATION);
-//                    markerAnimator.setRepeatCount(0);
-//                    markerAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-//                    markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                        @Override
-//                        public void onAnimationUpdate(ValueAnimator animation) {
-//                            if (markerView != null) {
-//
-//                                markerView.setPosition((LatLng) animation.getAnimatedValue());
-//
-//                            }
-//                        }
-//                    });
-//                    markerAnimator.start();
-                    markerView.setPosition(nowLocation);
+                    ValueAnimator markerAnimator = ValueAnimator.ofObject(new LatLngEvaluator(), (Object[]) new LatLng[]{oldLocation, nowLocation});
+                    markerAnimator.setDuration(DURATION);
+                    markerAnimator.setRepeatCount(0);
+                    markerAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+                    markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animation) {
+                            if (markerView != null) {
+
+                                markerView.setPosition((LatLng) animation.getAnimatedValue());
+
+                            }
+                        }
+                    });
+                    markerAnimator.start();
+//                    markerView.setPosition(nowLocation);
 
 
 //                    lastBearing = nowBearing;
@@ -526,15 +523,49 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                 }
                 oldLocation = nowLocation;
 
-                if (directionRoute != null) {
-                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
-                            .includes(LatLngHelper.toLatLng(directionRoute.routeOptions().coordinates()))
-                            .build(), 5));
-                }
+                animateMapToRoute(directionRoute, mapboxMap, padding);
 
             }
         };
 
+        HomeActivity homeActivity = getHomeActivity();
+
+        homeActivity.liveData.ride.observe(this, new Observer<Ride>() {
+            @Override
+            public void onChanged(Ride ride) {
+
+                if (ride == null || ride.students == null) return;
+
+                if (directionRoute != null) {
+                    setupRoute(directionRoute);
+                }
+
+//                for (Student student : ride.students) {
+
+                if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+
+                    Student student = getFirstNotPickedStudentMorning(ride.students);
+                    setStudent(student);
+
+                    //SHow Student which attandance is not marked
+
+
+                } else if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
+
+                    //SHow Student which is in the bus state
+
+                    Student student = getFirstUnDropedStudentEvening(ride.students);
+                    setStudent(student);
+
+
+                }
+
+            }
+//                setStudent(null);
+
+
+//            }
+        });
 
         getHomeActivity().liveData.currentRoute.observe(getViewLifecycleOwner(), new Observer<DirectionsRoute>() {
             @Override
@@ -545,11 +576,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mylocationMarker.getPosition(),14));
 
                 MapFragment.this.directionRoute = directionsRoute;
-                if (directionsRoute != null) {
-                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
-                            .includes(LatLngHelper.toLatLng(directionsRoute.routeOptions().coordinates()))
-                            .build(), padding));
-                }
+                animateMapToRoute(directionsRoute, mapboxMap, padding);
 
             }
         });
@@ -559,158 +586,191 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
     }
 
-    public void animateMarker(final LatLng marker, final LatLng toPosition, GeoJsonSource busSource) {
-        final Handler handler = new Handler();
-        final long start = SystemClock.uptimeMillis();
+    private Student getFirstUnDropedStudentEvening(List<Student> students) {
 
-
-        final LatLng startLatLng = marker;
-        final long duration = DURATION;
-
-        final Interpolator interpolator = new LinearInterpolator();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                long elapsed = SystemClock.uptimeMillis() - start;
-                float t = interpolator.getInterpolation((float) elapsed
-                        / duration);
-                double lng = t * toPosition.getLongitude() + (1 - t)
-                        * startLatLng.getLongitude();
-                double lat = t * toPosition.getLatitude() + (1 - t)
-                        * startLatLng.getLatitude();
-
-
-                FeatureCollection busCollectionSource = FeatureCollection.fromFeatures(new Feature[]{
-                        Feature.fromGeometry(Point.fromLngLat(lng, lat)),
-
-                });
-
-                busSource.setGeoJson(busCollectionSource);
-//                marker.setPosition(new LatLng(lat, lng));
-
-
-                if (t < 1.0) {
-                    // Post again 16ms later.
-                    handler.postDelayed(this, 16);
-
-                } else {
-//                    if (hideMarker) {
-//                        marker.setVisible(false);
-//                    } else {
-//                        marker.setVisible(true);
-//                    }
-                }
+        for (Student student : students) {
+            if (student.present == Student.PRESENT && student.status < Student.STATUS_AFTERNOON_ATYOURDOORSTEP) {
+                return student;
             }
-        });
+
+        }
+
+        return null;
+
     }
 
-    private void smothRotation(final SymbolLayer marker, double nowBearing, double lastBearing) {
-        ValueAnimator markerAnimator = new ValueAnimator();
-        markerAnimator.setObjectValues(Float.parseFloat(lastBearing + ""), nowBearing);
-        markerAnimator.setDuration(DURATION);
-        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    private Student getFirstNotPickedStudentMorning(List<Student> students) {
+        for (Student student : students) {
 
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
+            if (student.present == Student.UNKNOWN) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    public void animateMapToRoute(DirectionsRoute directionsRoute, MapboxMap mapboxMap, int padding) {
+        if (directionsRoute != null) {
+            mapboxMap.animateCamera(CameraUpdateFactory
+                    .newLatLngBounds(new LatLngBounds.Builder()
+
+                            .includes(LatLngHelper.toLatLng(directionsRoute.routeOptions().coordinates()))
+                            .build(), padding));
+        }
+    }
+
+//    public void animateMarker(final LatLng marker, final LatLng toPosition, GeoJsonSource busSource) {
+//        final Handler handler = new Handler();
+//        final long start = SystemClock.uptimeMillis();
+//
+//
+//        final LatLng startLatLng = marker;
+//        final long duration = DURATION;
+//
+//        final Interpolator interpolator = new LinearInterpolator();
+//        handler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                long elapsed = SystemClock.uptimeMillis() - start;
+//                float t = interpolator.getInterpolation((float) elapsed
+//                        / duration);
+//                double lng = t * toPosition.getLongitude() + (1 - t)
+//                        * startLatLng.getLongitude();
+//                double lat = t * toPosition.getLatitude() + (1 - t)
+//                        * startLatLng.getLatitude();
+//
+//
+//                FeatureCollection busCollectionSource = FeatureCollection.fromFeatures(new Feature[]{
+//                        Feature.fromGeometry(Point.fromLngLat(lng, lat)),
+//
+//                });
+//
+//                busSource.setGeoJson(busCollectionSource);
+////                marker.setPosition(new LatLng(lat, lng));
+//
+//
+//                if (t < 1.0) {
+//                    // Post again 16ms later.
+//                    handler.postDelayed(this, 16);
+//
+//                } else {
+////                    if (hideMarker) {
+////                        marker.setVisible(false);
+////                    } else {
+////                        marker.setVisible(true);
+////                    }
+//                }
+//            }
+//        });
+//    }
+//
+//    private void smothRotation(final SymbolLayer marker, double nowBearing, double lastBearing) {
+//        ValueAnimator markerAnimator = new ValueAnimator();
+//        markerAnimator.setObjectValues(Float.parseFloat(lastBearing + ""), nowBearing);
+//        markerAnimator.setDuration(DURATION);
+//        markerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//
+//            @Override
+//            public void onAnimationUpdate(ValueAnimator animator) {
+////                marker.setProperties(
+////                        PropertyFactory.iconSize((float) animator.getAnimatedValue())
+////                );
+//
+//
 //                marker.setProperties(
-//                        PropertyFactory.iconSize((float) animator.getAnimatedValue())
+//                        iconImage(BUS_ICON),
+//                        iconIgnorePlacement(true),
+//                        iconIgnorePlacement(true),
+//                        iconRotate((float) animator.getAnimatedValue())
 //                );
-
-
-                marker.setProperties(
-                        iconImage(BUS_ICON),
-                        iconIgnorePlacement(true),
-                        iconIgnorePlacement(true),
-                        iconRotate((float) animator.getAnimatedValue())
-                );
-
-            }
-        });
-        markerAnimator.start();
-    }
-
-    private double bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
-
-        double PI = 3.14159;
-        double lat1 = latLng1.getLatitude() * PI / 180;
-        double long1 = latLng1.getLongitude() * PI / 180;
-        double lat2 = latLng2.getLatitude() * PI / 180;
-        double long2 = latLng2.getLongitude() * PI / 180;
-
-        double dLon = (long2 - long1);
-
-        double y = Math.sin(dLon) * Math.cos(lat2);
-        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
-                * Math.cos(lat2) * Math.cos(dLon);
-
-        double brng = Math.atan2(y, x);
-
-        brng = Math.toDegrees(brng);
-        brng = (brng + 360) % 360;
-
-        return brng;
-    }
-
-    @SuppressLint("MissingPermission")
-    private void setupMyLocation(MapboxMap mapboxMap) {
-        LocationComponent locationComponent = mapboxMap.getLocationComponent();
-
-        LocationComponentOptions locationComponentOptions = locationComponent.getLocationComponentOptions();
-
-        locationComponent.activateLocationComponent(getContext());
-        locationComponent.setLocationComponentEnabled(true);
-        LocationComponentOptions.Builder builder = LocationComponentOptions.builder(getContext());
-        locationComponent.applyStyle(builder
-                .gpsDrawable(R.drawable.bus_marker)
-
-//                .foregroundDrawable(R.drawable.map_icon_bus)
-//                .backgroundDrawable(R.drawable.map_icon_bus)
-
-                .bearingDrawable(R.drawable.bus_marker)
-
-                .compassAnimationEnabled(true)
-                .accuracyAnimationEnabled(false)
-
-
-                .build());
-        locationComponent.setCameraMode(CameraMode.TRACKING);
-        locationComponent.zoomWhileTracking((mapboxMap.getMaxZoomLevel() - 5));
-
-        locationComponent.activateLocationComponent(getContext(), builder.build());
-        locationComponent.setRenderMode(RenderMode.GPS);
-    }
-
-
-    @SuppressLint("MissingPermission")
-    private void setupMyLocation(MapboxMap mapboxMap, DirectionsRoute directionsRoute) {
-        LocationComponent locationComponent = mapboxMap.getLocationComponent();
-
-        LocationComponentOptions locationComponentOptions = locationComponent.getLocationComponentOptions();
-
-        locationComponent.activateLocationComponent(getContext());
-        locationComponent.setLocationComponentEnabled(true);
-        LocationComponentOptions.Builder builder = LocationComponentOptions.builder(getContext());
-        locationComponent.applyStyle(builder
-                .gpsDrawable(R.drawable.bus_marker)
-
-//                .foregroundDrawable(R.drawable.map_icon_bus)
-//                .backgroundDrawable(R.drawable.map_icon_bus)
-
-                .bearingDrawable(R.drawable.bus_marker)
-
-                .compassAnimationEnabled(true)
-                .accuracyAnimationEnabled(false)
-
-
-                .build());
-        locationComponent.setCameraMode(CameraMode.TRACKING);
-        locationComponent.zoomWhileTracking((mapboxMap.getMaxZoomLevel() - 5));
-
-        locationComponent.activateLocationComponent(getContext(), builder.build());
-        locationComponent.setRenderMode(RenderMode.GPS);
-
-
-    }
+//
+//            }
+//        });
+//        markerAnimator.start();
+//    }
+//
+//    private double bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
+//
+//        double PI = 3.14159;
+//        double lat1 = latLng1.getLatitude() * PI / 180;
+//        double long1 = latLng1.getLongitude() * PI / 180;
+//        double lat2 = latLng2.getLatitude() * PI / 180;
+//        double long2 = latLng2.getLongitude() * PI / 180;
+//
+//        double dLon = (long2 - long1);
+//
+//        double y = Math.sin(dLon) * Math.cos(lat2);
+//        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+//                * Math.cos(lat2) * Math.cos(dLon);
+//
+//        double brng = Math.atan2(y, x);
+//
+//        brng = Math.toDegrees(brng);
+//        brng = (brng + 360) % 360;
+//
+//        return brng;
+//    }
+//
+//    @SuppressLint("MissingPermission")
+//    private void setupMyLocation(MapboxMap mapboxMap) {
+//        LocationComponent locationComponent = mapboxMap.getLocationComponent();
+//
+//        LocationComponentOptions locationComponentOptions = locationComponent.getLocationComponentOptions();
+//
+//        locationComponent.activateLocationComponent(getContext());
+//        locationComponent.setLocationComponentEnabled(true);
+//        LocationComponentOptions.Builder builder = LocationComponentOptions.builder(getContext());
+//        locationComponent.applyStyle(builder
+//                .gpsDrawable(R.drawable.bus_marker)
+//
+////                .foregroundDrawable(R.drawable.map_icon_bus)
+////                .backgroundDrawable(R.drawable.map_icon_bus)
+//
+//                .bearingDrawable(R.drawable.bus_marker)
+//
+//                .compassAnimationEnabled(true)
+//                .accuracyAnimationEnabled(false)
+//
+//
+//                .build());
+//        locationComponent.setCameraMode(CameraMode.TRACKING);
+//        locationComponent.zoomWhileTracking((mapboxMap.getMaxZoomLevel() - 5));
+//
+//        locationComponent.activateLocationComponent(getContext(), builder.build());
+//        locationComponent.setRenderMode(RenderMode.GPS);
+//    }
+//
+//
+//    @SuppressLint("MissingPermission")
+//    private void setupMyLocation(MapboxMap mapboxMap, DirectionsRoute directionsRoute) {
+//        LocationComponent locationComponent = mapboxMap.getLocationComponent();
+//
+//        LocationComponentOptions locationComponentOptions = locationComponent.getLocationComponentOptions();
+//
+//        locationComponent.activateLocationComponent(getContext());
+//        locationComponent.setLocationComponentEnabled(true);
+//        LocationComponentOptions.Builder builder = LocationComponentOptions.builder(getContext());
+//        locationComponent.applyStyle(builder
+//                .gpsDrawable(R.drawable.bus_marker)
+//
+////                .foregroundDrawable(R.drawable.map_icon_bus)
+////                .backgroundDrawable(R.drawable.map_icon_bus)
+//
+//                .bearingDrawable(R.drawable.bus_marker)
+//
+//                .compassAnimationEnabled(true)
+//                .accuracyAnimationEnabled(false)
+//
+//
+//                .build());
+//        locationComponent.setCameraMode(CameraMode.TRACKING);
+//        locationComponent.zoomWhileTracking((mapboxMap.getMaxZoomLevel() - 5));
+//
+//        locationComponent.activateLocationComponent(getContext(), builder.build());
+//        locationComponent.setRenderMode(RenderMode.GPS);
+//
+//
+//    }
 
 
     @OnClick(R.id.textViewFinishRide)
