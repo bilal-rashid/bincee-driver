@@ -71,4 +71,11 @@ public class LatLngHelper {
         if (value == null) return null;
         return new GeoPoint(value.getLatitude(), value.getLongitude());
     }
+
+    public static Point toPoint(Student lastPresentStudent) {
+        if (lastPresentStudent == null) return null;
+
+        return Point.fromLngLat(lastPresentStudent.lng, lastPresentStudent.lat);
+
+    }
 }

@@ -3,11 +3,9 @@ package com.bincee.driver;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,8 +40,6 @@ import com.bincee.driver.base.BA;
 import com.bincee.driver.databinding.ActivityHomeBinding;
 import com.bincee.driver.dialog.FinishRideDialog;
 import com.bincee.driver.dialog.MyProgressDialog;
-import com.bincee.driver.dialog.SelectRouteDialog;
-import com.bincee.driver.dialog.SelectRouteDialogBuilder;
 import com.bincee.driver.dialog.SendNotificationDialog;
 import com.bincee.driver.dialog.SendNotificationToAll;
 import com.bincee.driver.fragment.AbsentFragment;
@@ -78,9 +74,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -96,7 +90,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -123,13 +116,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.bincee.driver.R.drawable.ic_arrow_head_casing;
 import static com.bincee.driver.api.model.Student.PRESENT;
 import static com.bincee.driver.api.model.Student.STATUS_AFTERNOON_INTHEBUS;
 import static com.bincee.driver.api.model.Student.UNKNOWN;
-import static com.bincee.driver.api.model.notification.Notification.ATTANDACE;
 import static com.bincee.driver.api.model.notification.Notification.RIDE;
-import static com.bincee.driver.api.model.notification.Notification.UPDATE_STATUS;
 import static com.bincee.driver.fragment.RouteDesignerFragment.allStudentsMatched;
 
 /**
@@ -544,42 +534,43 @@ public class HomeActivity extends BA {
                                             //send notification to student
 //                                            student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
 
-                                            sendNotificationDialog = new SendNotificationDialog(HomeActivity.this);
-                                            sendNotificationDialog.setListner(new SendNotificationDialog.Listner() {
-                                                @Override
-                                                public void send() {
+                                            if (sendNotificationDialog == null || !sendNotificationDialog.isShowing()) {
+                                                sendNotificationDialog = new SendNotificationDialog(HomeActivity.this);
+                                                sendNotificationDialog.setStudent(student);
+                                                sendNotificationDialog.setListner(new SendNotificationDialog.Listner() {
+                                                    @Override
+                                                    public void send(Student student) {
 
 //                                                    [3:18 PM, 2/14/2019] Arslan Locopixel: acha next hai sir k jab tak popup ka button press na ho tab tak firebase bhi update na ho
 //                                                    [3:18 PM, 2/14/2019] Arslan Locopixel: jaise reached ka popup ata hai , ya at your doorstep ka
-                                                    //send notification to student
+                                                        //send notification to student
 
-                                                    Ride value = liveData.ride.getValue();
+                                                        Ride value = liveData.ride.getValue();
 //                                                    List<Student> students = value.students;
-                                                    for (int i = 0; i < value.students.size(); i++) {
+                                                        for (int i = 0; i < value.students.size(); i++) {
 
-                                                        if (value.students.get(i).id == student.id) {
+                                                            if (value.students.get(i).id == student.id) {
 //                                                            student.status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
-                                                            value.students.get(i).status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
+                                                                value.students.get(i).status = Student.STATUS_AFTERNOON_ATYOURDOORSTEP;
 
+                                                            }
                                                         }
-                                                    }
 
-
-                                                    liveData.ride.setValue(value);
-
-                                                    liveData.sentNotificationToStudent(student, "At your doorstep", "Please open the door " + student.fullname + " is waiting outside");
+                                                        liveData.ride.setValue(value);
+                                                        liveData.sentNotificationToStudent(student, "At your doorstep", "Please open the door " + student.fullname + " is waiting outside");
 
 //                                                    rideDocument.set(value).addOnCompleteListener(task ->
 //                                                            Log.d(TAG, "Updated"));
-                                                    updateRideToFireBase(value);
+                                                        updateRideToFireBase(value);
 
-                                                }
+                                                    }
 
-                                                @Override
-                                                public void cancel() {
+                                                    @Override
+                                                    public void cancel() {
 
-                                                }
-                                            }).show();
+                                                    }
+                                                }).show();
+                                            }
 
 
                                         }
@@ -1154,6 +1145,10 @@ public class HomeActivity extends BA {
                                 ) {
                                     if (student.lat == 0 && student.lng == 0) {
                                         Log.d(TAG, "Student Excluded" + new Gson().toJson(student));
+                                    } else if (student.id == 13) {
+                                        student.id = 133;
+                                        filterdStudents.add(student);
+
                                     } else {
                                         filterdStudents.add(student);
 
@@ -1656,7 +1651,7 @@ public class HomeActivity extends BA {
 
         }
 
-        public Point getLastPresentStudent() {
+        public Student getLastPresentStudent() {
             List<Student> students = ride.getValue().students;
             int i1 = students.size() - 1;
             for (int i = i1; i >= 0; i--) {
@@ -1664,7 +1659,7 @@ public class HomeActivity extends BA {
                 Student student = students.get(i);
                 if (student.present == PRESENT) {
 
-                    return Point.fromLngLat(student.lng, student.lat);
+                    return student;
 
                 }
 
@@ -1756,7 +1751,7 @@ public class HomeActivity extends BA {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(5);
-        locationRequest.setFastestInterval(1);
+        locationRequest.setFastestInterval(5);
         return locationRequest;
     }
 
@@ -1784,7 +1779,7 @@ public class HomeActivity extends BA {
         } else {
             //if ride is eving the last location will be last student
 
-            Point lasStudent = liveData.getLastPresentStudent();
+            Point lasStudent = LatLngHelper.toPoint(liveData.getLastPresentStudent());
 
             if (lasStudent == null) {
                 MyApp.showToast("No Present Student in the bus then why to create a route ? go Home driver");
@@ -1914,8 +1909,9 @@ public class HomeActivity extends BA {
 
                     for (int i = i1; i >= 0; i--) {
 
+                        Student lastPresentStudent = liveData.getLastPresentStudent();
                         Student student = ride.students.get(i);
-                        if (student.present == PRESENT) {
+                        if (student.id == lastPresentStudent.id) {
 
                             ride.students.get(i).distance = route.distance() / 1000;
                             ride.students.get(i).duration = route.duration() / 60;
@@ -1923,6 +1919,8 @@ public class HomeActivity extends BA {
                         }
 
                     }
+
+
                 }
 
 

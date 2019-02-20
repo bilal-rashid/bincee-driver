@@ -184,7 +184,7 @@ public class RouteDesignerFragment extends BFragment {
 
         for (Student studentRide : studentsRide) {
 
-            if (!isInList(studentRide, studentsRide)) {
+            if (!isInList(studentRide, studentsFirebase)) {
                 return false;
 
             }
@@ -192,9 +192,9 @@ public class RouteDesignerFragment extends BFragment {
         }
 
 
-//        if (studentsFirebase.size() == studentsRide.size()) {
-//            return false;
-//        }
+        if (studentsFirebase.size() != studentsRide.size()) {
+            return false;
+        }
 
         return true;
 

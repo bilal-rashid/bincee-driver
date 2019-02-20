@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bincee.driver.R;
+import com.bincee.driver.api.model.Student;
 import com.bincee.driver.base.BDialog;
 
 import butterknife.BindView;
@@ -21,6 +22,7 @@ public class SendNotificationDialog extends BDialog {
     @BindView(R.id.imageViewCross)
     ImageView imageViewCross;
     private Listner listner;
+    private Student student;
 
     public SendNotificationDialog(Context context) {
         super(context);
@@ -31,7 +33,7 @@ public class SendNotificationDialog extends BDialog {
 
     @OnClick(R.id.buttonSend)
     public void onButtonSendClicked() {
-        listner.send();
+        listner.send(student);
         dismiss();
     }
 
@@ -56,8 +58,12 @@ public class SendNotificationDialog extends BDialog {
 
     }
 
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
     public interface Listner {
-        public void send();
+        public void send(Student student);
 
         public void cancel();
     }
