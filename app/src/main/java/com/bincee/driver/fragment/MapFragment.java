@@ -99,7 +99,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 
-//    public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
+    //    public static final String MAPBOX_TOKEN = "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
     public static final int DURATION = 3000;
     private static MapFragment mapFragment;
     private DirectionsRoute directionRoute;
@@ -200,7 +200,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
             textViewNameKM.setText("");
 //            }
 
-            ImageBinder.roundedCornerCenterCorpKid(imageView9, null);
+//            ImageBinder.roundedCornerCenterCorpKid(imageView9, null);
+            imageView9.setImageBitmap(null);
         } else {
             textViewName.setText(student.fullname);
             textViewTime.setText(student.address);

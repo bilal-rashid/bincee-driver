@@ -68,8 +68,10 @@ public class NavigationFragment extends BFragment
 //        return "pk.eyJ1IjoiYmluY2VlIiwiYSI6ImNqc2E2Nm0wYjAwaGM0OXFjd3kxazBnNmYifQ.Wnu7rjFfU_qpl1Pmi062vg";
         return "pk.eyJ1IjoiZmluZHhhaW4iLCJhIjoiY2pxOTY1bjY3MTMwYjQzbDEwN3h2aTdsbCJ9.fKLD1_UzlMIWhXfUZ3aRYQ";
 
-    }    private static NavigationFragment mapFragment;
-//    @BindView(R.id.mapView)
+    }
+
+    private static NavigationFragment mapFragment;
+    //    @BindView(R.id.mapView)
 //    NavigationView mapView;
     @BindView(R.id.textViewFinishRide)
     TextView textViewFinishRide;
@@ -139,7 +141,7 @@ public class NavigationFragment extends BFragment
             @Override
             public void onChanged(Ride ride) {
 
-                if (ride==null||ride.students==null)return;
+                if (ride == null || ride.students == null) return;
 
                 for (Student student : ride.students) {
                     if (student.present == Student.UNKNOWN) {
@@ -227,11 +229,6 @@ public class NavigationFragment extends BFragment
         super.onSaveInstanceState(outState);
 //        mapView.onSaveInstanceState(outState);
     }
-
-
-
-
-
 
 
     @OnClick(R.id.textViewFinishRide)
