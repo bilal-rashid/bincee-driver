@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bincee.driver.BuildConfig;
 import com.bincee.driver.HomeActivity;
 import com.bincee.driver.MyApp;
 import com.bincee.driver.R;
@@ -314,6 +315,15 @@ public class AttendanceFragemnt extends BFragment {
         public VH(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
+            if (BuildConfig.FLAVOR.equalsIgnoreCase("client")) {
+                textViewDuration.setVisibility(View.GONE);
+                textViewDistance.setVisibility(View.GONE);
+            } else {
+                textViewDuration.setVisibility(View.VISIBLE);
+                textViewDistance.setVisibility(View.VISIBLE);
+            }
+
         }
 
         public void bind() {

@@ -39,7 +39,7 @@ android {
         }
         dev {
             dimension "map"
-            applicationIdSuffix ".dev"
+//            applicationIdSuffix ".dev"
             manifestPlaceholders = [appLabel: "Bincee Parent Dev"]
 //            signingConfig signingConfigs.release_configs
         }
