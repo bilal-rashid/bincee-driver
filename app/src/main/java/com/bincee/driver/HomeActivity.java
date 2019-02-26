@@ -116,6 +116,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.bincee.driver.api.model.Student.ABSENT;
 import static com.bincee.driver.api.model.Student.PRESENT;
 import static com.bincee.driver.api.model.Student.STATUS_AFTERNOON_INTHEBUS;
 import static com.bincee.driver.api.model.Student.UNKNOWN;
@@ -1870,8 +1871,8 @@ public class HomeActivity extends BA {
 
                         for (int j = 0; j < ride.students.size(); j++) {
                             if (ride.students.get(j).id == wayPointStudentID) {
-                                ride.students.get(i).duration = sumDuration;
-                                ride.students.get(i).distance = sumDistance;
+                                ride.students.get(j).duration = sumDuration;
+                                ride.students.get(j).distance = sumDistance;
                             }
                         }
                     }
@@ -1884,11 +1885,14 @@ public class HomeActivity extends BA {
                 for (int i = 0; i < ride.students.size(); i++) {
                     if (ride.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
 
-                        if (ride.students.get(i).present != UNKNOWN) {
+                        if (ride.students.get(i).present == PRESENT) {
 
-                            ride.students.get(i).duration = liveData.currentRoute.getValue().duration() / 60;
-                            ride.students.get(i).distance = liveData.currentRoute.getValue().distance() / 1000;
+                            ride.students.get(i).duration = (route.duration() / 60);
+                            ride.students.get(i).distance = (route.distance() / 1000);
 
+                        } else if (ride.students.get(i).present == ABSENT) {
+                            ride.students.get(i).duration = (double) 0;
+                            ride.students.get(i).distance = (double) 0;
                         }
 
                     } else if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {

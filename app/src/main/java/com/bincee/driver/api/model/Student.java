@@ -1,7 +1,9 @@
 package com.bincee.driver.api.model;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 public class Student {
@@ -53,5 +55,11 @@ public class Student {
     @Override
     public int hashCode() {
         return parent_id;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }

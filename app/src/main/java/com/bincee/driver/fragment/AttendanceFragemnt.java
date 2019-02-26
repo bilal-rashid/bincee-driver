@@ -306,6 +306,11 @@ public class AttendanceFragemnt extends BFragment {
         @BindView(R.id.rootView)
         FrameLayout rootView;
 
+        @BindView(R.id.textViewDuration)
+        TextView textViewDuration;
+        @BindView(R.id.textViewDistance)
+        TextView textViewDistance;
+
         public VH(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
@@ -333,6 +338,8 @@ public class AttendanceFragemnt extends BFragment {
                 markAbsent();
             }
 
+            textViewDistance.setText(student.distance + "");
+            textViewDuration.setText(student.duration + "");
         }
 
         private void setTextColorBlack() {
