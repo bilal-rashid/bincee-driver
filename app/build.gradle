@@ -28,6 +28,22 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    flavorDimensions "map"
+
+    productFlavors {
+        client {
+            dimension "map"
+//            signingConfig signingConfigs.release_configs
+//            manifestPlaceholders = [appLabel: "Apollo"]
+        }
+        dev {
+            dimension "map"
+            applicationIdSuffix ".dev"
+            manifestPlaceholders = [appLabel: "Bincee Parent Dev"]
+//            signingConfig signingConfigs.release_configs
+        }
+    }
 }
 
 dependencies {

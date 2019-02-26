@@ -91,8 +91,8 @@ public interface EndPoints {
     @POST("users/passwordreset")
     Observable<MyResponse> forgetPassword(@Field("username") String username
             , @Field("selected_option") String selected_option
-            , @Field("email") String email
-//            , @Field("phone_no") String phone_no
+//            , @Field("email") String email
+            , @Field("phone_no") String phone_no
             , @Field("type") String type);
 
 
