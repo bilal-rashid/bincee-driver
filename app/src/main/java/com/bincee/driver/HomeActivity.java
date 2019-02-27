@@ -315,7 +315,7 @@ public class HomeActivity extends BA {
 
 //        menuItem.add(MY_POWER);
         menuItem.add(MY_PROFILE);
-//        menuItem.add(ROUTE_DESIGNER);
+        menuItem.add(ROUTE_DESIGNER);
 //        menuItem.add("- FAQ");
         menuItem.add(CONTACT_US);
 //        menuItem.add(UPDATE_MY_LOCATION);
@@ -664,6 +664,7 @@ public class HomeActivity extends BA {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frameLayout, RouteDesignerFragment.getInstance())
+                .addToBackStack("")
                 .commit();
     }
 
@@ -995,7 +996,8 @@ public class HomeActivity extends BA {
             } else if (text.equalsIgnoreCase(ROUTE_DESIGNER)) {
 
 
-                RouteDesignerActivity.start(HomeActivity.this);
+//                RouteDesignerActivity.start(HomeActivity.this);
+                moveToRouteDesigner();
 
             }
 
@@ -1142,12 +1144,11 @@ public class HomeActivity extends BA {
 
                                 List<Student> filterdStudents = new ArrayList<>();
 
-                                for (Student student : data.data
-                                ) {
+                                for (Student student : data.data) {
                                     if (student.lat == 0 && student.lng == 0) {
                                         Log.d(TAG, "Student Excluded" + new Gson().toJson(student));
                                     } else if (student.id == 13) {
-                                        student.id = 133;
+//                                        student.id = 133;
                                         filterdStudents.add(student);
 
                                     } else {
@@ -1841,6 +1842,7 @@ public class HomeActivity extends BA {
 
         creatingRoute = true;
 
+
         client.enqueueCall(new Callback<DirectionsResponse>() {
             @Override
             public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
@@ -1853,6 +1855,7 @@ public class HomeActivity extends BA {
 
                 Ride ride = liveData.ride.getValue();
 
+                ride.routeCreated = true;
                 List<RouteLeg> legs = liveData.currentRoute.getValue().legs();
 
                 double sumDistance = 0;

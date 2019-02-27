@@ -102,66 +102,81 @@ public class RouteDesignerFragment extends BFragment {
         if (activity != null) {
 
             Ride value = activity.liveData.ride.getValue();
-            if (value.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
-                textViewTitle.setText("Preferred Pickup Route");
-            } else {
-                textViewTitle.setText("Preferred Drop off Route");
-            }
-            activity.setBackButton();
-            activity.bottomNavigationView.setEnabled(false);
 
+            if (value != null) {
 
-            HashMap<String, List<Student>> stringListHashMap = new HashMap<>();
-            stringListHashMap.put("students", value.students);
+                if (value.routeCreated) {
+                    buttonStartRide.setVisibility(View.GONE);
 
-            progressDialog = new MyProgressDialog(getContext());
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-
-            FireStoreHelper.getRouteDesigner(activity.liveData.ride.getValue().shiftId + "")
-                    .get().addOnCompleteListener(getActivity(), new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
-
-                    progressDialog.dismiss();
-
-                    if (task.isSuccessful()) {
-                        if (task.getResult().exists()) {
-
-                            DocumentSnapshot result = task.getResult();
-
-
-                            List<Student> students = new Gson().fromJson(new Gson().toJson(result.get("students")), new TypeToken<List<Student>>() {
-                            }.getType());
-
-                            if (allStudentsMatched(students, value.students)) {
-
-                                adapter.setData(students);
-
-                            } else {
-
-                                adapter.setData(value.students);
-                                showChangedMessage();
-
-                            }
-
-                        } else {
-                            MyApp.showToast("No Route Found");
-                            adapter.setData(value.students);
-
-                        }
-                    } else {
-
-                        new AlertDialog.Builder(getContext())
-                                .setMessage(task.getException().getMessage())
-                                .show();
-
-                    }
+                } else {
+                    buttonStartRide.setVisibility(View.VISIBLE);
 
                 }
-            });
 
+                if (value.shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
+                    textViewTitle.setText("Preferred Pickup Route");
+                } else {
+                    textViewTitle.setText("Preferred Drop off Route");
+                }
+                activity.setBackButton();
+                activity.bottomNavigationView.setEnabled(false);
+
+
+                HashMap<String, List<Student>> stringListHashMap = new HashMap<>();
+                stringListHashMap.put("students", value.students);
+
+                progressDialog = new MyProgressDialog(getContext());
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                FireStoreHelper.getRouteDesigner(activity.liveData.ride.getValue().shiftId + "")
+                        .get().addOnCompleteListener(getActivity(), new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+
+                        progressDialog.dismiss();
+
+                        if (task.isSuccessful()) {
+                            if (task.getResult().exists()) {
+
+                                DocumentSnapshot result = task.getResult();
+
+
+                                List<Student> students = new Gson().fromJson(new Gson().toJson(result.get("students")), new TypeToken<List<Student>>() {
+                                }.getType());
+
+                                if (allStudentsMatched(students, value.students)) {
+
+                                    adapter.setData(students);
+
+                                } else {
+
+                                    adapter.setData(value.students);
+                                    showChangedMessage();
+
+                                }
+
+                            } else {
+                                MyApp.showToast("No Route Found");
+                                adapter.setData(value.students);
+
+                            }
+                        } else {
+
+                            new AlertDialog.Builder(getContext())
+                                    .setMessage(task.getException().getMessage())
+                                    .show();
+
+                        }
+
+                    }
+                });
+
+            } else {
+                buttonStartRide.setVisibility(View.GONE);
+
+            }
 
         }
 
