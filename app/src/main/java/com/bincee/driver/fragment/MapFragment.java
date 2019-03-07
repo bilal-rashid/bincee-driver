@@ -504,6 +504,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                             if (markerView != null) {
 
                                 markerView.setPosition((LatLng) animation.getAnimatedValue());
+                                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerView.getPosition(), mapboxMap.getCameraPosition().zoom));
 
                             }
                         }
@@ -520,11 +521,13 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //                    busSource.setGeoJson(busCollectionSource);
                     markerView = MapFragment.this.mapboxMap.addMarker(new MarkerOptions()
                             .icon(iconBusMyLoc).position(nowLocation));
+                    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerView.getPosition(), mapboxMap.getCameraPosition().zoom));
 
                 }
                 oldLocation = nowLocation;
 
-                animateMapToRoute(directionRoute, mapboxMap, padding);
+//                animateMapToRoute(directionRoute, mapboxMap, padding);
+
 
             }
         };
@@ -568,6 +571,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 //            }
         });
 
+        getHomeActivity().liveData.myLocaton.observe(MapFragment.this, mylocationObserver);
+
         getHomeActivity().liveData.currentRoute.observe(getViewLifecycleOwner(), new Observer<DirectionsRoute>() {
             @Override
             public void onChanged(DirectionsRoute directionsRoute) {
@@ -581,8 +586,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
             }
         });
-
-        getHomeActivity().liveData.myLocaton.observe(MapFragment.this, mylocationObserver);
 
 
     }
@@ -614,7 +617,6 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         if (directionsRoute != null) {
             mapboxMap.animateCamera(CameraUpdateFactory
                     .newLatLngBounds(new LatLngBounds.Builder()
-
                             .includes(LatLngHelper.toLatLng(directionsRoute.routeOptions().coordinates()))
                             .build(), padding));
         }

@@ -12,6 +12,7 @@ import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.gsonparserfactory.GsonParserFactory;
 import com.bincee.driver.api.EndPoints;
 import com.bincee.driver.api.model.LoginResponse;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 
@@ -52,6 +53,7 @@ public class MyApp extends Application {
 
         FirebaseFirestore.setLoggingEnabled(true);
 
+//        Crashlytics.getInstance().crash();
 
     }
 

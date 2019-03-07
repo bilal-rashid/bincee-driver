@@ -358,7 +358,7 @@ public class HomeActivity extends BA {
                 ride.students = students;
                 ride.latLng = LatLngHelper.toGeoPoint(liveData.myLocaton.getValue());
 
-                ride.driverId = MyApp.instance.user.getValue().id;
+                ride.driverId = MyApp.instance.user.getValue().id;;
                 ride.schoolLatLng = new GeoPoint(liveData.schoolResponce.getValue().lat, liveData.schoolResponce.getValue().lng);
                 ShiftItem shift = liveData.selectedShift.getValue();
                 ride.shiftId = shift.shift_id;
@@ -441,7 +441,7 @@ public class HomeActivity extends BA {
                                             //send notification to student
                                             Log.d(TAG, "At Student Location" + student.fullname);
                                             student.status = Student.STATUS_MORNING_ATYOURLOCATION;
-                                            liveData.sentNotificationToStudent(student, "Bus is here", "Bus has arrived to pickup " + student.fullname + " and will leave in 5 minutes");
+                                            liveData.sentNotificationToStudent(student, "Bus is here", "Bus has arrived to pickup " + student.fullname + " and will leave soon");
 
                                         }
                                     }
@@ -520,7 +520,8 @@ public class HomeActivity extends BA {
                                         if (myLocation.distanceTo(studentLocation) < 1000) {
 
                                             student.status = Student.STATUS_AFTERNOON_ALMOSTTHERE;
-                                            liveData.sentNotificationToStudent(student, "Almost there", student.fullname + "  will reach home in " + Math.round(student.duration) + " minutes");
+//                                            liveData.sentNotificationToStudent(student, "Almost there", student.fullname + "  will reach home in " + Math.round(student.duration) + " minutes");
+                                            liveData.sentNotificationToStudent(student, "Almost there", student.fullname + "  will reach home soon");
 
                                         }
                                     } else if (student.status == Student.STATUS_AFTERNOON_ALMOSTTHERE) {
