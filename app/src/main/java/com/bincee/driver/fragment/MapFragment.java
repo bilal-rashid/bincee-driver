@@ -33,12 +33,15 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.bincee.driver.HomeActivity;
+import com.bincee.driver.MyApp;
 import com.bincee.driver.R;
 import com.bincee.driver.api.firestore.Ride;
+import com.bincee.driver.api.model.AddNotificationBackednBody;
 import com.bincee.driver.api.model.GetSchoolResponce;
 import com.bincee.driver.api.model.Student;
 import com.bincee.driver.base.BFragment;
 import com.bincee.driver.dialog.SendAlertDialog;
+import com.bincee.driver.helper.DateHelper;
 import com.bincee.driver.helper.ImageBinder;
 import com.bincee.driver.helper.LatLngHelper;
 import com.mapbox.android.core.location.LocationEngine;
@@ -78,6 +81,7 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -504,7 +508,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                             if (markerView != null) {
 
                                 markerView.setPosition((LatLng) animation.getAnimatedValue());
-                                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerView.getPosition(), mapboxMap.getCameraPosition().zoom));
+//                                mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerView.getPosition(), mapboxMap.getCameraPosition().zoom));
 
                             }
                         }
@@ -800,7 +804,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                         @Override
                         public void send(String text) {
 
-                            getHomeActivity().liveData.sendNotificationTOALlPresentStudents(text);
+                            getHomeActivity().liveData.sendNotificationTOALlPresentStudents(text, true);
+
 
                         }
 

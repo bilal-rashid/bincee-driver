@@ -2,6 +2,7 @@ package com.bincee.driver.api;
 
 import com.bincee.driver.api.model.AbsentListBody;
 import com.bincee.driver.api.model.AbsenteStdent;
+import com.bincee.driver.api.model.AddNotificationBackednBody;
 import com.bincee.driver.api.model.GetSchoolResponce;
 import com.bincee.driver.api.model.SendNotificationBody;
 import com.bincee.driver.api.model.SendNotificationResponce;
@@ -99,6 +100,9 @@ public interface EndPoints {
     @GET("school/driver/bus/{driverId}")
     Observable<MyResponse<BusInfo>> listBus(@Path("driverId") String driverId);
 
+
+    @POST("school/notification/create")
+    Observable<MyResponse> addNotificationToBackend(@Body AddNotificationBackednBody addNotificationBackednBody);
 
 }
 

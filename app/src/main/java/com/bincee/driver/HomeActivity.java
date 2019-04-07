@@ -27,6 +27,7 @@ import com.bincee.driver.api.EndPoints;
 import com.bincee.driver.api.firestore.FireStoreHelper;
 import com.bincee.driver.api.firestore.Ride;
 import com.bincee.driver.api.model.AbsenteStdent;
+import com.bincee.driver.api.model.AddNotificationBackednBody;
 import com.bincee.driver.api.model.DriverProfileResponse;
 import com.bincee.driver.api.model.GetSchoolResponce;
 import com.bincee.driver.api.model.SendNotificationBody;
@@ -89,6 +90,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -358,7 +360,8 @@ public class HomeActivity extends BA {
                 ride.students = students;
                 ride.latLng = LatLngHelper.toGeoPoint(liveData.myLocaton.getValue());
 
-                ride.driverId = MyApp.instance.user.getValue().id;;
+                ride.driverId = MyApp.instance.user.getValue().id;
+                ;
                 ride.schoolLatLng = new GeoPoint(liveData.schoolResponce.getValue().lat, liveData.schoolResponce.getValue().lng);
                 ShiftItem shift = liveData.selectedShift.getValue();
                 ride.shiftId = shift.shift_id;
@@ -1621,7 +1624,7 @@ public class HomeActivity extends BA {
             return students;
         }
 
-        public void sendNotificationTOALlPresentStudents(String text) {
+        public void sendNotificationTOALlPresentStudents(String text, boolean addToBackend) {
 
 
             List<Student> students = ride.getValue().students;
@@ -1642,6 +1645,30 @@ public class HomeActivity extends BA {
                 if (student.present == PRESENT) {
 
                     sentNotificationToStudent(student, "Alert", text);
+                    if (addToBackend) {
+                        long time = Calendar.getInstance().getTimeInMillis() / 1000L;
+                        MyApp.endPoints.addNotificationToBackend(new AddNotificationBackednBody(text
+                                , time
+                                , student.id)).subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribeWith(new EndpointObserver<MyResponse>() {
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+
+                                    @Override
+                                    public void onData(MyResponse o) throws Exception {
+
+                                    }
+
+                                    @Override
+                                    public void onHandledError(Throwable e) {
+                                        e.printStackTrace();
+
+                                    }
+                                });
+                    }
 
 
                 }
