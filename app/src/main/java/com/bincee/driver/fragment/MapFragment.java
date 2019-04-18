@@ -81,8 +81,10 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -136,12 +138,22 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     private String BUS_ICON_SOURCE = "bus-icon_source";
     private String BUS_ICON = "bus-icon";
     private LatLng oldLocation;
+    private Location currentLocation;
     private double lastBearing = 0;
     private int padding = 5;
     private Observer<Location> mylocationObserver;
     //    private DirectionsRoute currentRoute;
 //    private Point destination;
 
+    public void enableFinishRide (){
+        textViewFinishRide.setEnabled(true);
+        textViewFinishRide.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),R.color.sky_blue));
+    }
+
+    public void disableFinishRide(){
+        textViewFinishRide.setEnabled(false);
+        textViewFinishRide.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),R.color.color_grey));
+    }
     public MapFragment() {
         // Required empty public constructor
     }
@@ -269,8 +281,8 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 
             GeoJsonSource lineSource = mapboxMap.getSourceAs(LINE_SOURCE);
-
-            lineSource.setGeoJson(featureCollection);
+            if(lineSource != null)
+                lineSource.setGeoJson(featureCollection);
 
 
             if (markers != null && markers.size() > 0) {
@@ -456,6 +468,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
 
                 LatLng nowLocation = LatLngHelper.toLatLng(location);
+                currentLocation = location;
 
                 FeatureCollection busCollectionSource = FeatureCollection.fromFeatures(new Feature[]{
                         Feature.fromGeometry(Point.fromLngLat(nowLocation.getLongitude(), nowLocation.getLatitude())),
@@ -554,6 +567,17 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
                     Student student = getFirstNotPickedStudentMorning(ride.students);
                     setStudent(student);
+                    if(currentLocation!=null) {
+                        Double distanceFromSchool = distance(currentLocation.getLatitude(),
+                                currentLocation.getLongitude(),
+                                ride.schoolLatLng.getLatitude(),
+                                ride.schoolLatLng.getLongitude());
+                        if(distanceFromSchool < 40.5){
+                            enableFinishRide();
+                        }else {
+                            disableFinishRide();
+                        }
+                    }
 
                     //SHow Student which attandance is not marked
 
@@ -564,6 +588,21 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
 
                     Student student = getFirstUnDropedStudentEvening(ride.students);
                     setStudent(student);
+                    if (getPresentStudents(ride.students).size()==1) {
+                        if(currentLocation!=null) {
+                            List<Student> lastStudentList = getPresentStudents(ride.students);
+                            Double distanceFromLastStudent = distance(currentLocation.getLatitude(),
+                                    currentLocation.getLongitude(),
+                                    lastStudentList.get(0).lat,
+                                    lastStudentList.get(0).lng);
+                            if(distanceFromLastStudent < 40.5){
+                                enableFinishRide();
+                            }else {
+                                disableFinishRide();
+                            }
+                        }
+                    }
+
 
 
                 }
@@ -592,6 +631,37 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
         });
 
 
+    }
+
+    private List<Student> getPresentStudents(List<Student> students) {
+        List<Student> result = new ArrayList<>();
+        for(int i = 0;i<students.size();i++){
+            if(students.get(i).present == Student.PRESENT){
+                result.add(students.get(i));
+            }
+        }
+        return result;
+    }
+
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1))
+                * Math.sin(deg2rad(lat2))
+                + Math.cos(deg2rad(lat1))
+                * Math.cos(deg2rad(lat2))
+                * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        return (dist*1000);
+    }
+
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
     }
 
     private Student getFirstUnDropedStudentEvening(List<Student> students) {

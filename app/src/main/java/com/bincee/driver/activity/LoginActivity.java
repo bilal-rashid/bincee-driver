@@ -21,6 +21,9 @@ import com.bincee.driver.helper.MyPref;
 import com.bincee.driver.observer.EndpointObserver;
 import com.google.android.material.textfield.TextInputEditText;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -63,6 +66,7 @@ public class LoginActivity extends BA {
 
 //        editTextUsername.setText("test_driverd1");
 //        editTextPassword.setText("ChangeMe@2");
+        checkForUpdates();
 
     }
 
@@ -128,8 +132,38 @@ public class LoginActivity extends BA {
                 }));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkForCrashes();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterManagers();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterManagers();
+    }
+
     @OnClick(R.id.textViewPassword)
     public void onForgrtPasswordClicked() {
         ForgetPasswordActivity.start(this);
+    }
+    private void checkForCrashes() {
+        CrashManager.register(this);
+    }
+
+    private void checkForUpdates() {
+        // Remove this for store builds!
+        UpdateManager.register(this);
+    }
+
+    private void unregisterManagers() {
+        UpdateManager.unregister();
     }
 }

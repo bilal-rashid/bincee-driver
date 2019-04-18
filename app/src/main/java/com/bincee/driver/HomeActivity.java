@@ -124,6 +124,8 @@ import static com.bincee.driver.api.model.Student.STATUS_AFTERNOON_INTHEBUS;
 import static com.bincee.driver.api.model.Student.UNKNOWN;
 import static com.bincee.driver.api.model.notification.Notification.RIDE;
 import static com.bincee.driver.fragment.RouteDesignerFragment.allStudentsMatched;
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
 
 /**
  * The type Home activity.
@@ -420,7 +422,7 @@ public class HomeActivity extends BA {
 
                 if (locations.size() > 0 && locations.get(0) != null) {
                     Location myLocation = locations.get(0);
-                    HomeActivity.this.liveData.myLocaton.setValue(myLocation);
+                    HomeActivity.this.liveData.myLocaton.postValue(myLocation);
 
 
                     Ride ride = liveData.ride.getValue();
@@ -606,6 +608,7 @@ public class HomeActivity extends BA {
         mFusedLocationClient = new FusedLocationProviderClient(this);
 
         setupBottemNavListner();
+        checkForUpdates();
 
 
     }
@@ -782,6 +785,19 @@ public class HomeActivity extends BA {
             creatRouteTask.cancel();
         }
         timer.cancel();
+        unregisterManagers();
+    }
+    private void checkForCrashes() {
+        CrashManager.register(this);
+    }
+
+    private void checkForUpdates() {
+        // Remove this for store builds!
+        UpdateManager.register(this);
+    }
+
+    private void unregisterManagers() {
+        UpdateManager.unregister();
     }
 
     private void setupBottemNavListner() {
@@ -1701,6 +1717,7 @@ public class HomeActivity extends BA {
     @Override
     protected void onResume() {
         super.onResume();
+        checkForCrashes();
         liveData.getDriverProfile();
         permissionHelper = new PermissionHelper();
         permissionHelper
@@ -1735,6 +1752,7 @@ public class HomeActivity extends BA {
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterManagers();
     }
 
 
