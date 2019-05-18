@@ -155,7 +155,7 @@ public class LoginActivity extends BA {
         ForgetPasswordActivity.start(this);
     }
     private void checkForCrashes() {
-        CrashManager.register(this);
+//        CrashManager.register(this);
     }
 
     private void checkForUpdates() {

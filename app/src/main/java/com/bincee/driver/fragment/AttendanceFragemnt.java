@@ -197,37 +197,42 @@ public class AttendanceFragemnt extends BFragment {
 
         HomeActivity.LiveData liveData = getHomeActivity().liveData;
         Ride ride = liveData.ride.getValue();
-        if (ride.shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
+        if(ride!=null) {
+            if (ride.shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
 
-            if (getHomeActivity().liveData.currentRoute.getValue() != null) return;
+                if (getHomeActivity().liveData.currentRoute.getValue() != null) return;
 
-            if (!liveData.isAttandanceMarked()) {
-                MyApp.showToast("Please mark all students before proceeding");
-            } else if (getHomeActivity().liveData.getAbsentStudents().size() > 0) {
+                if (!liveData.isAttandanceMarked()) {
+                    MyApp.showToast("Please mark all students before proceeding");
+                } else if (getHomeActivity().liveData.getAbsentStudents().size() > 0) {
 
-                MarkStudentAbdentDialog absentDialog = new MarkStudentAbdentDialog(getContext(), getHomeActivity().liveData.getAbsentStudents());
-                absentDialog.setListner(new MarkStudentAbdentDialog.Listner() {
-                    @Override
-                    public void yes() {
+                    MarkStudentAbdentDialog absentDialog = new MarkStudentAbdentDialog(getContext(), getHomeActivity().liveData.getAbsentStudents());
+                    absentDialog.setListner(new MarkStudentAbdentDialog.Listner() {
+                        @Override
+                        public void yes() {
 
-                        checkIfRouteExists();
+                            checkIfRouteExists();
 
-                    }
+                        }
 
-                    @Override
-                    public void no() {
+                        @Override
+                        public void no() {
 
-                    }
-                });
-                absentDialog.show();
+                        }
+                    });
+                    absentDialog.show();
 
-            } else {
+                } else {
 
-                checkIfRouteExists();
+                    checkIfRouteExists();
+
+                }
+
 
             }
-
-
+        }else
+        {
+            MyApp.showToast("Can't start without students");
         }
 
 

@@ -522,7 +522,7 @@ public class HomeActivity extends BA {
                                         studentLocation.setLongitude(student.lng);
 
 
-                                        if (myLocation.distanceTo(studentLocation) < 1000) {
+                                        if (student.duration < 5.1) {
 
                                             student.status = Student.STATUS_AFTERNOON_ALMOSTTHERE;
 //                                            liveData.sentNotificationToStudent(student, "Almost there", student.fullname + "  will reach home in " + Math.round(student.duration) + " minutes");
@@ -1831,6 +1831,10 @@ public class HomeActivity extends BA {
 
             if (lasStudent == null) {
                 MyApp.showToast("No Present Student in the bus then why to create a route ? go Home driver");
+                try {
+                    createRouteDialog.hide();
+                    finishRide();
+                }catch (Exception e){}
                 return;
             }
 
