@@ -4,6 +4,7 @@ package com.bincee.driver.fragment;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,6 +54,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.bincee.driver.api.firestore.Ride.SHIFT_AFTERNOON;
+import static com.bincee.driver.api.firestore.Ride.SHIFT_MORNING;
 import static com.bincee.driver.api.model.notification.Notification.ATTANDACE;
 
 /**
@@ -157,6 +159,7 @@ public class AttendanceFragemnt extends BFragment {
         getRide().observe(getViewLifecycleOwner(), new Observer<Ride>() {
             @Override
             public void onChanged(Ride ride) {
+                attandanceAdapter.notifyDataSetChanged();
                 if (ride != null && ride.shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
                     buttonStartRide.setVisibility(View.VISIBLE);
 
@@ -272,13 +275,45 @@ public class AttendanceFragemnt extends BFragment {
 
         @Override
         public int getItemCount() {
-            return getStudents().size();
+            return getStudentsInProximity().size();
         }
     }
-
+    private float checkDistance(Ride ride,double lat,double lon){
+        Location obj1 = new Location("1");
+        Location obj2 = new Location("2");
+        obj1.setLatitude(lat);
+        obj1.setLongitude(lon);
+        obj2.setLatitude(ride.latLng.getLatitude());
+        obj2.setLongitude(ride.latLng.getLongitude());
+        return obj1.distanceTo(obj2);
+    }
     private List<Student> getStudents() {
         Ride ride = getRide().getValue();
         return ride != null ? ride.students : new ArrayList<>();
+    }
+
+    private List<Student> getStudentsInProximity() {
+        Ride ride = getRide().getValue();
+        try {
+            if(ride.shift.equalsIgnoreCase(SHIFT_MORNING)) {
+                List<Student> result = new ArrayList<>();
+                if (ride != null) {
+                    for (int i = 0; i < ride.students.size(); i++) {
+                        if (checkDistance(ride, ride.students.get(i).lat, ride.students.get(i).lng) < 15000) {
+                            result.add(ride.students.get(i));
+                        }
+                    }
+                    return result;
+                } else {
+                    return new ArrayList<>();
+                }
+            }else {
+                return ride != null ? ride.students : new ArrayList<>();
+            }
+        }catch (Exception e){
+            return new ArrayList<>();
+        }
+
     }
 
     private MutableLiveData<Ride> getRide() {
@@ -333,7 +368,7 @@ public class AttendanceFragemnt extends BFragment {
 
         public void bind() {
 
-            Student student = getStudents().get(getAdapterPosition());
+            Student student = getStudentsInProximity().get(getAdapterPosition());
             textViewName.setText(student.fullname);
             textViewLocation.setText(student.address);
 
@@ -370,7 +405,7 @@ public class AttendanceFragemnt extends BFragment {
 
 
             setTextColorWhite();
-            getStudents().get(getAdapterPosition()).present = Student.ABSENT;
+            getStudentsInProximity().get(getAdapterPosition()).present = Student.ABSENT;
 
 
         }
@@ -405,14 +440,14 @@ public class AttendanceFragemnt extends BFragment {
             imageViewCross.setImageBitmap(null);
 
             setTextColorWhite();
-            getStudents().get(getAdapterPosition()).present = Student.PRESENT;
+            getStudentsInProximity().get(getAdapterPosition()).present = Student.PRESENT;
 
 
         }
 
         private void sendNotification(int parentId, String title, String body) {
 
-            Student student = getStudents().get(getAdapterPosition());
+            Student student = getStudentsInProximity().get(getAdapterPosition());
 
 
             FireStoreHelper.getToken(parentId + "")
@@ -505,7 +540,7 @@ public class AttendanceFragemnt extends BFragment {
 
 
             MarkAttendanceDialog markAttendanceDialog = new MarkAttendanceDialog(getContext())
-                    .setStudent(getStudents().get(getAdapterPosition()))
+                    .setStudent(getStudentsInProximity().get(getAdapterPosition()))
                     .setListner(new MarkAttendanceDialog.Listner() {
                         @Override
                         public void markAbsent() {
@@ -513,10 +548,10 @@ public class AttendanceFragemnt extends BFragment {
                             if (getRide().getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
                                 updateStudentStatus();
 
-                                Student student = getStudents().get(getAdapterPosition());
+                                Student student = getStudentsInProximity().get(getAdapterPosition());
 //                                getHomeActivity().liveData.sendNotificationToAll("dsd","sdsds");
 
-                                sendNotification(getStudents().get(getAdapterPosition()).parent_id, "Kid is absent", student.fullname + " is absent ");
+                                sendNotification(getStudentsInProximity().get(getAdapterPosition()).parent_id, "Kid is absent", student.fullname + " is absent ");
 
                                 //TODO
 
@@ -533,8 +568,8 @@ public class AttendanceFragemnt extends BFragment {
                             if (getRide().getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
                                 updateStudentStatus();
 
-                                Student student = getStudents().get(getAdapterPosition());
-                                sendNotification(getStudents().get(getAdapterPosition()).parent_id, "On the way", " Bus is on the way to school and will be there in ETA " + Math.round(student.duration) + " minutes");
+                                Student student = getStudentsInProximity().get(getAdapterPosition());
+                                sendNotification(getStudentsInProximity().get(getAdapterPosition()).parent_id, "On the way", " Bus is on the way to school and will be there in ETA " + Math.round(student.duration) + " minutes");
 
 
                             } else {

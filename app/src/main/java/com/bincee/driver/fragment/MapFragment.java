@@ -151,7 +151,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     }
 
     public void disableFinishRide(){
-        textViewFinishRide.setEnabled(false);
+        textViewFinishRide.setEnabled(true);
         textViewFinishRide.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),R.color.color_grey));
     }
     public MapFragment() {
@@ -572,7 +572,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                                 currentLocation.getLongitude(),
                                 ride.schoolLatLng.getLatitude(),
                                 ride.schoolLatLng.getLongitude());
-                        if(distanceFromSchool < 40.5){
+                        if(distanceFromSchool < 150){
                             enableFinishRide();
                         }else {
                             disableFinishRide();
@@ -585,6 +585,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                 } else if (ride.shift.equalsIgnoreCase(Ride.SHIFT_AFTERNOON)) {
 
                     //SHow Student which is in the bus state
+                    enableFinishRide();
 
                     Student student = getFirstUnDropedStudentEvening(ride.students);
                     setStudent(student);
@@ -595,10 +596,10 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
                                     currentLocation.getLongitude(),
                                     lastStudentList.get(0).lat,
                                     lastStudentList.get(0).lng);
-                            if(distanceFromLastStudent < 40.5){
+                            if(distanceFromLastStudent < 150){
                                 enableFinishRide();
                             }else {
-                                disableFinishRide();
+                                enableFinishRide();
                             }
                         }
                     }
