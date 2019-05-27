@@ -56,6 +56,7 @@ import com.bincee.driver.helper.MyPref;
 import com.bincee.driver.helper.PermissionHelper;
 import com.bincee.driver.observer.EndpointObserver;
 import com.bincee.driver.api.model.CreateRideBody;
+import com.bincee.driver.service.MyService;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -264,6 +265,9 @@ public class HomeActivity extends BA {
 
             }
         });
+        Intent locationServiceIntent = new Intent(this, MyService.class);
+        locationServiceIntent.addCategory("locationService");
+        startService(locationServiceIntent);
 
 
         if (MyApp.instance.user == null) return;
@@ -693,6 +697,7 @@ public class HomeActivity extends BA {
     }
 
     public void updateRideToFireBase(Ride ride) {
+        MyPref.saveRide(ride,this);
         rideDocument.set(ride)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: User Ride Stated Succefully"))
                 .addOnFailureListener(HomeActivity.this, Throwable::printStackTrace);
@@ -909,6 +914,7 @@ public class HomeActivity extends BA {
         });
 
         liveData.students.setValue(new ArrayList<>());
+        MyPref.saveRide(null,HomeActivity.this);
 
 
         new FinishRideDialog(this).setListner(new FinishRideDialog.Listner() {
@@ -1176,6 +1182,9 @@ public class HomeActivity extends BA {
 
                                     }
 
+                                }
+                                if(data.data.size()==0){
+                                    MyApp.showToast("No students available for ride");
                                 }
                                 LiveData.this.students.setValue(filterdStudents);
                                 getAbsentList(shiftItem.shift_id);

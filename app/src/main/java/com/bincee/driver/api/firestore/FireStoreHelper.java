@@ -22,6 +22,17 @@ public class FireStoreHelper {
         return db.collection("ride").document(MyApp.instance.user.getValue().id + "");
     }
 
+    public static DocumentReference getRealTimeDriver() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        return db.collection("real_time").document(MyApp.instance.user.getValue().id + "");
+    }
+    public static DocumentReference getRideByRideId(String rideId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        return db.collection("ride").document(rideId);
+    }
+
     public static CollectionReference getHistory() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 

@@ -72,6 +72,7 @@
         <activity
             android:name=".activity.ForgetPasswordActivity"
             android:screenOrientation="portrait" />
+        <service android:name=".service.MyService"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

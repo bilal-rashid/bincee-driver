@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.bincee.driver.activity.LoginActivity;
+import com.bincee.driver.api.firestore.Ride;
 import com.bincee.driver.api.model.LoginResponse;
 import com.google.gson.Gson;
 
@@ -14,6 +15,7 @@ public class MyPref {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     private static final String REMEMBER_ME = "remember_me";
+    private static final String CURRENT_RIDE = "CURRENT_RIDE";
 
 
     public static void SAVE_USER(Context loginActivity, LoginResponse.User user) {
@@ -21,6 +23,22 @@ public class MyPref {
         sharedPref.edit().putString("user", new Gson().toJson(user)).apply();
 
 
+    }
+
+    public static void saveRide (Ride ride,Context context){
+        SharedPreferences sharedPref = getSharedPref(context);
+        sharedPref.edit().putString(CURRENT_RIDE, new Gson().toJson(ride)).apply();
+    }
+
+    public static Ride getRide (Context context){
+        SharedPreferences sharedPref = getSharedPref(context);
+        String rideJson = sharedPref.getString(CURRENT_RIDE, null);
+        Ride ride = null;
+        if (rideJson != null) {
+            ride = new Gson().fromJson(rideJson, Ride.class);
+
+        }
+        return ride;
     }
 
     public static LoginResponse.User GET_USER(Context loginActivity) {
