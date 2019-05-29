@@ -299,7 +299,7 @@ public class AttendanceFragemnt extends BFragment {
                 List<Student> result = new ArrayList<>();
                 if (ride != null) {
                     for (int i = 0; i < ride.students.size(); i++) {
-                        if (checkDistance(ride, ride.students.get(i).lat, ride.students.get(i).lng) < 15000) {
+                        if (checkDistance(ride, ride.students.get(i).lat, ride.students.get(i).lng) < 150) {
                             result.add(ride.students.get(i));
                         }
                     }
