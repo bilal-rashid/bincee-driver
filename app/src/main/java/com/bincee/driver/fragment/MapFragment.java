@@ -151,7 +151,7 @@ public class MapFragment extends BFragment implements OnMapReadyCallback {
     }
 
     public void disableFinishRide(){
-        textViewFinishRide.setEnabled(true);
+        textViewFinishRide.setEnabled(false);
         textViewFinishRide.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getContext()),R.color.color_grey));
     }
     public MapFragment() {
