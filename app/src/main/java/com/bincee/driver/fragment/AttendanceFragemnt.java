@@ -381,11 +381,11 @@ public class AttendanceFragemnt extends BFragment {
             } else if (student.present == Student.PRESENT) {
 
 
-                markPresent();
+                markPresent(getAdapterPosition());
 
             } else if (student.present == Student.ABSENT) {
 
-                markAbsent();
+                markAbsent(getAdapterPosition());
             }
 
             textViewDistance.setText(student.distance + "");
@@ -397,7 +397,7 @@ public class AttendanceFragemnt extends BFragment {
             textViewLocation.setTextColor(Color.BLACK);
         }
 
-        private void markAbsent() {
+        private void markAbsent(int adapterposition) {
             imageViewRedSelected.setAlpha(1f);
             imageViewGreenSelected.setAlpha(0f);
             imageViewCheck.setImageBitmap(null);
@@ -405,7 +405,7 @@ public class AttendanceFragemnt extends BFragment {
 
 
             setTextColorWhite();
-            getStudentsInProximity().get(getAdapterPosition()).present = Student.ABSENT;
+            getStudentsInProximity().get(adapterposition).present = Student.ABSENT;
 
 
         }
@@ -432,7 +432,7 @@ public class AttendanceFragemnt extends BFragment {
             activity.updateAttendance();
         }
 
-        private void markPresent() {
+        private void markPresent(int adapterposition) {
             imageViewRedSelected.setAlpha(0f);
             imageViewGreenSelected.setAlpha(1f);
 
@@ -440,14 +440,14 @@ public class AttendanceFragemnt extends BFragment {
             imageViewCross.setImageBitmap(null);
 
             setTextColorWhite();
-            getStudentsInProximity().get(getAdapterPosition()).present = Student.PRESENT;
+            getStudentsInProximity().get(adapterposition).present = Student.PRESENT;
 
 
         }
 
-        private void sendNotification(int parentId, String title, String body) {
+        private void sendNotification(int parentId, String title, String body,int adapterposition) {
 
-            Student student = getStudentsInProximity().get(getAdapterPosition());
+            Student student = getStudentsInProximity().get(adapterposition);
 
 
             FireStoreHelper.getToken(parentId + "")
@@ -514,46 +514,48 @@ public class AttendanceFragemnt extends BFragment {
         @OnClick(R.id.imageViewCross)
         public void onCrossClicked() {
 
-            showAttDialog();
+            showAttDialog(getAdapterPosition());
         }
 
 
         @OnClick(R.id.imageViewCheck)
         public void onCheckClicked() {
 
-            showAttDialog();
+            showAttDialog(getAdapterPosition());
 
         }
 
         @OnClick(R.id.rootView)
         public void onRootViewClicked() {
 
-            showAttDialog();
+            showAttDialog(getAdapterPosition());
 
         }
 
 
-        private void showAttDialog() {
+        private void showAttDialog(int adapterPosition) {
 
             if (getHomeActivity().liveData.ride.getValue().shift.equalsIgnoreCase(SHIFT_AFTERNOON))
                 return;
 
 
             MarkAttendanceDialog markAttendanceDialog = new MarkAttendanceDialog(getContext())
-                    .setStudent(getStudentsInProximity().get(getAdapterPosition()))
+                    .setStudent(getStudentsInProximity().get(adapterPosition))
                     .setListner(new MarkAttendanceDialog.Listner() {
                         @Override
                         public void markAbsent() {
-                            VH.this.markAbsent();
+                            VH.this.markAbsent(adapterPosition);
                             if (getRide().getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
-                                updateStudentStatus();
+                                try {
+                                    updateStudentStatus();
 
-                                Student student = getStudentsInProximity().get(getAdapterPosition());
+                                    Student student = getStudentsInProximity().get(adapterPosition);
 //                                getHomeActivity().liveData.sendNotificationToAll("dsd","sdsds");
 
-                                sendNotification(getStudentsInProximity().get(getAdapterPosition()).parent_id, "Kid is absent", student.fullname + " is absent ");
+                                    sendNotification(getStudentsInProximity().get(adapterPosition).parent_id, "Kid is absent", student.fullname + " is absent ",adapterPosition);
 
-                                //TODO
+                                    //TODO
+                                }catch (Exception e){e.printStackTrace();}
 
 
                             } else {
@@ -563,13 +565,16 @@ public class AttendanceFragemnt extends BFragment {
 
                         @Override
                         public void markPresent() {
-                            VH.this.markPresent();
+                            VH.this.markPresent(adapterPosition);
 
                             if (getRide().getValue().shift.equalsIgnoreCase(Ride.SHIFT_MORNING)) {
-                                updateStudentStatus();
+                                try {
+                                    updateStudentStatus();
 
-                                Student student = getStudentsInProximity().get(getAdapterPosition());
-                                sendNotification(getStudentsInProximity().get(getAdapterPosition()).parent_id, "On the way", " Bus is on the way to school and will be there in ETA " + Math.round(student.duration) + " minutes");
+                                    Student student = getStudentsInProximity().get(adapterPosition);
+                                    sendNotification(getStudentsInProximity().get(adapterPosition).parent_id, "On the way", " Bus is on the way to school and will be there in ETA "
+                                            + Math.round(student.duration) + " minutes",adapterPosition);
+                                }catch (Exception e){e.printStackTrace();}
 
 
                             } else {
@@ -621,17 +626,17 @@ public class AttendanceFragemnt extends BFragment {
 
                 if (getHomeActivity().liveData.ride.getValue().shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
 
-                    markAbsent();
+                    markAbsent(getAdapterPosition());
                 } else {
-                    showAttDialog();
+                    showAttDialog(getAdapterPosition());
                 }
             } else if (direction == ItemTouchHelper.RIGHT) {
 //                showAttDialog();
                 if (getHomeActivity().liveData.ride.getValue().shift.equalsIgnoreCase(SHIFT_AFTERNOON)) {
 
-                    markPresent();
+                    markPresent(getAdapterPosition());
                 } else {
-                    showAttDialog();
+                    showAttDialog(getAdapterPosition());
                 }
             }
         }
